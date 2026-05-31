@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg:         #2B2B2B;   /* Main background — dark charcoal (matches logo) */
+  --color-surface:    #1E1E1E;   /* Cards, modals, panels */
+  --color-surface-2:  #333333;   /* Elevated surfaces, inputs */
+  --color-border:     #3D3D3D;   /* Borders, dividers */
+  --color-yellow:     #F5C200;   /* Primary brand yellow (exact logo match) */
+  --color-yellow-dim: #C49A00;   /* Hover state for yellow */
+  --color-yellow-glow:#F5C20033; /* Yellow glow (20% opacity) */
+  --color-white:      #F5F5F5;   /* Primary text */
+  --color-muted:      #999999;   /* Secondary text, placeholders */
+  --color-success:    #4CAF50;   /* Order confirmed */
+  --color-error:      #EF4444;   /* Errors, full slots */
+  --color-warning:    #FB923C;   /* Low slots warning */
+}
+
+/* Global resets & scroll dynamics */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-white);
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Headings typography default */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border);
+}
+
+/* Design System Utilities */
+.shadow-card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-yellow {
+  box-shadow: 0 0 20px rgba(245, 194, 0, 0.15);
+}
+
+.shadow-yellow-strong {
+  box-shadow: 0 0 32px rgba(245, 194, 0, 0.35);
+}
+
+/* Keyframes & Custom Animations from Section 5 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(245, 194, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(245, 194, 0, 0.7);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Animation utilities classes */
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shake keyframes for admin validation errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* ─── Cart Badge: scale-bounce when item added ─── */
+@keyframes badgeBounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.4); }
+  70%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+.animate-badge-bounce {
+  animation: badgeBounce 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* ─── Page Route: fade-in on mount ─── */
+@keyframes pageFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-page-fade {
+  animation: pageFade 0.2s ease-out forwards;
+}
+
+/* ─── Confetti Burst: pure CSS dots animate outward ─── */
+@keyframes confettiOut1 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(60px, -70px) scale(0); opacity: 0; }
+}
+@keyframes confettiOut2 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-55px, -65px) scale(0); opacity: 0; }
+}
+@keyframes confettiOut3 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(75px, 20px) scale(0); opacity: 0; }
+}
+@keyframes confettiOut4 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-70px, 25px) scale(0); opacity: 0; }
+}
+@keyframes confettiOut5 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(30px, 70px) scale(0); opacity: 0; }
+}
+@keyframes confettiOut6 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-35px, 68px) scale(0); opacity: 0; }
+}
+@keyframes confettiOut7 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(10px, -80px) scale(0); opacity: 0; }
+}
+@keyframes confettiOut8 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-15px, -75px) scale(0); opacity: 0; }
+}
+
+.confetti-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.confetti-dot:nth-child(1) { background: #F5C200; animation: confettiOut1 0.65s ease-out forwards; }
+.confetti-dot:nth-child(2) { background: #4CAF50; animation: confettiOut2 0.65s ease-out forwards; }
+.confetti-dot:nth-child(3) { background: #FB923C; animation: confettiOut3 0.65s ease-out forwards; }
+.confetti-dot:nth-child(4) { background: #EF4444; animation: confettiOut4 0.65s ease-out forwards; }
+.confetti-dot:nth-child(5) { background: #F5C200; animation: confettiOut5 0.65s ease-out forwards; }
+.confetti-dot:nth-child(6) { background: #4CAF50; animation: confettiOut6 0.65s ease-out forwards; }
+.confetti-dot:nth-child(7) { background: #FB923C; animation: confettiOut7 0.65s ease-out forwards; }
+.confetti-dot:nth-child(8) { background: #EF4444; animation: confettiOut8 0.65s ease-out forwards; }
+

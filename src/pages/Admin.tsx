@@ -1,0 +1,1035 @@
+import React, { useState, useEffect } from 'react';
+import { format, addDays } from 'date-fns';
+import { Product, Order } from '../types';
+import { supabase } from '../utils/supabase';
+import { getAvailableDeliveryDates, MAX_ORDERS_PER_DAY } from '../utils/deliveryDates';
+
+// Default mock menu list as fallback if Supabase returns empty
+const DEFAULT_PRODUCTS: Product[] = [
+  {
+    id: 'prod-1',
+    name: "Mughlai Mutton Dum Biryani",
+    description: "Mom's signature long-grain basmati rice Dum cooked with spices.",
+    price: 480,
+    image_url: null,
+    category: 'mains',
+    in_stock: true,
+  },
+  {
+    id: 'prod-2',
+    name: "Mom's Special Butter Chicken",
+    description: "Succulent grilled chicken simmers in rich butter gravy.",
+    price: 390,
+    image_url: null,
+    category: 'mains',
+    in_stock: true,
+  },
+];
+
+const Admin: React.FC = () => {
+  // Gating State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('bams_admin_authenticated') === 'true';
+  });
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
+  const [authError, setAuthError] = useState('');
+
+  // Tab State: 0 = Products, 1 = Orders
+  const [activeTab, setActiveTab] = useState<0 | 1>(0);
+
+  // Products Tab States
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Add Product Form States
+  const [newProdName, setNewProdName] = useState('');
+  const [newProdDesc, setNewProdDesc] = useState('');
+  const [newProdPrice, setNewProdPrice] = useState('');
+  const [newProdCat, setNewProdCat] = useState('mains');
+  const [newProdStock, setNewProdStock] = useState(true);
+  
+  // Image Upload States
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
+  // Orders Tab States
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+
+  // Notify All Customers State
+  const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState('');
+  const [notifyState, setNotifyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [notifyResult, setNotifyResult] = useState<string | null>(null);
+
+  // Date Filters
+  const { saturday: thisSat, sunday: thisSun } = getAvailableDeliveryDates();
+  const nextSat = addDays(thisSat, 7);
+  const nextSun = addDays(thisSun, 7);
+
+  const filterOptions = [
+    { date: thisSat, label: 'This Saturday', dbStr: format(thisSat, 'yyyy-MM-dd') },
+    { date: thisSun, label: 'This Sunday', dbStr: format(thisSun, 'yyyy-MM-dd') },
+    { date: nextSat, label: 'Next Saturday', dbStr: format(nextSat, 'yyyy-MM-dd') },
+    { date: nextSun, label: 'Next Sunday', dbStr: format(nextSun, 'yyyy-MM-dd') },
+  ];
+
+  const [activeFilterDateStr, setActiveFilterDateStr] = useState<string>(
+    format(thisSat, 'yyyy-MM-dd')
+  );
+
+  // Load Products & Orders
+  const loadProducts = async () => {
+    try {
+      setProductsLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setProducts(data);
+      } else {
+        setProducts(DEFAULT_PRODUCTS);
+      }
+    } catch (err) {
+      console.warn('Failed to load products list from database. Falling back to default records.');
+      setProducts(DEFAULT_PRODUCTS);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+
+  const loadOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data) {
+        // cast JSON items to CartItem[]
+        setOrders(data as Order[]);
+      }
+    } catch (err) {
+      console.warn('Failed to load orders list from database.');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadProducts();
+      loadOrders();
+    }
+  }, [isAuthenticated]);
+
+  // Auth Submit Action
+  const handleAuthSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'bamsadmin';
+
+    if (passwordInput === adminPassword) {
+      setIsAuthenticated(true);
+      setAuthError('');
+      sessionStorage.setItem('bams_admin_authenticated', 'true');
+    } else {
+      setIsShaking(true);
+      setAuthError('Incorrect password');
+      setPasswordInput('');
+      setTimeout(() => {
+        setIsShaking(false);
+      }, 300);
+    }
+  };
+
+  // Products CRUD: Toggle Stock
+  const handleToggleStock = async (id: string, currentStock: boolean) => {
+    try {
+      // Update local state first for instant responsive feel
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, in_stock: !currentStock } : p))
+      );
+
+      const { error } = await supabase
+        .from('products')
+        .update({ in_stock: !currentStock })
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Failed to update stock state in Supabase:', err);
+      // Revert if error
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, in_stock: currentStock } : p))
+      );
+    }
+  };
+
+  // Products CRUD: Delete Item
+  const handleDeleteProduct = async (id: string, name: string) => {
+    if (window.confirm(`Delete ${name}? This cannot be undone.`)) {
+      try {
+        const { error } = await supabase.from('products').delete().eq('id', id);
+        if (error) throw error;
+        
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+      } catch (err) {
+        console.error('Failed to delete item from database:', err);
+        alert('Could not delete product. Database error occurred.');
+      }
+    }
+  };
+
+  // Upload Product Image to Bucket
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    // Setup local preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      setIsUploadingImage(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `menu-images/${fileName}`;
+
+      // Upload to bucket
+      const { error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      // Fetch public URL
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      setUploadedImageUrl(urlData.publicUrl);
+    } catch (err) {
+      console.warn('Storage uploads offline. Visual previews generated locally.', err);
+      // Generate standard plate fallback url for demo
+      setUploadedImageUrl(null);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Products CRUD: Save Form Item
+  const handleSaveProduct = async () => {
+    const errors: { [key: string]: string } = {};
+    if (!newProdName.trim()) errors.name = 'Product name is required';
+    if (!newProdPrice.trim() || isNaN(Number(newProdPrice))) {
+      errors.price = 'Enter a valid numeric price';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
+
+    try {
+      // Use uploaded image URL, preview, or default placeholder if empty
+      const finalImgUrl = uploadedImageUrl || imagePreview || null;
+
+      const newProduct = {
+        name: newProdName.trim(),
+        description: newProdDesc.trim() || null,
+        price: Number(newProdPrice),
+        category: newProdCat,
+        in_stock: newProdStock,
+        image_url: finalImgUrl,
+      };
+
+      const { data, error } = await supabase
+        .from('products')
+        .insert([newProduct])
+        .select();
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setProducts((prev) => [data[0], ...prev]);
+      } else {
+        // Fallback mockup local insertion
+        const mockItem: Product = {
+          id: `local-${Date.now()}`,
+          ...newProduct,
+        };
+        setProducts((prev) => [mockItem, ...prev]);
+      }
+
+      // Close modal & reset fields
+      setIsAddModalOpen(false);
+      setNewProdName('');
+      setNewProdDesc('');
+      setNewProdPrice('');
+      setNewProdCat('mains');
+      setNewProdStock(true);
+      setImagePreview(null);
+      setUploadedImageUrl(null);
+
+    } catch (err) {
+      console.error('Failed to create new product in Supabase:', err);
+      alert('Error creating product. Please try again.');
+    }
+  };
+
+  // Orders CRUD: Update Status dropdown
+  const handleUpdateStatus = async (orderId: string, newStatus: 'pending' | 'confirmed' | 'delivered') => {
+    try {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+      );
+
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Failed to update status in Supabase:', err);
+      alert('Error updating order status in database.');
+    }
+  };
+
+  // Send push notification to all subscribed customers
+  const handleNotifyAll = async () => {
+    if (!notifyMessage.trim()) return;
+    try {
+      setNotifyState('sending');
+
+      // Fetch all push subscriptions from Supabase
+      const { data: subs, error } = await supabase
+        .from('push_subscriptions')
+        .select('subscription');
+
+      if (error) throw error;
+      if (!subs || subs.length === 0) {
+        setNotifyState('error');
+        setNotifyResult('No subscribers found. Ask customers to opt-in first.');
+        return;
+      }
+
+      const subscriptions = subs.map((row) => row.subscription);
+
+      const res = await fetch('/api/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscriptions, message: notifyMessage.trim() }),
+      });
+
+      if (!res.ok) throw new Error('API call failed');
+      const result = await res.json();
+
+      setNotifyState('sent');
+      setNotifyResult(`Sent to ${result.sent} subscriber(s). Failed: ${result.failed}.`);
+      setNotifyMessage('');
+    } catch (err) {
+      console.error('Failed to send push notification:', err);
+      setNotifyState('error');
+      setNotifyResult('Failed to send. Check VAPID keys and API configuration.');
+    }
+  };
+
+  // Filter orders matching selected date
+  const filteredOrders = orders.filter((o) => o.delivery_date === activeFilterDateStr);
+  const slotsCount = filteredOrders.length;
+
+  // Gate view
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg px-4 select-text">
+        <div className="absolute inset-0 pointer-events-none opacity-20"
+          style={{ background: 'radial-gradient(circle, rgba(245,194,0,0.06) 0%, rgba(43,43,43,0) 70%)' }} />
+        
+        <div
+          className={`w-full max-w-md bg-surface border border-border p-8 rounded-2xl shadow-card text-center transition-all duration-300 ${
+            isShaking ? 'animate-shake' : ''
+          }`}
+        >
+          <img src="/logo.jpeg" alt="Bam's Delicacies Logo" className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border border-yellow shadow-yellow"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://placehold.co/80x80/f5c200/1e1e1e?text=BD';
+            }}
+          />
+          <h1 className="font-serif font-black text-3xl text-yellow mb-2">Admin Login</h1>
+          <p className="font-sans text-muted text-xs mb-8">Manage products, orders, and slot availabilities.</p>
+
+          <form onSubmit={handleAuthSubmit} className="space-y-6">
+            <div className="text-left">
+              <label className="block text-xs font-sans font-bold text-white/70 uppercase tracking-widest mb-2.5">
+                Enter Admin Password
+              </label>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => {
+                  setPasswordInput(e.target.value);
+                  if (authError) setAuthError('');
+                }}
+                placeholder="••••••••"
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-muted/40 focus:outline-none focus:border-yellow focus:ring-2 focus:ring-yellow-glow transition-all duration-200 ${
+                  authError ? 'border-error' : 'border-border'
+                }`}
+                autoFocus
+              />
+              {authError && (
+                <span className="text-error text-xs font-semibold mt-2 block font-sans">
+                  ⚠️ {authError}
+                </span>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-yellow text-bg font-sans font-bold py-3.5 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] hover:shadow-yellow shadow-md active:scale-98 transition-all duration-300"
+            >
+              Verify Credentials
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex bg-bg text-white select-text">
+      {/* 1. Sidebar Panel (Fixed left, 240px) */}
+      <aside className="w-60 bg-surface border-r border-border h-screen sticky top-0 flex flex-col justify-between flex-shrink-0 z-30 select-none">
+        <div>
+          {/* Logo & Brand Header */}
+          <div className="p-6 border-b border-border flex items-center gap-3">
+            <img
+              src="/logo.jpeg"
+              alt="Bam's Delicacies"
+              className="h-10 w-10 rounded-full object-cover border border-border"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/f5c200/1e1e1e?text=BD';
+              }}
+            />
+            <div className="flex flex-col text-left">
+              <span className="font-serif font-black text-yellow text-sm tracking-tight leading-none">
+                Bam's
+              </span>
+              <span className="font-serif text-[11px] text-white/50 tracking-wider font-bold mt-1 uppercase">
+                Admin Panel
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation links */}
+          <nav className="p-4 space-y-2 mt-6">
+            <button
+              onClick={() => setActiveTab(0)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
+                activeTab === 0
+                  ? 'bg-surface-2 border-yellow text-yellow'
+                  : 'border-transparent text-white/70 hover:text-white hover:bg-surface-2/40'
+              }`}
+            >
+              <span>🍱</span>
+              <span>Products</span>
+            </button>
+            <button
+              onClick={() => setActiveTab(1)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
+                activeTab === 1
+                  ? 'bg-surface-2 border-yellow text-yellow'
+                  : 'border-transparent text-white/70 hover:text-white hover:bg-surface-2/40'
+              }`}
+            >
+              <span>📋</span>
+              <span>Orders</span>
+            </button>
+          </nav>
+        </div>
+
+        {/* Admin signout trigger */}
+        <div className="p-4 border-t border-border">
+          <button
+            onClick={() => {
+              setIsAuthenticated(false);
+              sessionStorage.removeItem('bams_admin_authenticated');
+            }}
+            className="w-full py-2.5 px-4 rounded-xl font-sans font-bold text-xs tracking-wider text-error hover:bg-error/10 border border-transparent hover:border-error/25 transition-all duration-200 uppercase"
+          >
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. Main content area */}
+      <main className="flex-grow p-8 overflow-y-auto h-screen bg-bg/95 relative z-10 flex flex-col">
+        {/* Products tab screen */}
+        {activeTab === 0 && (
+          <div className="flex-grow flex flex-col">
+            {/* Tab Header bar */}
+            <div className="flex justify-between items-center mb-8 pb-4 border-b border-border/40 select-none">
+              <div className="text-left">
+                <h2 className="font-serif font-black text-3xl text-white">Menu Catalog</h2>
+                <p className="text-muted text-xs font-sans mt-1">Add, update stock status, or remove delicacies.</p>
+              </div>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-yellow text-bg font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-yellow hover:bg-yellow-dim hover:scale-105 active:scale-95 transition-all duration-300"
+              >
+                + Add Product
+              </button>
+            </div>
+
+            {/* Catalog list grid view */}
+            {productsLoading ? (
+              <div className="flex-grow flex items-center justify-center py-20 select-none">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-yellow border-r-2 border-transparent"></div>
+              </div>
+            ) : (
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-border bg-surface-2 text-muted font-sans text-xs font-bold uppercase tracking-wider select-none">
+                        <th className="py-4 px-6">Product</th>
+                        <th className="py-4 px-6">Category</th>
+                        <th className="py-4 px-6">Price</th>
+                        <th className="py-4 px-6">Stock Status</th>
+                        <th className="py-4 px-6 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60 text-sm font-sans">
+                      {products.map((prod) => (
+                        <tr key={prod.id} className="hover:bg-surface-2/30 transition-colors duration-150">
+                          {/* Image & Title Details */}
+                          <td className="py-4 px-6 flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-xl bg-bg border border-border flex-shrink-0 flex items-center justify-center overflow-hidden">
+                              {prod.image_url ? (
+                                <img
+                                  src={prod.image_url}
+                                  alt={prod.name}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    const fallback = e.currentTarget.nextElementSibling as HTMLSpanElement;
+                                    if (fallback) fallback.style.display = 'inline';
+                                  }}
+                                />
+                              ) : null}
+                              <span
+                                className="text-xl"
+                                style={{ display: prod.image_url ? 'none' : 'inline' }}
+                              >
+                                🍽️
+                              </span>
+                            </div>
+                            <div className="text-left font-bold text-white/95">
+                              {prod.name}
+                              <span className="block text-xs font-normal text-muted truncate max-w-xs mt-1">
+                                {prod.description || 'No description available'}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Category Cell */}
+                          <td className="py-4 px-6 capitalize text-white/80">
+                            {prod.category}
+                          </td>
+
+                          {/* Price Cell */}
+                          <td className="py-4 px-6 font-serif font-semibold text-yellow">
+                            ₹{prod.price}
+                          </td>
+
+                          {/* stock status switch toggle */}
+                          <td className="py-4 px-6 select-none">
+                            <button
+                              onClick={() => handleToggleStock(prod.id, prod.in_stock)}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                                prod.in_stock ? 'bg-yellow shadow-yellow' : 'bg-surface-2 border border-border'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                                  prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                                }`}
+                              />
+                            </button>
+                          </td>
+
+                          {/* Delete Action button */}
+                          <td className="py-4 px-6 text-center select-none">
+                            <button
+                              onClick={() => handleDeleteProduct(prod.id, prod.name)}
+                              className="p-2 text-error hover:bg-error/10 border border-transparent hover:border-error/20 rounded-xl transition-all duration-200"
+                              title="Delete Item"
+                            >
+                              {/* SVG Trash Icon */}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="2"
+                                stroke="currentColor"
+                                className="w-4 h-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-1.816A2.25 2.25 0 0122.167 2h-4.333a2.25 2.25 0 01-2.244 2.077v1.816m-7.5 0V4a2.25 2.25 0 012.244-2.243h4.333M19 19H5"
+                                />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* "+ Add Product" Modal overlay popup */}
+            {isAddModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 select-text">
+                <div onClick={() => setIsAddModalOpen(false)} className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+                
+                <div className="w-full max-w-xl bg-surface border border-border rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-fade-slide-up flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="px-6 py-5 border-b border-border flex justify-between items-center flex-shrink-0">
+                    <h3 className="font-serif font-bold text-xl text-yellow">Add New Delicacy</h3>
+                    <button
+                      onClick={() => setIsAddModalOpen(false)}
+                      className="p-1 rounded-lg bg-surface-2 border border-border text-white hover:text-yellow transition-all duration-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Modal Form scroll container */}
+                  <div className="p-6 overflow-y-auto space-y-5 flex-grow text-left">
+                    {/* Name input */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                        Product Name <span className="text-yellow">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newProdName}
+                        onChange={(e) => {
+                          setNewProdName(e.target.value);
+                          if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }));
+                        }}
+                        placeholder="e.g. Special Chicken Dum Biryani"
+                        className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 ${
+                          formErrors.name ? 'border-error' : 'border-border'
+                        }`}
+                      />
+                      {formErrors.name && (
+                        <span className="text-error text-xs font-sans mt-1 block">{formErrors.name}</span>
+                      )}
+                    </div>
+
+                    {/* Category & Price dual row */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                          Category
+                        </label>
+                        <select
+                          value={newProdCat}
+                          onChange={(e) => setNewProdCat(e.target.value)}
+                          className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 capitalize"
+                        >
+                          <option value="mains">Mains</option>
+                          <option value="snacks">Snacks</option>
+                          <option value="breads">Breads</option>
+                          <option value="desserts">Desserts</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                          Price (₹) <span className="text-yellow">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={newProdPrice}
+                          onChange={(e) => {
+                            setNewProdPrice(e.target.value);
+                            if (formErrors.price) setFormErrors((prev) => ({ ...prev, price: '' }));
+                          }}
+                          placeholder="e.g. 250"
+                          className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 ${
+                            formErrors.price ? 'border-error' : 'border-border'
+                          }`}
+                        />
+                        {formErrors.price && (
+                          <span className="text-error text-xs font-sans mt-1 block">{formErrors.price}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Description field */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={newProdDesc}
+                        onChange={(e) => setNewProdDesc(e.target.value)}
+                        placeholder="Provide details about flavors, portions, preparation, or key ingredients..."
+                        rows={3}
+                        className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 resize-none"
+                      />
+                    </div>
+
+                    {/* Image Upload Input Area */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                        Product Image
+                      </label>
+                      <div className="flex gap-4 items-center">
+                        <label className="bg-surface-2 border border-border border-dashed hover:border-yellow rounded-xl px-4 py-3 cursor-pointer text-xs font-bold hover:text-yellow transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageFileChange}
+                            className="hidden"
+                          />
+                          <span>📂 Choose Image File</span>
+                        </label>
+                        
+                        {/* Status indicator */}
+                        {isUploadingImage && (
+                          <span className="text-xs text-yellow animate-pulse">Uploading file...</span>
+                        )}
+                        {uploadedImageUrl && (
+                          <span className="text-xs text-success">✓ Upload success!</span>
+                        )}
+                      </div>
+
+                      {/* Preview box */}
+                      {imagePreview && (
+                        <div className="mt-3 relative h-28 w-28 rounded-xl border border-border overflow-hidden bg-bg/50 flex items-center justify-center">
+                          <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                          <button
+                            onClick={() => {
+                              setImagePreview(null);
+                              setUploadedImageUrl(null);
+                            }}
+                            className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-black/80 rounded-full text-white text-[10px]"
+                            title="Remove file"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Stock switch toggle */}
+                    <div className="flex items-center gap-4 bg-surface-2/30 border border-border/40 p-4 rounded-xl select-none">
+                      <div className="text-left flex-grow">
+                        <span className="block text-sm font-bold text-white/95">Initial Stock Status</span>
+                        <span className="text-muted text-xs block mt-0.5">Toggle whether customers can order this instantly on load.</span>
+                      </div>
+                      <button
+                        onClick={() => setNewProdStock(!newProdStock)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                          newProdStock ? 'bg-yellow shadow-yellow' : 'bg-surface-2 border border-border'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                            newProdStock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Modal Sticky Footer buttons */}
+                  <div className="px-6 py-4 border-t border-border bg-surface-2/65 flex justify-end gap-3 flex-shrink-0 select-none">
+                    <button
+                      onClick={() => setIsAddModalOpen(false)}
+                      className="px-5 py-2.5 border border-border rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-surface-2 transition-all duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveProduct}
+                      disabled={isUploadingImage}
+                      className="bg-yellow text-bg font-sans font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-yellow hover:bg-yellow-dim transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Save Product
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Orders tab screen */}
+        {activeTab === 1 && (
+          <div className="flex-grow flex flex-col">
+            {/* Header section */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-4 border-b border-border/40 select-none">
+              <div className="text-left">
+                <h2 className="font-serif font-black text-3xl text-white">Orders Manager</h2>
+                <p className="text-muted text-xs font-sans mt-1">Review weekend deliveries, booking capacities, and statuses.</p>
+              </div>
+              
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Notify All Customers Button */}
+                <button
+                  onClick={() => {
+                    setIsNotifyModalOpen(true);
+                    setNotifyState('idle');
+                    setNotifyResult(null);
+                  }}
+                  className="inline-flex items-center gap-2 bg-surface border border-border text-yellow font-sans font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl hover:bg-surface-2 hover:border-yellow/50 transition-all duration-200"
+                >
+                  <span>🔔</span>
+                  <span>Notify All Customers</span>
+                </button>
+
+                {/* Slots Count Display badge */}
+                <div className="self-start inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-surface border border-border">
+                  <span className="text-yellow text-xs font-bold uppercase tracking-wider">Slot Tally:</span>
+                  <span className="bg-yellow text-bg font-sans font-black text-xs px-2.5 py-0.5 rounded-full shadow-yellow">
+                    {slotsCount} / {MAX_ORDERS_PER_DAY} bookings
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Date Filter buttons bar */}
+            <div className="flex flex-wrap gap-3 mb-8 select-none">
+              {filterOptions.map((opt) => {
+                const isActive = opt.dbStr === activeFilterDateStr;
+                return (
+                  <button
+                    key={opt.dbStr}
+                    onClick={() => setActiveFilterDateStr(opt.dbStr)}
+                    className={`px-5 py-2.5 border rounded-xl font-sans text-xs md:text-sm font-semibold tracking-wider transition-all duration-300 ${
+                      isActive
+                        ? 'bg-yellow border-yellow text-bg shadow-yellow hover:scale-[1.02]'
+                        : 'bg-surface border-border text-white/80 hover:text-yellow hover:border-yellow hover:scale-[1.01]'
+                    }`}
+                  >
+                    <div className="flex flex-col text-left">
+                      <span>{opt.label}</span>
+                      <span className={`text-[10px] font-normal mt-0.5 ${isActive ? 'text-bg/75' : 'text-muted'}`}>
+                        {format(opt.date, 'MMM d, yyyy')}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Orders Data Table Display grid */}
+            {ordersLoading ? (
+              <div className="flex-grow flex items-center justify-center py-20 select-none">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-yellow border-r-2 border-transparent"></div>
+              </div>
+            ) : filteredOrders.length === 0 ? (
+              <div className="flex-grow flex flex-col items-center justify-center text-center py-24 border border-dashed border-border rounded-2xl bg-surface/30 select-none">
+                <span className="text-5xl animate-float" style={{ animationDuration: '3.5s' }}>🎉</span>
+                <h3 className="font-serif font-bold text-xl text-yellow mt-4">
+                  No orders for this day yet
+                </h3>
+                <p className="text-muted text-sm mt-2 max-w-sm">
+                  Slots are fully open! Share the website link to invite customers.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-border bg-surface-2 text-muted font-sans text-xs font-bold uppercase tracking-wider select-none">
+                        <th className="py-4 px-6">#</th>
+                        <th className="py-4 px-6">Customer</th>
+                        <th className="py-4 px-6">Contact info</th>
+                        <th className="py-4 px-6">Address</th>
+                        <th className="py-4 px-6">Items Order</th>
+                        <th className="py-4 px-6">Total Amount</th>
+                        <th className="py-4 px-6">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60 text-sm font-sans">
+                      {filteredOrders.map((ord, idx) => (
+                        <tr key={ord.id} className="hover:bg-surface-2/30 transition-colors duration-150">
+                          {/* Row Number */}
+                          <td className="py-4 px-6 font-mono text-muted/80">
+                            {idx + 1}
+                          </td>
+
+                          {/* Customer Name */}
+                          <td className="py-4 px-6 font-bold text-white/95 text-left">
+                            {ord.customer_name}
+                          </td>
+
+                          {/* Phone Info */}
+                          <td className="py-4 px-6 font-mono text-white/80 text-left">
+                            {ord.customer_phone}
+                          </td>
+
+                          {/* Address Info */}
+                          <td className="py-4 px-6 max-w-xs truncate text-white/70 text-left" title={ord.customer_address}>
+                            {ord.customer_address}
+                          </td>
+
+                          {/* Items Cart list */}
+                          <td className="py-4 px-6 text-left">
+                            <ul className="list-none space-y-1">
+                              {ord.items && ord.items.map((item, keyIdx) => (
+                                <li key={keyIdx} className="text-xs text-white/85">
+                                  • {item.name}{' '}
+                                  <span className="text-yellow font-bold">×{item.quantity}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </td>
+
+                          {/* Total Bill */}
+                          <td className="py-4 px-6 font-serif font-semibold text-yellow">
+                            ₹{ord.total}
+                          </td>
+
+                          {/* Live Dropdown Status Select */}
+                          <td className="py-4 px-6 select-none">
+                            <select
+                              value={ord.status}
+                              onChange={(e) =>
+                                handleUpdateStatus(
+                                  ord.id,
+                                  e.target.value as 'pending' | 'confirmed' | 'delivered'
+                                )
+                              }
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-bold focus:outline-none transition-colors duration-250 cursor-pointer ${
+                                ord.status === 'pending'
+                                  ? 'bg-warning/10 border-warning/35 text-warning'
+                                  : ord.status === 'confirmed'
+                                  ? 'bg-yellow/10 border-yellow/35 text-yellow'
+                                  : 'bg-success/10 border-success/35 text-success'
+                              }`}
+                            >
+                              <option value="pending" className="bg-surface text-warning font-bold">Pending</option>
+                              <option value="confirmed" className="bg-surface text-yellow font-bold">Confirmed</option>
+                              <option value="delivered" className="bg-surface text-success font-bold">Delivered</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* ─── Notify All Customers Modal ──────────────────────────────────── */}
+      {isNotifyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            onClick={() => setIsNotifyModalOpen(false)}
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+          />
+          <div className="relative z-10 w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden animate-fade-slide-up">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-border flex justify-between items-center">
+              <h3 className="font-serif font-bold text-xl text-yellow">🔔 Notify All Customers</h3>
+              <button
+                onClick={() => setIsNotifyModalOpen(false)}
+                className="p-1 rounded-lg bg-surface-2 border border-border text-white hover:text-yellow transition-all duration-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              <p className="text-muted text-sm font-sans">
+                This will send a push notification to all opted-in customers. Make sure your VAPID keys are configured.
+              </p>
+
+              <div>
+                <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                  Message
+                </label>
+                <textarea
+                  value={notifyMessage}
+                  onChange={(e) => setNotifyMessage(e.target.value)}
+                  placeholder="e.g. Your delivery is confirmed for Saturday! 🎉"
+                  rows={4}
+                  disabled={notifyState === 'sending' || notifyState === 'sent'}
+                  className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-white font-sans text-sm focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-200 resize-none disabled:opacity-50"
+                />
+              </div>
+
+              {/* Result feedback */}
+              {notifyResult && (
+                <div className={`px-4 py-3 rounded-xl text-sm font-sans font-medium ${
+                  notifyState === 'sent'
+                    ? 'bg-success/10 border border-success/25 text-success'
+                    : 'bg-error/10 border border-error/25 text-error'
+                }`}>
+                  {notifyResult}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-border bg-surface-2/65 flex justify-end gap-3">
+              <button
+                onClick={() => setIsNotifyModalOpen(false)}
+                className="px-5 py-2.5 border border-border rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-surface-2 transition-all duration-200"
+              >
+                {notifyState === 'sent' ? 'Close' : 'Cancel'}
+              </button>
+              {notifyState !== 'sent' && (
+                <button
+                  onClick={handleNotifyAll}
+                  disabled={notifyState === 'sending' || !notifyMessage.trim()}
+                  className="inline-flex items-center gap-2 bg-yellow text-bg font-sans font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-yellow hover:bg-yellow-dim transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {notifyState === 'sending' ? (
+                    <>
+                      <span className="w-3 h-3 rounded-full border-2 border-bg border-t-transparent animate-spin" />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <span>Send Notification</span>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Admin;
