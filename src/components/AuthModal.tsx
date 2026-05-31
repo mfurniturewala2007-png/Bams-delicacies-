@@ -75,6 +75,22 @@ const AuthModal: React.FC = () => {
     if (!password || password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }
+    if (!name.trim()) {
+      errors.name = 'Full Name is required';
+    }
+    if (!phone.trim()) {
+      errors.phone = 'Phone Number is required';
+    } else if (!/^[0-9]{10}$/.test(phone.trim())) {
+      errors.phone = 'Phone must be exactly 10 digits';
+    }
+    if (!address.trim()) {
+      errors.address = 'Delivery Address is required';
+    }
+    if (!pincode.trim()) {
+      errors.pincode = 'Pincode is required';
+    } else if (!/^[0-9]{6}$/.test(pincode.trim())) {
+      errors.pincode = 'Pincode must be exactly 6 digits';
+    }
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -85,9 +101,12 @@ const AuthModal: React.FC = () => {
       setIsSubmitting(true);
       setErrorMsg('');
       setFieldErrors({});
-      await signUp(email.trim(), password);
-      // If auto-login is disabled, users must check their email. 
-      // If enabled, they will be logged in and the state change will immediately advance to 'profile' view
+      await signUp(email.trim(), password, {
+        name: name.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        pincode: pincode.trim(),
+      });
     } catch (err: any) {
       console.error('Sign Up error:', err);
       setErrorMsg(err.message || 'Failed to create account. Please try again.');
@@ -249,10 +268,10 @@ const AuthModal: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleSignUpSubmit} className="space-y-4 text-left">
+            <form onSubmit={handleSignUpSubmit} className="space-y-3.5 text-left">
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                  Email Address
+                  Email Address <span className="text-primary">*</span>
                 </label>
                 <input
                   type="email"
@@ -262,7 +281,7 @@ const AuthModal: React.FC = () => {
                     if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
                   }}
                   placeholder="name@example.com"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.email ? 'border-error' : 'border-border'
                   }`}
                 />
@@ -275,7 +294,7 @@ const AuthModal: React.FC = () => {
 
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                  Password (min 6 chars)
+                  Password (min 6 chars) <span className="text-primary">*</span>
                 </label>
                 <input
                   type="password"
@@ -285,13 +304,109 @@ const AuthModal: React.FC = () => {
                     if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
                   }}
                   placeholder="••••••••"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.password ? 'border-error' : 'border-border'
                   }`}
                 />
                 {fieldErrors.password && (
                   <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
                     {fieldErrors.password}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
+                  Full Name <span className="text-primary">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
+                  }}
+                  placeholder="e.g. Mohammed Furniturewala"
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                    fieldErrors.name ? 'border-error' : 'border-border'
+                  }`}
+                />
+                {fieldErrors.name && (
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
+                    {fieldErrors.name}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
+                    Phone Number <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    maxLength={10}
+                    onChange={(e) => {
+                      setPhone(e.target.value.replace(/[^0-9]/g, ''));
+                      if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
+                    }}
+                    placeholder="10-digit mobile"
+                    className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                      fieldErrors.phone ? 'border-error' : 'border-border'
+                    }`}
+                  />
+                  {fieldErrors.phone && (
+                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
+                      {fieldErrors.phone}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
+                    Pincode <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={pincode}
+                    maxLength={6}
+                    onChange={(e) => {
+                      setPincode(e.target.value.replace(/[^0-9]/g, ''));
+                      if (fieldErrors.pincode) setFieldErrors((prev) => ({ ...prev, pincode: '' }));
+                    }}
+                    placeholder="6-digit pincode"
+                    className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                      fieldErrors.pincode ? 'border-error' : 'border-border'
+                    }`}
+                  />
+                  {fieldErrors.pincode && (
+                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
+                      {fieldErrors.pincode}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
+                  Delivery Address <span className="text-primary">*</span>
+                </label>
+                <textarea
+                  value={address}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                    if (fieldErrors.address) setFieldErrors((prev) => ({ ...prev, address: '' }));
+                  }}
+                  placeholder="Enter your flat/street, landmark details for hot deliveries..."
+                  rows={2}
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none ${
+                    fieldErrors.address ? 'border-error' : 'border-border'
+                  }`}
+                />
+                {fieldErrors.address && (
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
+                    {fieldErrors.address}
                   </span>
                 )}
               </div>

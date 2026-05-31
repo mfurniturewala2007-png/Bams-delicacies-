@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabase';
 import { User } from '@supabase/supabase-js';
 import { UserProfile } from '../types';
@@ -11,7 +11,16 @@ interface AuthContextType {
   needsProfile: boolean;
   openAuthModal: () => void;
   closeAuthModal: () => void;
-  signUp: (email: string, password: string) => Promise<any>;
+  signUp: (
+    email: string,
+    password: string,
+    profileData?: {
+      name: string;
+      phone: string;
+      address: string;
+      pincode: string;
+    }
+  ) => Promise<any>;
   signIn: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
   upsertProfile: (profileData: {
@@ -30,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [needsProfile, setNeedsProfile] = useState<boolean>(false);
+  const isSigningUpRef = useRef(false);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => {
@@ -104,6 +114,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (session?.user) {
           setUser(session.user);
+          if (isSigningUpRef.current) {
+            setLoading(false);
+            return;
+          }
           const prof = await fetchProfile(session.user.id);
           if (mounted) {
             setProfile(prof);
@@ -131,13 +145,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user, needsProfile]);
 
-  const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) throw error;
-    return data;
+  const signUp = async (
+    email: string,
+    password: string,
+    profileData?: {
+      name: string;
+      phone: string;
+      address: string;
+      pincode: string;
+    }
+  ) => {
+    try {
+      if (profileData) {
+        isSigningUpRef.current = true;
+      }
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+
+      if (data.user && profileData) {
+        const newProfile: UserProfile = {
+          id: data.user.id,
+          email: email,
+          ...profileData,
+        };
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert(newProfile);
+
+        if (profileError) throw profileError;
+
+        setProfile(newProfile);
+        setNeedsProfile(false);
+        setIsAuthModalOpen(false);
+      }
+      return data;
+    } finally {
+      isSigningUpRef.current = false;
+    }
   };
 
   const signIn = async (email: string, password: string) => {
