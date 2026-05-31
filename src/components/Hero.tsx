@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { supabase } from '../utils/supabase';
-import { getAvailableDeliveryDates, MAX_ORDERS_PER_DAY } from '../utils/deliveryDates';
+import { getAvailableDeliveryDates } from '../utils/deliveryDates';
 
 // ─── Push Subscription Helpers ───────────────────────────────────────────────
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
@@ -42,13 +42,29 @@ const Hero: React.FC = () => {
           throw error;
         }
 
+        // Fetch dynamic capacity settings for Saturday
+        let limit = 15;
+        try {
+          const { data: settingsData } = await supabase
+            .from('settings')
+            .select('*')
+            .in('key', ['max_orders_per_day', 'max_orders_saturday']);
+          if (settingsData) {
+            const general = settingsData.find(r => r.key === 'max_orders_per_day')?.value || '15';
+            const sat = settingsData.find(r => r.key === 'max_orders_saturday')?.value || general;
+            limit = Number(sat);
+          }
+        } catch (se) {
+          console.warn('Failed to load settings limit, falling back to 15', se);
+        }
+
         const ordersCount = count || 0;
-        const slotsRemaining = Math.max(0, MAX_ORDERS_PER_DAY - ordersCount);
+        const slotsRemaining = Math.max(0, limit - ordersCount);
         setSlotsLeft(slotsRemaining);
       } catch (err) {
         console.error('Error fetching order count from Supabase:', err);
         // Robust fallback to full slots if Supabase vars are missing or request fails
-        setSlotsLeft(MAX_ORDERS_PER_DAY);
+        setSlotsLeft(15);
       } finally {
         setLoading(false);
       }

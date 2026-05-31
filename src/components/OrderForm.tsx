@@ -58,7 +58,8 @@ const OrderForm: React.FC = () => {
   const dbSatStr = format(saturday, 'yyyy-MM-dd');
   const dbSunStr = format(sunday, 'yyyy-MM-dd');
 
-  const [maxOrdersLimit, setMaxOrdersLimit] = useState(15);
+  const [maxOrdersSatLimit, setMaxOrdersSatLimit] = useState(15);
+  const [maxOrdersSunLimit, setMaxOrdersSunLimit] = useState(15);
 
   // Fetch orders count on mount to populate slot calculations
   const fetchOrdersForWeekend = async () => {
@@ -81,12 +82,16 @@ const OrderForm: React.FC = () => {
     try {
       const { data } = await supabase
         .from('settings')
-        .select('value')
-        .eq('key', 'max_orders_per_day')
-        .maybeSingle();
+        .select('*')
+        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday']);
 
-      if (data && data.value) {
-        setMaxOrdersLimit(Number(data.value));
+      if (data) {
+        const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
+        const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
+        const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
+        
+        setMaxOrdersSatLimit(Number(sat));
+        setMaxOrdersSunLimit(Number(sun));
       }
     } catch (err) {
       console.warn('Failed to fetch settings from Supabase. Falling back to 15.');
@@ -387,7 +392,8 @@ const OrderForm: React.FC = () => {
                   if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
                 }}
                 orders={orders}
-                maxOrdersLimit={maxOrdersLimit}
+                maxOrdersSatLimit={maxOrdersSatLimit}
+                maxOrdersSunLimit={maxOrdersSunLimit}
               />
               {fieldErrors.date && (
                 <span className="text-error text-xs font-sans font-semibold text-left mt-2 block">

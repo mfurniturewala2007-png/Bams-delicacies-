@@ -65,8 +65,9 @@ const Admin: React.FC = () => {
   const [editUploadedImageUrl, setEditUploadedImageUrl] = useState<string | null>(null);
   const [isUploadingEditImage, setIsUploadingEditImage] = useState(false);
 
-  // Max orders settings state
-  const [maxOrdersInput, setMaxOrdersInput] = useState('15');
+  // Max orders settings states
+  const [maxOrdersSatInput, setMaxOrdersSatInput] = useState('15');
+  const [maxOrdersSunInput, setMaxOrdersSunInput] = useState('15');
   const [isSavingMaxOrders, setIsSavingMaxOrders] = useState(false);
 
   // Image Upload States
@@ -168,14 +169,19 @@ const Admin: React.FC = () => {
 
   const loadMaxOrders = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('settings')
-        .select('value')
-        .eq('key', 'max_orders_per_day')
-        .maybeSingle();
+        .select('*')
+        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday']);
 
-      if (data && data.value) {
-        setMaxOrdersInput(data.value);
+      if (error) throw error;
+      if (data) {
+        const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
+        const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
+        const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
+        
+        setMaxOrdersSatInput(sat);
+        setMaxOrdersSunInput(sun);
       }
     } catch (e) {
       console.warn('Failed to load settings.');
@@ -499,21 +505,34 @@ const Admin: React.FC = () => {
   const handleSaveMaxOrders = async () => {
     try {
       setIsSavingMaxOrders(true);
-      const val = Number(maxOrdersInput);
-      if (isNaN(val) || val <= 0) {
-        alert('Please enter a valid positive capacity.');
+      const satVal = Number(maxOrdersSatInput);
+      const sunVal = Number(maxOrdersSunInput);
+      if (isNaN(satVal) || satVal <= 0 || isNaN(sunVal) || sunVal <= 0) {
+        alert('Please enter a valid positive capacity for both days.');
         return;
       }
 
-      const { error } = await supabase
+      const { error: errorSat } = await supabase
         .from('settings')
-        .upsert({ key: 'max_orders_per_day', value: String(val) });
+        .upsert({ key: 'max_orders_saturday', value: String(satVal) });
 
-      if (error) throw error;
-      showToast(`Order capacity updated to ${val} slots! ✓`, 'success');
+      if (errorSat) throw errorSat;
+
+      const { error: errorSun } = await supabase
+        .from('settings')
+        .upsert({ key: 'max_orders_sunday', value: String(sunVal) });
+
+      if (errorSun) throw errorSun;
+
+      // Backward compatibility backup
+      await supabase
+        .from('settings')
+        .upsert({ key: 'max_orders_per_day', value: String(satVal) });
+
+      showToast(`Order capacity updated: Saturday = ${satVal}, Sunday = ${sunVal}! ✓`, 'success');
     } catch (err: any) {
       console.error(err);
-      alert(`Failed to save capacity settings. Make sure you have created the settings table. Error: ${err.message}`);
+      alert(`Failed to save capacity settings. Error: ${err.message}`);
     } finally {
       setIsSavingMaxOrders(false);
     }
@@ -586,6 +605,15 @@ const Admin: React.FC = () => {
       return 0;
     });
   const slotsCount = filteredOrders.length;
+  const getActiveLimit = () => {
+    const activeOpt = filterOptions.find(o => o.dbStr === activeFilterDateStr);
+    if (activeOpt) {
+      const day = activeOpt.date.getDay(); // 6 = Sat, 0 = Sun
+      if (day === 6) return maxOrdersSatInput;
+      if (day === 0) return maxOrdersSunInput;
+    }
+    return maxOrdersSatInput;
+  };
 
   // Gate view
   if (!isAuthenticated) {
@@ -1277,32 +1305,49 @@ const Admin: React.FC = () => {
                 <div className="self-start inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-surface border border-border">
                   <span className="text-yellow text-xs font-bold uppercase tracking-wider">Slot Tally:</span>
                   <span className="bg-yellow text-bg font-sans font-black text-xs px-2.5 py-0.5 rounded-full shadow-yellow">
-                    {slotsCount} / {maxOrdersInput} bookings
+                    {slotsCount} / {getActiveLimit()} bookings
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Dynamic Orders Limit Configuration Card */}
-            <div className="bg-surface border border-border p-6 rounded-2xl mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-card text-left select-none animate-fade-slide-up">
+            <div className="bg-surface border border-border p-6 rounded-2xl mb-8 flex flex-col gap-6 shadow-card text-left select-none animate-fade-slide-up">
               <div>
                 <h3 className="font-serif font-bold text-lg text-heading">Weekend Order Capacity</h3>
-                <p className="text-muted text-xs font-sans mt-1">Set the maximum slots available for weekend deliveries. This is instantly shared with checkout customers.</p>
+                <p className="text-muted text-xs font-sans mt-1">Set the maximum slots available for Saturday and Sunday deliveries separately. This dynamically controls customer order limits.</p>
               </div>
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <input
-                  type="number"
-                  value={maxOrdersInput}
-                  onChange={(e) => setMaxOrdersInput(e.target.value)}
-                  className="w-24 bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans font-bold focus:outline-none focus:border-primary text-center"
-                  min={1}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Saturday Slots Limit */}
+                <div className="flex flex-col gap-1.5 p-4 bg-surface-2 border border-border rounded-xl">
+                  <label className="text-xs font-sans font-bold text-text/80 uppercase tracking-wider">Saturday Capacity</label>
+                  <input
+                    type="number"
+                    value={maxOrdersSatInput}
+                    onChange={(e) => setMaxOrdersSatInput(e.target.value)}
+                    className="bg-bg border border-border rounded-xl px-4 py-2.5 text-text font-sans font-bold focus:outline-none focus:border-primary text-center mt-1"
+                    min={1}
+                  />
+                </div>
+                {/* Sunday Slots Limit */}
+                <div className="flex flex-col gap-1.5 p-4 bg-surface-2 border border-border rounded-xl">
+                  <label className="text-xs font-sans font-bold text-text/80 uppercase tracking-wider">Sunday Capacity</label>
+                  <input
+                    type="number"
+                    value={maxOrdersSunInput}
+                    onChange={(e) => setMaxOrdersSunInput(e.target.value)}
+                    className="bg-bg border border-border rounded-xl px-4 py-2.5 text-text font-sans font-bold focus:outline-none focus:border-primary text-center mt-1"
+                    min={1}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end">
                 <button
                   onClick={handleSaveMaxOrders}
                   disabled={isSavingMaxOrders}
-                  className="flex-1 md:flex-initial bg-primary text-white font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-primary hover:bg-primary-hover active:scale-95 transition-all duration-300"
+                  className="w-full sm:w-auto bg-primary text-bg font-sans font-black text-sm uppercase tracking-wider px-6 py-3.5 rounded-full shadow-primary hover:scale-[1.03] active:scale-95 transition-all duration-300 disabled:opacity-50"
                 >
-                  {isSavingMaxOrders ? 'Saving...' : 'Update Capacity'}
+                  {isSavingMaxOrders ? 'Saving capacities...' : 'Update Capacity Limits ✓'}
                 </button>
               </div>
             </div>
