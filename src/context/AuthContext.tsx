@@ -9,8 +9,10 @@ interface AuthContextType {
   loading: boolean;
   isAuthModalOpen: boolean;
   needsProfile: boolean;
+  isEditingProfile: boolean;
   openAuthModal: () => void;
   closeAuthModal: () => void;
+  openProfileEdit: () => void;
   signUp: (
     email: string,
     password: string,
@@ -39,13 +41,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [needsProfile, setNeedsProfile] = useState<boolean>(false);
+  const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
   const isSigningUpRef = useRef(false);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
+  const openProfileEdit = () => {
+    setIsEditingProfile(true);
+    setIsAuthModalOpen(true);
+  };
   const closeAuthModal = () => {
-    // If the user has an incomplete profile, we do not let them close the modal.
-    if (!needsProfile) {
+    // Lock modal closure if guest is unauthenticated OR profile is incomplete
+    if (user && !needsProfile) {
       setIsAuthModalOpen(false);
+      setIsEditingProfile(false);
     }
   };
 
@@ -98,6 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setProfile(prof);
             evaluateProfile(prof);
           }
+        } else {
+          if (mounted) {
+            setIsAuthModalOpen(true);
+          }
         }
       } catch (err) {
         console.error('Error recovering persistent auth session:', err);
@@ -127,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
           setProfile(null);
           setNeedsProfile(false);
+          setIsAuthModalOpen(true);
         }
         setLoading(false);
       }
@@ -228,6 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setProfile(newProfile);
     setNeedsProfile(false);
+    setIsEditingProfile(false);
     setIsAuthModalOpen(false);
   };
 
@@ -239,8 +253,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         isAuthModalOpen,
         needsProfile,
+        isEditingProfile,
         openAuthModal,
         closeAuthModal,
+        openProfileEdit,
         signUp,
         signIn,
         signOut,

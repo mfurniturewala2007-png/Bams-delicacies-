@@ -8,7 +8,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
   const { totalCount, lastAddedAt } = useCart();
-  const { user, profile, signOut, openAuthModal } = useAuth();
+  const { user, profile, signOut, openAuthModal, openProfileEdit } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -128,6 +128,15 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                         {user.email}
                       </p>
                     </div>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        openProfileEdit();
+                      }}
+                      className="w-full text-left font-sans font-bold text-xs text-text hover:bg-surface-2 px-4 py-2.5 transition-all duration-150 uppercase tracking-wider border-b border-border/40"
+                    >
+                      Edit Profile
+                    </button>
                     <button
                       onClick={() => {
                         setIsDropdownOpen(false);

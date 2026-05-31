@@ -5,14 +5,16 @@ const AuthModal: React.FC = () => {
   const {
     isAuthModalOpen,
     needsProfile,
+    isEditingProfile,
     closeAuthModal,
     signIn,
     signUp,
     upsertProfile,
     user,
+    profile,
   } = useAuth();
 
-  const [tab, setTab] = useState<'signin' | 'signup'>('signin');
+  const [tab, setTab] = useState<'signin' | 'signup'>('signup');
   
   // Input fields
   const [email, setEmail] = useState('');
@@ -29,10 +31,25 @@ const AuthModal: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
+  // Sync profile fields when modal opens or profile changes
+  React.useEffect(() => {
+    if (profile) {
+      setName(profile.name || '');
+      setPhone(profile.phone || '');
+      setAddress(profile.address || '');
+      setPincode(profile.pincode || '');
+    } else {
+      setName('');
+      setPhone('');
+      setAddress('');
+      setPincode('');
+    }
+  }, [profile, isAuthModalOpen]);
+
   if (!isAuthModalOpen) return null;
 
   // Decide current active step
-  const activeStep = needsProfile ? 'profile' : tab;
+  const activeStep = (needsProfile || isEditingProfile) ? 'profile' : tab;
 
   // Toggle Tab
   const handleTabToggle = (newTab: 'signin' | 'signup') => {
@@ -166,8 +183,8 @@ const AuthModal: React.FC = () => {
       {/* Dimmed Overlay */}
       <div
         onClick={() => {
-          // Locked: modal cannot be closed if user profile setup is mandatory
-          if (!needsProfile) {
+          // Locked: modal cannot be closed if user is not authenticated OR profile setup is mandatory
+          if (user && !needsProfile) {
             closeAuthModal();
           }
         }}
@@ -177,8 +194,8 @@ const AuthModal: React.FC = () => {
       {/* Centered Modal Content Card */}
       <div className="w-full max-w-[440px] bg-surface border border-border p-8 rounded-2xl shadow-2xl relative z-10 text-center animate-fade-slide-up flex flex-col max-h-[90vh] overflow-y-auto">
         
-        {/* Dismiss Button (only shown if profile setup is not locked) */}
-        {!needsProfile && (
+        {/* Dismiss Button (only shown if profile setup is not locked and user is authenticated) */}
+        {user && !needsProfile && (
           <button
             onClick={closeAuthModal}
             className="absolute top-4 right-4 p-1 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
