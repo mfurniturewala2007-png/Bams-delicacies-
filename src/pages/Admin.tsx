@@ -337,7 +337,7 @@ const Admin: React.FC = () => {
       const { error: deleteError } = await supabase
         .from('products')
         .delete()
-        .neq('id', '');
+        .not('id', 'is', null);
 
       if (deleteError) throw deleteError;
 
