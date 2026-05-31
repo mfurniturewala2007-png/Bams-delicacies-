@@ -8,7 +8,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
   const { totalCount, lastAddedAt } = useCart();
-  const { user, profile, signOut, openAuthModal, openProfileEdit } = useAuth();
+  const { profile, signOut, openAuthModal, openProfileEdit } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -82,7 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
         {/* Right: Cart Button & Mobile Hamburger */}
         <div className="flex items-center gap-4 relative">
           {/* Authentication State Section */}
-          {user ? (
+          {profile ? (
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -97,7 +97,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                         .join('')
                         .toUpperCase()
                         .slice(0, 2)
-                    : user.email?.slice(0, 2).toUpperCase() || 'U'}
+                    : '?'}
                 </div>
                 {/* Small Arrow Icon */}
                 <svg
@@ -125,7 +125,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                         {profile?.name || 'My Profile'}
                       </p>
                       <p className="font-sans text-[10px] text-muted truncate">
-                        {profile?.phone || user.email}
+                        {profile?.phone || ''}
                       </p>
                     </div>
                     <button

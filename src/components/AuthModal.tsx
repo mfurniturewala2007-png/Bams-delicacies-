@@ -4,57 +4,57 @@ import { useAuth } from '../context/AuthContext';
 const AuthModal: React.FC = () => {
   const {
     isAuthModalOpen,
-    needsProfile,
     isEditingProfile,
     closeAuthModal,
     signIn,
     signUp,
-    upsertProfile,
-    user,
+    updateProfile,
     profile,
   } = useAuth();
 
   const [tab, setTab] = useState<'signin' | 'signup'>('signup');
-  
-  // Profile fields
+
+  // Form fields
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [pincode, setPincode] = useState('');
 
-  // States
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
-  // Sync profile fields when modal opens or profile changes
+  // Pre-fill fields when editing profile
   React.useEffect(() => {
-    if (profile) {
+    if (isEditingProfile && profile) {
       setName(profile.name || '');
       setPhone(profile.phone || '');
       setAddress(profile.address || '');
       setPincode(profile.pincode || '');
-    } else {
+    } else if (!isEditingProfile) {
       setName('');
       setPhone('');
       setAddress('');
       setPincode('');
     }
-  }, [profile, isAuthModalOpen]);
+  }, [isEditingProfile, profile]);
 
   if (!isAuthModalOpen) return null;
 
-  // Decide current active step
-  const activeStep = (needsProfile || isEditingProfile) ? 'profile' : tab;
+  // Decide which view to show
+  const activeStep = isEditingProfile ? 'profile' : tab;
 
-  // Toggle Tab
   const handleTabToggle = (newTab: 'signin' | 'signup') => {
     setTab(newTab);
     setErrorMsg('');
     setFieldErrors({});
+    setPhone('');
+    setName('');
+    setAddress('');
+    setPincode('');
   };
 
-  // Submit Handler: Sign In
+  // SIGN IN — just phone number
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: { [key: string]: string } = {};
@@ -74,38 +74,31 @@ const AuthModal: React.FC = () => {
       setIsSubmitting(true);
       setErrorMsg('');
       setFieldErrors({});
-      const dummyEmail = `${phone.trim()}@bams.com`;
-      const dummyPassword = phone.trim();
-      await signIn(dummyEmail, dummyPassword);
+      await signIn(phone.trim());
     } catch (err: any) {
-      console.error('Sign In error:', err);
-      setErrorMsg(err.message || 'Phone number not registered. Please sign up first.');
+      setErrorMsg(err.message || 'Phone number not found. Please sign up first.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Submit Handler: Sign Up
+  // SIGN UP — name + phone + pincode + address
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: { [key: string]: string } = {};
 
-    if (!name.trim()) {
-      errors.name = 'Full Name is required';
-    }
+    if (!name.trim()) errors.name = 'Full Name is required';
     if (!phone.trim()) {
       errors.phone = 'Phone Number is required';
     } else if (!/^[0-9]{10}$/.test(phone.trim())) {
       errors.phone = 'Phone must be exactly 10 digits';
-    }
-    if (!address.trim()) {
-      errors.address = 'Delivery Address is required';
     }
     if (!pincode.trim()) {
       errors.pincode = 'Pincode is required';
     } else if (!/^[0-9]{6}$/.test(pincode.trim())) {
       errors.pincode = 'Pincode must be exactly 6 digits';
     }
+    if (!address.trim()) errors.address = 'Delivery Address is required';
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -116,47 +109,26 @@ const AuthModal: React.FC = () => {
       setIsSubmitting(true);
       setErrorMsg('');
       setFieldErrors({});
-      const dummyEmail = `${phone.trim()}@bams.com`;
-      const dummyPassword = phone.trim();
-      await signUp(dummyEmail, dummyPassword, {
-        name: name.trim(),
-        phone: phone.trim(),
-        address: address.trim(),
-        pincode: pincode.trim(),
-      });
+      await signUp(phone.trim(), name.trim(), address.trim(), pincode.trim());
     } catch (err: any) {
-      console.error('Sign Up error:', err);
-      if (err.message?.includes('User already exists')) {
-        setErrorMsg('This phone number is already registered. Please sign in instead!');
-      } else {
-        setErrorMsg(err.message || 'Failed to create account. Please try again.');
-      }
+      setErrorMsg(err.message || 'Failed to create account. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Submit Handler: Profile setup
+  // EDIT PROFILE — update name, address, pincode
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: { [key: string]: string } = {};
 
-    if (!name.trim()) {
-      errors.name = 'Full Name is required';
-    }
-    if (!phone.trim()) {
-      errors.phone = 'Phone Number is required';
-    } else if (!/^[0-9]{10}$/.test(phone.trim())) {
-      errors.phone = 'Phone must be exactly 10 digits';
-    }
-    if (!address.trim()) {
-      errors.address = 'Delivery Address is required';
-    }
+    if (!name.trim()) errors.name = 'Full Name is required';
     if (!pincode.trim()) {
       errors.pincode = 'Pincode is required';
     } else if (!/^[0-9]{6}$/.test(pincode.trim())) {
       errors.pincode = 'Pincode must be exactly 6 digits';
     }
+    if (!address.trim()) errors.address = 'Delivery Address is required';
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -167,15 +139,13 @@ const AuthModal: React.FC = () => {
       setIsSubmitting(true);
       setErrorMsg('');
       setFieldErrors({});
-      await upsertProfile({
+      await updateProfile({
         name: name.trim(),
         phone: phone.trim(),
         address: address.trim(),
         pincode: pincode.trim(),
       });
-      // Success will close modal inside context
     } catch (err: any) {
-      console.error('Profile Upsert error:', err);
       setErrorMsg(err.message || 'Failed to save profile. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -184,22 +154,17 @@ const AuthModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-text">
-      {/* Dimmed Overlay */}
+      {/* Dimmed overlay — only closeable if logged in */}
       <div
-        onClick={() => {
-          // Locked: modal cannot be closed if user is not authenticated OR profile setup is mandatory
-          if (user && !needsProfile) {
-            closeAuthModal();
-          }
-        }}
+        onClick={closeAuthModal}
         className="absolute inset-0 bg-black/75 backdrop-blur-sm"
       />
 
-      {/* Centered Modal Content Card */}
+      {/* Modal Card */}
       <div className="w-full max-w-[440px] bg-surface border border-border p-8 rounded-2xl shadow-2xl relative z-10 text-center animate-fade-slide-up flex flex-col max-h-[90vh] overflow-y-auto">
-        
-        {/* Dismiss Button (only shown if profile setup is not locked and user is authenticated) */}
-        {user && !needsProfile && (
+
+        {/* Close Button — only when logged in and editing */}
+        {profile && (
           <button
             onClick={closeAuthModal}
             className="absolute top-4 right-4 p-1 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
@@ -215,10 +180,11 @@ const AuthModal: React.FC = () => {
           className="w-16 h-16 rounded-full mx-auto mb-4 object-cover border border-border shadow-md"
         />
 
+        {/* ─── SIGN IN VIEW ─── */}
         {activeStep === 'signin' && (
           <>
             <h1 className="font-serif font-black text-2xl text-heading mb-1">Welcome Back</h1>
-            <p className="font-sans text-xs text-muted mb-6">Sign in to check out and track your gourmet orders.</p>
+            <p className="font-sans text-xs text-muted mb-6">Enter your phone number to sign in instantly.</p>
 
             {errorMsg && (
               <div className="bg-error/10 border border-error/25 text-error text-xs font-semibold px-4 py-2.5 rounded-xl text-left mb-4 font-sans">
@@ -240,7 +206,6 @@ const AuthModal: React.FC = () => {
                     if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
                   }}
                   placeholder="Enter your 10-digit phone number"
-                  required
                   className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.phone ? 'border-error' : 'border-border'
                   }`}
@@ -261,20 +226,21 @@ const AuthModal: React.FC = () => {
               </button>
             </form>
 
-            <div className="mt-6 text-center select-none">
+            <div className="mt-6 text-center">
               <span className="text-xs text-muted font-sans">
-                Don't have an account?{' '}
+                New here?{' '}
                 <button
                   onClick={() => handleTabToggle('signup')}
                   className="text-primary font-bold hover:underline"
                 >
-                  Sign Up
+                  Create Account
                 </button>
               </span>
             </div>
           </>
         )}
 
+        {/* ─── SIGN UP VIEW ─── */}
         {activeStep === 'signup' && (
           <>
             <h1 className="font-serif font-black text-2xl text-heading mb-1">Create Account</h1>
@@ -287,6 +253,7 @@ const AuthModal: React.FC = () => {
             )}
 
             <form onSubmit={handleSignUpSubmit} className="space-y-3.5 text-left">
+              {/* Full Name */}
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
                   Full Name <span className="text-primary">*</span>
@@ -304,12 +271,11 @@ const AuthModal: React.FC = () => {
                   }`}
                 />
                 {fieldErrors.name && (
-                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                    {fieldErrors.name}
-                  </span>
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.name}</span>
                 )}
               </div>
 
+              {/* Phone + Pincode row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
@@ -323,15 +289,13 @@ const AuthModal: React.FC = () => {
                       setPhone(e.target.value.replace(/[^0-9]/g, ''));
                       if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
                     }}
-                    placeholder="10-digit mobile"
+                    placeholder="10-digit number"
                     className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                       fieldErrors.phone ? 'border-error' : 'border-border'
                     }`}
                   />
                   {fieldErrors.phone && (
-                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                      {fieldErrors.phone}
-                    </span>
+                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.phone}</span>
                   )}
                 </div>
 
@@ -347,19 +311,18 @@ const AuthModal: React.FC = () => {
                       setPincode(e.target.value.replace(/[^0-9]/g, ''));
                       if (fieldErrors.pincode) setFieldErrors((prev) => ({ ...prev, pincode: '' }));
                     }}
-                    placeholder="6-digit pincode"
+                    placeholder="6-digit code"
                     className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                       fieldErrors.pincode ? 'border-error' : 'border-border'
                     }`}
                   />
                   {fieldErrors.pincode && (
-                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                      {fieldErrors.pincode}
-                    </span>
+                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.pincode}</span>
                   )}
                 </div>
               </div>
 
+              {/* Delivery Address */}
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
                   Delivery Address <span className="text-primary">*</span>
@@ -370,16 +333,14 @@ const AuthModal: React.FC = () => {
                     setAddress(e.target.value);
                     if (fieldErrors.address) setFieldErrors((prev) => ({ ...prev, address: '' }));
                   }}
-                  placeholder="Enter your flat/street, landmark details for hot deliveries..."
+                  placeholder="Flat no., street, landmark..."
                   rows={2}
                   className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none ${
                     fieldErrors.address ? 'border-error' : 'border-border'
                   }`}
                 />
                 {fieldErrors.address && (
-                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                    {fieldErrors.address}
-                  </span>
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.address}</span>
                 )}
               </div>
 
@@ -392,7 +353,7 @@ const AuthModal: React.FC = () => {
               </button>
             </form>
 
-            <div className="mt-6 text-center select-none">
+            <div className="mt-6 text-center">
               <span className="text-xs text-muted font-sans">
                 Already have an account?{' '}
                 <button
@@ -406,10 +367,11 @@ const AuthModal: React.FC = () => {
           </>
         )}
 
+        {/* ─── EDIT PROFILE VIEW ─── */}
         {activeStep === 'profile' && (
           <>
-            <h1 className="font-serif font-black text-2xl text-heading mb-1">Tell us about yourself 👋</h1>
-            <p className="font-sans text-xs text-muted mb-6">Complete your mandatory profile details to reserve order slots.</p>
+            <h1 className="font-serif font-black text-2xl text-heading mb-1">Edit Profile</h1>
+            <p className="font-sans text-xs text-muted mb-6">Update your delivery details below.</p>
 
             {errorMsg && (
               <div className="bg-error/10 border border-error/25 text-error text-xs font-semibold px-4 py-2.5 rounded-xl text-left mb-4 font-sans">
@@ -417,8 +379,7 @@ const AuthModal: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleProfileSubmit} className="space-y-4 text-left">
-
+            <form onSubmit={handleProfileSubmit} className="space-y-3.5 text-left">
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
                   Full Name <span className="text-primary">*</span>
@@ -430,66 +391,50 @@ const AuthModal: React.FC = () => {
                     setName(e.target.value);
                     if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
                   }}
-                  placeholder="e.g. Mohammed Furniturewala"
+                  placeholder="Your full name"
                   className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.name ? 'border-error' : 'border-border'
                   }`}
                 />
                 {fieldErrors.name && (
-                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                    {fieldErrors.name}
-                  </span>
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.name}</span>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                    Phone Number <span className="text-primary">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    maxLength={10}
-                    onChange={(e) => {
-                      setPhone(e.target.value.replace(/[^0-9]/g, ''));
-                      if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
-                    }}
-                    placeholder="10-digit mobile"
-                    className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
-                      fieldErrors.phone ? 'border-error' : 'border-border'
-                    }`}
-                  />
-                  {fieldErrors.phone && (
-                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                      {fieldErrors.phone}
-                    </span>
-                  )}
-                </div>
+              {/* Phone (read-only when editing) */}
+              <div>
+                <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  disabled
+                  className="w-full bg-surface-2/50 border border-border rounded-xl px-4 py-2.5 text-muted font-sans cursor-not-allowed opacity-60"
+                />
+                <span className="text-muted text-[10px] font-sans mt-1 block">Phone number cannot be changed.</span>
+              </div>
 
-                <div>
-                  <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                    Pincode <span className="text-primary">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={pincode}
-                    maxLength={6}
-                    onChange={(e) => {
-                      setPincode(e.target.value.replace(/[^0-9]/g, ''));
-                      if (fieldErrors.pincode) setFieldErrors((prev) => ({ ...prev, pincode: '' }));
-                    }}
-                    placeholder="6-digit pincode"
-                    className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
-                      fieldErrors.pincode ? 'border-error' : 'border-border'
-                    }`}
-                  />
-                  {fieldErrors.pincode && (
-                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                      {fieldErrors.pincode}
-                    </span>
-                  )}
-                </div>
+              <div>
+                <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
+                  Pincode <span className="text-primary">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={pincode}
+                  maxLength={6}
+                  onChange={(e) => {
+                    setPincode(e.target.value.replace(/[^0-9]/g, ''));
+                    if (fieldErrors.pincode) setFieldErrors((prev) => ({ ...prev, pincode: '' }));
+                  }}
+                  placeholder="6-digit pincode"
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                    fieldErrors.pincode ? 'border-error' : 'border-border'
+                  }`}
+                />
+                {fieldErrors.pincode && (
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.pincode}</span>
+                )}
               </div>
 
               <div>
@@ -502,16 +447,14 @@ const AuthModal: React.FC = () => {
                     setAddress(e.target.value);
                     if (fieldErrors.address) setFieldErrors((prev) => ({ ...prev, address: '' }));
                   }}
-                  placeholder="Enter your flat/street, landmark details for hot deliveries..."
+                  placeholder="Flat no., street, landmark..."
                   rows={3}
                   className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none ${
                     fieldErrors.address ? 'border-error' : 'border-border'
                   }`}
                 />
                 {fieldErrors.address && (
-                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                    {fieldErrors.address}
-                  </span>
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.address}</span>
                 )}
               </div>
 
@@ -520,7 +463,7 @@ const AuthModal: React.FC = () => {
                 disabled={isSubmitting}
                 className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-3.5 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
               >
-                {isSubmitting ? 'Saving Profile...' : 'Save & Continue'}
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
             </form>
           </>

@@ -1,246 +1,104 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { User } from '@supabase/supabase-js';
 import { UserProfile } from '../types';
 
 interface AuthContextType {
-  user: User | null;
   profile: UserProfile | null;
-  loading: boolean;
   isAuthModalOpen: boolean;
-  needsProfile: boolean;
   isEditingProfile: boolean;
   openAuthModal: () => void;
   closeAuthModal: () => void;
   openProfileEdit: () => void;
-  signUp: (
-    email: string,
-    password: string,
-    profileData?: {
-      name: string;
-      phone: string;
-      address: string;
-      pincode: string;
-    }
-  ) => Promise<any>;
-  signIn: (email: string, password: string) => Promise<any>;
-  signOut: () => Promise<void>;
-  upsertProfile: (profileData: {
-    name: string;
-    phone: string;
-    address: string;
-    pincode: string;
-  }) => Promise<void>;
+  signUp: (phone: string, name: string, address: string, pincode: string) => Promise<void>;
+  signIn: (phone: string) => Promise<void>;
+  signOut: () => void;
+  updateProfile: (data: { name: string; phone: string; address: string; pincode: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [needsProfile, setNeedsProfile] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(true); // Open by default for guests
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
-  const isSigningUpRef = useRef(false);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
+
   const openProfileEdit = () => {
     setIsEditingProfile(true);
     setIsAuthModalOpen(true);
   };
+
   const closeAuthModal = () => {
-    // Lock modal closure if guest is unauthenticated OR profile is incomplete
-    if (user && !needsProfile) {
+    // Only allow closing if the user is logged in
+    if (profile) {
       setIsAuthModalOpen(false);
       setIsEditingProfile(false);
     }
   };
 
-  const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+  // SIGN UP — insert new profile row, phone is the unique key
+  const signUp = async (phone: string, name: string, address: string, pincode: string) => {
+    // Check if phone already exists
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('phone')
+      .eq('phone', phone)
+      .maybeSingle();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Profile does not exist yet
-          return null;
-        }
-        throw error;
-      }
-      return data as UserProfile;
-    } catch (err) {
-      console.warn('Error fetching profile from Supabase:', err);
-      return null;
+    if (existing) {
+      throw new Error('This phone number is already registered. Please sign in instead!');
     }
-  };
 
-  const evaluateProfile = (prof: UserProfile | null) => {
-    if (!prof) {
-      setNeedsProfile(true);
-      return;
-    }
-    const isIncomplete =
-      !prof.name?.trim() ||
-      !prof.phone?.trim() ||
-      !prof.address?.trim() ||
-      !prof.pincode?.trim();
-    setNeedsProfile(isIncomplete);
-  };
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({ phone, name, address, pincode })
+      .select()
+      .single();
 
-  // On Mount: restore session and set up onAuthStateChange listener
-  useEffect(() => {
-    let mounted = true;
-
-    const initializeAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          if (mounted) setUser(session.user);
-          const prof = await fetchProfile(session.user.id);
-          if (mounted) {
-            setProfile(prof);
-            evaluateProfile(prof);
-          }
-        } else {
-          if (mounted) {
-            setIsAuthModalOpen(true);
-          }
-        }
-      } catch (err) {
-        console.error('Error recovering persistent auth session:', err);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!mounted) return;
-
-        if (session?.user) {
-          setUser(session.user);
-          if (isSigningUpRef.current) {
-            setLoading(false);
-            return;
-          }
-          const prof = await fetchProfile(session.user.id);
-          if (mounted) {
-            setProfile(prof);
-            evaluateProfile(prof);
-          }
-        } else {
-          setUser(null);
-          setProfile(null);
-          setNeedsProfile(false);
-          setIsAuthModalOpen(true);
-        }
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Force open the profile setup modal if user is logged in but profile is incomplete
-  useEffect(() => {
-    if (user && needsProfile) {
-      setIsAuthModalOpen(true);
-    }
-  }, [user, needsProfile]);
-
-  const signUp = async (
-    email: string,
-    password: string,
-    profileData?: {
-      name: string;
-      phone: string;
-      address: string;
-      pincode: string;
-    }
-  ) => {
-    try {
-      if (profileData) {
-        isSigningUpRef.current = true;
-      }
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      if (error) throw error;
-
-      if (data.user && profileData) {
-        const newProfile: UserProfile = {
-          id: data.user.id,
-          email: email,
-          ...profileData,
-        };
-
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert(newProfile);
-
-        if (profileError) throw profileError;
-
-        setProfile(newProfile);
-        setNeedsProfile(false);
-        setIsAuthModalOpen(false);
-      }
-      return data;
-    } finally {
-      isSigningUpRef.current = false;
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
     if (error) throw error;
-    return data;
-  };
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setUser(null);
-    setProfile(null);
-    setNeedsProfile(false);
+    setProfile(data as UserProfile);
     setIsAuthModalOpen(false);
   };
 
-  const upsertProfile = async (profileData: {
-    name: string;
-    phone: string;
-    address: string;
-    pincode: string;
-  }) => {
-    if (!user) throw new Error('Must be authenticated to save a profile.');
-
-    const newProfile: UserProfile = {
-      id: user.id,
-      email: user.email || '',
-      ...profileData,
-    };
-
-    const { error } = await supabase
+  // SIGN IN — look up profile by phone number
+  const signIn = async (phone: string) => {
+    const { data, error } = await supabase
       .from('profiles')
-      .upsert(newProfile);
+      .select('*')
+      .eq('phone', phone)
+      .maybeSingle();
 
     if (error) throw error;
 
-    setProfile(newProfile);
-    setNeedsProfile(false);
+    if (!data) {
+      throw new Error('Phone number not found. Please sign up first!');
+    }
+
+    setProfile(data as UserProfile);
+    setIsAuthModalOpen(false);
+  };
+
+  // SIGN OUT — clear profile, reopen modal
+  const signOut = () => {
+    setProfile(null);
+    setIsEditingProfile(false);
+    setIsAuthModalOpen(true);
+  };
+
+  // UPDATE PROFILE — edit existing row by phone
+  const updateProfile = async (data: { name: string; phone: string; address: string; pincode: string }) => {
+    if (!profile) throw new Error('Not logged in.');
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ name: data.name, address: data.address, pincode: data.pincode })
+      .eq('phone', profile.phone);
+
+    if (error) throw error;
+
+    setProfile({ ...profile, ...data });
     setIsEditingProfile(false);
     setIsAuthModalOpen(false);
   };
@@ -248,11 +106,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider
       value={{
-        user,
         profile,
-        loading,
         isAuthModalOpen,
-        needsProfile,
         isEditingProfile,
         openAuthModal,
         closeAuthModal,
@@ -260,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
-        upsertProfile,
+        updateProfile,
       }}
     >
       {children}

@@ -46,11 +46,9 @@ export interface PushSubscriptionJSON {
 }
 
 export interface UserProfile {
-  id: string;
-  name: string | null;
-  phone: string | null;
-  address: string | null;
-  pincode: string | null;
-  email: string | null;
+  phone: string;
+  name: string;
+  address: string;
+  pincode: string;
   created_at?: string;
 }

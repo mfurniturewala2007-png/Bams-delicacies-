@@ -14,7 +14,7 @@ interface ToastState {
 
 const OrderForm: React.FC = () => {
   const { items, totalAmount, clearCart } = useCart();
-  const { user, profile, openAuthModal } = useAuth();
+  const { profile, openAuthModal } = useAuth();
 
   // Inputs state
   const [customerName, setCustomerName] = useState('');
@@ -186,7 +186,7 @@ const OrderForm: React.FC = () => {
   }
 
   // If user is not logged in, show mandatory "Sign in to order" prompt card
-  if (!user) {
+  if (!profile) {
     return (
       <section id="order" className="py-24 px-6 md:px-12 bg-surface-2 border-t border-border/40 text-center relative">
         <div className="max-w-md mx-auto p-8 border border-border bg-surface rounded-2xl shadow-card animate-fade-slide-up">
