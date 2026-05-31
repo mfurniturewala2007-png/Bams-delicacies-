@@ -28,8 +28,14 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
 
   return (
     <div className="w-full">
-      <label className="block text-left text-sm font-sans font-semibold text-text uppercase tracking-wider mb-3">
-        Select Delivery Date <span className="text-primary">*</span>
+      <label className="block text-left text-sm font-sans font-semibold text-text uppercase tracking-wider mb-3 flex items-center justify-between">
+        <span>Select Delivery Date <span className="text-primary">*</span></span>
+        {!selectedDate && (
+          <span className="text-[10px] text-yellow font-bold uppercase tracking-wider animate-pulse flex items-center gap-1">
+            <span>⚠️</span>
+            <span>Please Select A Slot</span>
+          </span>
+        )}
       </label>
 
       {/* Side-by-Side (2 cols) Weekend Picker Grid */}
@@ -57,6 +63,8 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
                   ? 'bg-surface border-border opacity-50 cursor-not-allowed pointer-events-none'
                   : isSelected
                   ? 'bg-surface-2 border-primary shadow-primary text-text hover:scale-[1.01]'
+                  : !selectedDate
+                  ? 'bg-surface border-primary/50 animate-pulse-glow shadow-yellow text-text/85 hover:scale-[1.01]'
                   : 'bg-surface border-border hover:border-primary/50 text-text/80 hover:scale-[1.01]'
               }`}
             >
