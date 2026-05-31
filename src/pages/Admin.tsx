@@ -9,20 +9,22 @@ import { BAMS_MENU } from '../utils/seedMenu';
 const DEFAULT_PRODUCTS: Product[] = [
   {
     id: 'prod-1',
-    name: "Mughlai Mutton Dum Biryani",
-    description: "Mom's signature long-grain basmati rice Dum cooked with spices.",
-    price: 480,
+    name: "Chicken Keema Samosa",
+    description: "Crispy samosas stuffed with spiced chicken keema. 12 pcs per order.",
+    price: 360,
     image_url: null,
-    category: 'mains',
+    category: 'Non-Veg Samosa',
+    unit_label: '12 pcs',
     in_stock: true,
   },
   {
     id: 'prod-2',
-    name: "Mom's Special Butter Chicken",
-    description: "Succulent grilled chicken simmers in rich butter gravy.",
-    price: 390,
+    name: "Smoked Dal Samosa",
+    description: "Crispy samosas with a smoky spiced dal filling. 12 pcs per order.",
+    price: 300,
     image_url: null,
-    category: 'mains',
+    category: 'Veg Samosa',
+    unit_label: '12 pcs',
     in_stock: true,
   },
 ];
@@ -46,7 +48,8 @@ const Admin: React.FC = () => {
   const [newProdName, setNewProdName] = useState('');
   const [newProdDesc, setNewProdDesc] = useState('');
   const [newProdPrice, setNewProdPrice] = useState('');
-  const [newProdCat, setNewProdCat] = useState('mains');
+  const [newProdCat, setNewProdCat] = useState('Non-Veg Samosa');
+  const [newProdUnit, setNewProdUnit] = useState('12 pcs');
   const [newProdStock, setNewProdStock] = useState(true);
   
   // Image Upload States
@@ -282,6 +285,7 @@ const Admin: React.FC = () => {
         price: Number(newProdPrice),
         category: newProdCat,
         in_stock: newProdStock,
+        unit_label: newProdUnit.trim() || '12 pcs',
         image_url: finalImgUrl,
       };
 
@@ -309,7 +313,8 @@ const Admin: React.FC = () => {
       setNewProdName('');
       setNewProdDesc('');
       setNewProdPrice('');
-      setNewProdCat('mains');
+      setNewProdCat('Non-Veg Samosa');
+      setNewProdUnit('12 pcs');
       setNewProdStock(true);
       setImagePreview(null);
       setUploadedImageUrl(null);
@@ -322,7 +327,7 @@ const Admin: React.FC = () => {
 
   // Products CRUD: Seed default gourmet BAMS menu
   const handleSeedMenu = async () => {
-    const confirmSeed = window.confirm("This will delete ALL existing products and replace with default menu. Continue?");
+    const confirmSeed = window.confirm("This will DELETE all existing products and load Bam's real menu. Continue?");
     if (!confirmSeed) return;
 
     try {
@@ -345,7 +350,7 @@ const Admin: React.FC = () => {
 
       // 3. Mark seeded and reload products to show real new menu
       setIsSeeded(true);
-      showToast("Menu seeded! Update prices in the admin panel.", "success");
+      showToast("Menu seeded! 17 products loaded. ✓", "success");
       await loadProducts();
 
     } catch (err: any) {
@@ -568,7 +573,7 @@ const Admin: React.FC = () => {
                     disabled={isSeeding}
                     className="text-[11px] font-sans font-semibold text-muted hover:text-text bg-surface-2 hover:bg-border/30 px-3 py-1.5 rounded-lg border border-border/50 transition-all duration-200 select-none disabled:opacity-50"
                   >
-                    {isSeeding ? 'Seeding...' : 'Seed Default Menu'}
+                    {isSeeding ? 'Seeding...' : '🌱 Seed Bam\'s Menu'}
                   </button>
                 )}
               </div>
@@ -587,7 +592,7 @@ const Admin: React.FC = () => {
                       <tr className="border-b border-border bg-surface-2 text-muted font-sans text-xs font-bold uppercase tracking-wider select-none">
                         <th className="py-4 px-6">Product</th>
                         <th className="py-4 px-6">Category</th>
-                        <th className="py-4 px-6">Price</th>
+                        <th className="py-4 px-6">Price / Dozen</th>
                         <th className="py-4 px-6">Stock Status</th>
                         <th className="py-4 px-6 text-center">Actions</th>
                       </tr>
@@ -632,7 +637,7 @@ const Admin: React.FC = () => {
 
                           {/* Price Cell */}
                           <td className="py-4 px-6 font-serif font-semibold text-yellow">
-                            ₹{prod.price}
+                            ₹{prod.price} <span className="text-xs font-sans text-muted">/ {prod.unit_label || '12 pcs'}</span>
                           </td>
 
                           {/* stock status switch toggle */}
@@ -733,12 +738,12 @@ const Admin: React.FC = () => {
                         <select
                           value={newProdCat}
                           onChange={(e) => setNewProdCat(e.target.value)}
-                          className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 capitalize"
+                          className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250"
                         >
-                          <option value="mains">Mains</option>
-                          <option value="snacks">Snacks</option>
-                          <option value="breads">Breads</option>
-                          <option value="desserts">Desserts</option>
+                          <option value="Non-Veg Samosa">Non-Veg Samosa</option>
+                          <option value="Veg Samosa">Veg Samosa</option>
+                          <option value="Chicken Starter">Chicken Starter</option>
+                          <option value="Mutton Starter">Mutton Starter</option>
                         </select>
                       </div>
 
@@ -753,7 +758,7 @@ const Admin: React.FC = () => {
                             setNewProdPrice(e.target.value);
                             if (formErrors.price) setFormErrors((prev) => ({ ...prev, price: '' }));
                           }}
-                          placeholder="e.g. 250"
+                          placeholder="e.g. 360"
                           className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 ${
                             formErrors.price ? 'border-error' : 'border-border'
                           }`}
@@ -762,6 +767,20 @@ const Admin: React.FC = () => {
                           <span className="text-error text-xs font-sans mt-1 block">{formErrors.price}</span>
                         )}
                       </div>
+                    </div>
+
+                    {/* Unit Label Field */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                        Unit Label (e.g. 12 pcs, 6 pcs)
+                      </label>
+                      <input
+                        type="text"
+                        value={newProdUnit}
+                        onChange={(e) => setNewProdUnit(e.target.value)}
+                        placeholder="e.g. 12 pcs"
+                        className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250"
+                      />
                     </div>
 
                     {/* Description field */}
@@ -991,7 +1010,9 @@ const Admin: React.FC = () => {
                               {ord.items && ord.items.map((item, keyIdx) => (
                                 <li key={keyIdx} className="text-xs text-text/85">
                                   • {item.name}{' '}
-                                  <span className="text-primary font-bold">×{item.quantity}</span>
+                                  <span className="text-primary font-bold">
+                                    {item.dozens !== undefined ? `×${item.dozens} doz (${item.dozens * 12} pcs)` : `×${(item as any).quantity}`}
+                                  </span>
                                 </li>
                               ))}
                             </ul>

@@ -3,9 +3,9 @@ import { CartItem } from '../types';
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
+  addItem: (item: CartItem) => void;
   removeItem: (productId: string) => void;
-  updateQty: (productId: string, quantity: number) => void;
+  updateQty: (productId: string, dozens: number) => void;
   clearCart: () => void;
   totalAmount: number;
   totalCount: number;
@@ -20,18 +20,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [lastAddedAt, setLastAddedAt] = useState<number | null>(null);
 
-  const addItem = (newItem: Omit<CartItem, 'quantity'>, quantity = 1) => {
+  const addItem = (newItem: CartItem) => {
     setLastAddedAt(Date.now());
     setItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.product_id === newItem.product_id);
       if (existingItem) {
         return prevItems.map((item) =>
           item.product_id === newItem.product_id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, dozens: item.dozens + newItem.dozens }
             : item
         );
       }
-      return [...prevItems, { ...newItem, quantity }];
+      return [...prevItems, newItem];
     });
   };
 
@@ -39,14 +39,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems((prevItems) => prevItems.filter((item) => item.product_id !== productId));
   };
 
-  const updateQty = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateQty = (productId: string, dozens: number) => {
+    if (dozens <= 0) {
       removeItem(productId);
       return;
     }
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.product_id === productId ? { ...item, quantity } : item
+        item.product_id === productId ? { ...item, dozens } : item
       )
     );
   };
@@ -56,11 +56,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const totalAmount = useMemo(() => {
-    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return items.reduce((sum, item) => sum + item.price_per_dozen * item.dozens, 0);
   }, [items]);
 
   const totalCount = useMemo(() => {
-    return items.reduce((sum, item) => sum + item.quantity, 0);
+    return items.reduce((sum, item) => sum + item.dozens, 0);
   }, [items]);
 
   const value = useMemo(

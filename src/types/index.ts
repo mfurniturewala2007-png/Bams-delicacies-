@@ -6,16 +6,20 @@ export interface Product {
   image_url: string | null;
   category: string | null;
   in_stock: boolean;
+  unit_label?: string | null;
   created_at?: string;
 }
 
 export interface CartItem {
   product_id: string;
   name: string;
-  price: number;
-  quantity: number;
-  image_url: string | null;
+  price_per_dozen: number;   // price for 12 pcs
+  dozens: number;            // how many sets of 12 the user wants
+  image_url: string;
+  category: string;
 }
+
+export const cartItemTotal = (item: CartItem) => item.price_per_dozen * item.dozens;
 
 export interface Order {
   id: string;

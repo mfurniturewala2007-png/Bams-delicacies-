@@ -99,12 +99,12 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                           🍳
                         </span>
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 text-left">
                         <h4 className="font-sans font-bold text-sm text-text truncate">
                           {item.name}
                         </h4>
                         <p className="font-serif text-xs text-yellow font-semibold mt-1">
-                          ₹{item.price} <span className="font-sans text-muted/80 font-normal">each</span>
+                          ₹{item.price_per_dozen} <span className="font-sans text-muted/80 font-normal">/ doz</span>
                         </p>
                       </div>
                     </div>
@@ -113,24 +113,29 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
                       <div className="flex items-center gap-1.5 bg-bg border border-border rounded-lg p-1">
                         <button
-                          onClick={() => updateQty(item.product_id, item.quantity - 1)}
+                          onClick={() => updateQty(item.product_id, item.dozens - 1)}
                           className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
                         >
                           −
                         </button>
                         <span className="font-sans font-bold text-xs px-2 w-5 text-center text-text select-none">
-                          {item.quantity}
+                          {item.dozens}
                         </span>
                         <button
-                          onClick={() => updateQty(item.product_id, item.quantity + 1)}
+                          onClick={() => updateQty(item.product_id, item.dozens + 1)}
                           className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
                         >
                           +
                         </button>
                       </div>
-                      <span className="font-serif text-sm font-semibold text-text font-bold">
-                        ₹{item.price * item.quantity}
-                      </span>
+                      <div className="text-right">
+                        <span className="font-sans text-[10px] text-muted font-medium mb-0.5 block uppercase tracking-wider">
+                          ({item.dozens * 12} pcs)
+                        </span>
+                        <span className="font-serif text-sm font-bold text-text">
+                          ₹{item.price_per_dozen * item.dozens}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))

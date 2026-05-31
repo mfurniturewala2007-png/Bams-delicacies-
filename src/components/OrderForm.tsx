@@ -391,11 +391,11 @@ const OrderForm: React.FC = () => {
                         {item.name}
                       </span>
                       <span className="text-muted text-xs font-sans mt-0.5 block">
-                        ₹{item.price} × {item.quantity}
+                        ₹{item.price_per_dozen} × {item.dozens} doz ({item.dozens * 12} pcs)
                       </span>
                     </div>
                     <span className="font-serif text-sm font-bold text-text flex-shrink-0">
-                      ₹{item.price * item.quantity}
+                      ₹{item.price_per_dozen * item.dozens}
                     </span>
                   </div>
                 ))}

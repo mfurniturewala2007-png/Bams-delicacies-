@@ -1,81 +1,161 @@
 export const BAMS_MENU = [
+  // Non-Veg Samosa
   {
-    name: "Chicken Biryani",
-    description: "Slow-cooked basmati rice with tender chicken, whole spices, and caramelized onions. Bam's signature dish.",
-    category: "mains",
-    price: 0,
+    name: "Chicken Keema Samosa",
+    description: "Crispy samosas stuffed with spiced chicken keema. 12 pcs per order.",
+    category: "Non-Veg Samosa",
+    price: 360,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Mutton Curry",
-    description: "Rich, slow-cooked mutton in a thick masala gravy. Best eaten with rice or chapati.",
-    category: "mains",
-    price: 0,
+    name: "Cheese & Chicken Samosa",
+    description: "Golden samosas with a rich cheese and chicken filling. 12 pcs per order.",
+    category: "Non-Veg Samosa",
+    price: 420,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Dal Tadka",
-    description: "Yellow dal tempered with ghee, cumin, garlic, and dried red chillies.",
-    category: "mains",
-    price: 0,
+    name: "Mutton Keema Samosa",
+    description: "Flaky samosas packed with minced mutton and warm spices. 12 pcs per order.",
+    category: "Non-Veg Samosa",
+    price: 420,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Paneer Butter Masala",
-    description: "Soft paneer in a creamy tomato-butter gravy. A crowd favourite.",
-    category: "mains",
-    price: 0,
+    name: "Mutton Cheese Keema Samosa",
+    description: "Samosas with a decadent mutton keema and melted cheese filling. 12 pcs per order.",
+    category: "Non-Veg Samosa",
+    price: 460,
+    unit_label: "12 pcs",
+    in_stock: true,
+    image_url: ""
+  },
+
+  // Veg Samosa
+  {
+    name: "Smoked Dal Samosa",
+    description: "Crispy samosas with a smoky spiced dal filling. 12 pcs per order.",
+    category: "Veg Samosa",
+    price: 300,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Veg Pulao",
-    description: "Fragrant basmati rice cooked with seasonal vegetables and whole spices.",
-    category: "mains",
-    price: 0,
+    name: "Corn & Cheese Samosa",
+    description: "Golden samosas filled with sweet corn and gooey cheese. 12 pcs per order.",
+    category: "Veg Samosa",
+    price: 360,
+    unit_label: "12 pcs",
+    in_stock: true,
+    image_url: ""
+  },
+
+  // Chicken Starter
+  {
+    name: "Chicken Cream Tikka",
+    description: "Tender chicken marinated in a creamy spiced blend, char-grilled to perfection. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 420,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Chicken Curry",
-    description: "Home-style chicken curry in a robust onion-tomato gravy.",
-    category: "mains",
-    price: 0,
+    name: "Chicken Russian Kabab",
+    description: "Juicy minced chicken kababs with a Russian-style coating. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 420,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Chapati (4 pcs)",
-    description: "Soft whole-wheat chapatis, made fresh and packed warm.",
-    category: "breads",
-    price: 0,
+    name: "Chicken Shami Kabab",
+    description: "Soft, melt-in-your-mouth chicken shami kababs. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 360,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Gulab Jamun (4 pcs)",
-    description: "Soft milk-solid dumplings soaked in rose-cardamom sugar syrup.",
-    category: "desserts",
-    price: 0,
+    name: "Chicken Keema Cutlet",
+    description: "Crispy fried cutlets made with spiced minced chicken. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 360,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Kheer",
-    description: "Creamy rice pudding with milk, sugar, cardamom, and nuts.",
-    category: "desserts",
-    price: 0,
+    name: "Chicken Potato Cutlet",
+    description: "Classic chicken and potato cutlets, fried golden. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 360,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   },
   {
-    name: "Lemon Rice",
-    description: "Tangy tempered rice with curry leaves, mustard seeds, and peanuts.",
-    category: "mains",
-    price: 0,
+    name: "Chicken Cheese Cutlet",
+    description: "Crunchy cutlets with a cheesy chicken filling. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 420,
+    unit_label: "12 pcs",
+    in_stock: true,
+    image_url: ""
+  },
+  {
+    name: "Chicken Seekh Kabab",
+    description: "Minced chicken seekh kababs with aromatic herbs and spices. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 420,
+    unit_label: "12 pcs",
+    in_stock: true,
+    image_url: ""
+  },
+  {
+    name: "Chicken Keema Pattice",
+    description: "Soft pattice filled with spiced chicken keema, baked and fried. 12 pcs per order.",
+    category: "Chicken Starter",
+    price: 420,
+    unit_label: "12 pcs",
+    in_stock: true,
+    image_url: ""
+  },
+
+  // Mutton Starter
+  {
+    name: "Mutton Keema Pattice",
+    description: "Hearty pattice with a richly spiced mutton keema filling. 12 pcs per order.",
+    category: "Mutton Starter",
+    price: 480,
+    unit_label: "12 pcs",
+    in_stock: true,
+    image_url: ""
+  },
+  {
+    name: "Mutton Shami Kabab",
+    description: "Classic slow-cooked mutton shami kababs, soft and flavourful. 12 pcs per order.",
+    category: "Mutton Starter",
+    price: 420,
+    unit_label: "12 pcs",
+    in_stock: true,
+    image_url: ""
+  },
+  {
+    name: "Mutton Keema Cutlet",
+    description: "Golden fried cutlets loaded with spiced mutton keema. 12 pcs per order.",
+    category: "Mutton Starter",
+    price: 420,
+    unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
   }

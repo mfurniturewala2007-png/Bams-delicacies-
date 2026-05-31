@@ -7,58 +7,44 @@ import ProductCard from './ProductCard';
 const MOCK_PRODUCTS: Product[] = [
   {
     id: 'mock-1',
-    name: "Mughlai Mutton Dum Biryani",
-    description: "Mom's signature long-grain basmati rice layered with tender marinated mutton and secret spices, dum-cooked to perfection. Serves 1-2.",
-    price: 480,
+    name: "Chicken Keema Samosa",
+    description: "Crispy samosas stuffed with spiced chicken keema. 12 pcs per order.",
+    price: 360,
     image_url: null,
-    category: 'mains',
+    category: 'Non-Veg Samosa',
+    unit_label: '12 pcs',
     in_stock: true,
   },
   {
     id: 'mock-2',
-    name: "Mom's Special Butter Chicken",
-    description: "Succulent tandoori grilled chicken chunks simmered in a rich, creamy, buttery tomato gravy. Mildly spiced and packed with rich flavors.",
-    price: 390,
+    name: "Smoked Dal Samosa",
+    description: "Crispy samosas with a smoky spiced dal filling. 12 pcs per order.",
+    price: 300,
     image_url: null,
-    category: 'mains',
+    category: 'Veg Samosa',
+    unit_label: '12 pcs',
     in_stock: true,
   },
   {
     id: 'mock-3',
-    name: "Tandoori Paneer Tikka Masala",
-    description: "Spiced paneer cottage cheese cubes charcoal grilled in tandoor then simmered in a thick, semi-dry aromatic onion tomato masala gravy.",
-    price: 320,
+    name: "Chicken Cream Tikka",
+    description: "Tender chicken marinated in a creamy spiced blend, char-grilled to perfection. 12 pcs per order.",
+    price: 420,
     image_url: null,
-    category: 'mains',
+    category: 'Chicken Starter',
+    unit_label: '12 pcs',
     in_stock: true,
   },
   {
     id: 'mock-4',
-    name: "Crispy Punjabi Samosas (4pcs)",
-    description: "Golden flaky deep-fried pastry shells stuffed with spiced mashed green peas and potatoes. Served with tangy sweet tamarind chutney.",
-    price: 120,
+    name: "Mutton Keema Pattice",
+    description: "Hearty pattice with a richly spiced mutton keema filling. 12 pcs per order.",
+    price: 480,
     image_url: null,
-    category: 'snacks',
+    category: 'Mutton Starter',
+    unit_label: '12 pcs',
     in_stock: true,
-  },
-  {
-    id: 'mock-5',
-    name: "Rich Badami Gajar Halwa",
-    description: "Slow-cooked grated red winter carrots simmered in thickened milk, sugar, ghee, and generously garnished with roasted slivered almonds.",
-    price: 150,
-    image_url: null,
-    category: 'desserts',
-    in_stock: true,
-  },
-  {
-    id: 'mock-6',
-    name: "Fresh Garlic Butter Naan (2pcs)",
-    description: "Fluffy leavened flatbreads loaded with crushed fresh garlic and chopped coriander leaves, baked inside tandoor and brushed with butter.",
-    price: 90,
-    image_url: null,
-    category: 'breads',
-    in_stock: true,
-  },
+  }
 ];
 
 const SkeletonCard: React.FC = () => (
@@ -114,7 +100,7 @@ const MenuGrid: React.FC = () => {
   }, []);
 
   // Filter products by category tab
-  const categories = ['all', 'mains', 'snacks', 'breads', 'desserts'];
+  const categories = ['all', 'Non-Veg Samosa', 'Veg Samosa', 'Chicken Starter', 'Mutton Starter'];
   const filteredProducts = activeCategory === 'all' 
     ? products 
     : products.filter(p => p.category === activeCategory);
