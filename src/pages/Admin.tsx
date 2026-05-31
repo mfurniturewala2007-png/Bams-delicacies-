@@ -210,6 +210,7 @@ const Admin: React.FC = () => {
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `menu-images/${fileName}`;
 
+      // ACTION NEEDED: create bucket "product-images" in Supabase dashboard and set to PUBLIC
       // Upload to bucket
       const { error } = await supabase.storage
         .from('product-images')
@@ -224,6 +225,7 @@ const Admin: React.FC = () => {
 
       setUploadedImageUrl(urlData.publicUrl);
     } catch (err) {
+      // ACTION NEEDED: create bucket "product-images" in Supabase dashboard if upload fails
       console.warn('Storage uploads offline. Visual previews generated locally.', err);
       // Generate standard plate fallback url for demo
       setUploadedImageUrl(null);
@@ -260,6 +262,7 @@ const Admin: React.FC = () => {
         image_url: finalImgUrl,
       };
 
+      // ACTION NEEDED: add INSERT policy for products table to allow public / anon inserts if not using Supabase auth
       const { data, error } = await supabase
         .from('products')
         .insert([newProduct])
@@ -288,9 +291,9 @@ const Admin: React.FC = () => {
       setImagePreview(null);
       setUploadedImageUrl(null);
 
-    } catch (err) {
-      console.error('Failed to create new product in Supabase:', err);
-      alert('Error creating product. Please try again.');
+    } catch (err: any) {
+      console.error('Failed to create new product in Supabase. Full error object:', err);
+      alert(`Error: ${err?.message || 'Please try again.'}`);
     }
   };
 
