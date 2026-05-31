@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { UserProfile } from '../types';
 
@@ -21,6 +21,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(true); // Open by default for guests
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
+
+  // Restore user session from localStorage on mount
+  useEffect(() => {
+    const savedPhone = localStorage.getItem('bams_user_phone');
+    if (savedPhone) {
+      const restoreSession = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('phone', savedPhone)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (data) {
+            setProfile(data as UserProfile);
+            setIsAuthModalOpen(false);
+          } else {
+            // Clean up stale phone number if not found in db
+            localStorage.removeItem('bams_user_phone');
+            setIsAuthModalOpen(true);
+          }
+        } catch (err) {
+          console.warn('Failed to restore user session:', err);
+          setIsAuthModalOpen(true);
+        }
+      };
+      restoreSession();
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  }, []);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
 
@@ -58,6 +91,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (error) throw error;
 
+    // Persist login session locally across reloads
+    localStorage.setItem('bams_user_phone', phone);
     setProfile(data as UserProfile);
     setIsAuthModalOpen(false);
   };
@@ -76,12 +111,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error('Phone number not found. Please sign up first!');
     }
 
+    // Persist login session locally across reloads
+    localStorage.setItem('bams_user_phone', phone);
     setProfile(data as UserProfile);
     setIsAuthModalOpen(false);
   };
 
-  // SIGN OUT — clear profile, reopen modal
+  // SIGN OUT — clear profile, clear local session, reopen modal
   const signOut = () => {
+    localStorage.removeItem('bams_user_phone');
     setProfile(null);
     setIsEditingProfile(false);
     setIsAuthModalOpen(true);
