@@ -37,9 +37,6 @@ const Home: React.FC = () => {
               src="/logo.jpeg"
               alt="Bam's Delicacies"
               className="h-8 w-8 rounded-full object-cover border border-border"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://placehold.co/32x32/C8511B/FFF8EE?text=BD';
-              }}
             />
             <span className="font-serif font-black text-heading text-lg tracking-tight">
               Bam's Delicacies

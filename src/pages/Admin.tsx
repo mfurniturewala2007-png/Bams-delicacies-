@@ -366,11 +366,7 @@ const Admin: React.FC = () => {
             isShaking ? 'animate-shake' : ''
           }`}
         >
-          <img src="/logo.jpeg" alt="Bam's Delicacies Logo" className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border border-border shadow-md"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://placehold.co/80x80/C8511B/FFF8EE?text=BD';
-            }}
-          />
+          <img src="/logo.jpeg" alt="Bam's Delicacies Logo" className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border border-border shadow-md" />
           <h1 className="font-serif font-black text-3xl text-heading mb-2">Admin Login</h1>
           <p className="font-sans text-muted text-xs mb-8">Manage products, orders, and slot availabilities.</p>
 
@@ -422,9 +418,6 @@ const Admin: React.FC = () => {
               src="/logo.jpeg"
               alt="Bam's Delicacies"
               className="h-10 w-10 rounded-full object-cover border border-border"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/C8511B/FFF8EE?text=BD';
-              }}
             />
             <div className="flex flex-col text-left">
               <span className="font-serif font-black text-heading text-sm tracking-tight leading-none">

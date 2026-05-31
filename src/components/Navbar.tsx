@@ -57,15 +57,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
       <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between">
         {/* Left: Brand Logo & Title */}
         <a href="#" className="flex items-center gap-3 group">
-          <img
-            src="/logo.jpeg"
-            alt="Bam's Delicacies"
-            className="h-10 w-10 rounded-full object-cover border border-border group-hover:border-primary transition-all duration-300"
-            onError={(e) => {
-              // Fallback if image isn't available yet
-              (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/C8511B/FFF8EE?text=BD';
-            }}
-          />
+          <img src="/logo.jpeg" alt="Bam's Delicacies" style={{ height: '40px' }} />
           <span className="font-serif font-black text-xl md:text-2xl text-heading tracking-tight group-hover:text-primary transition-colors duration-200">
             Bam's Delicacies
           </span>

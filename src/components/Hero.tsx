@@ -156,14 +156,7 @@ const Hero: React.FC = () => {
       <div className="flex flex-col items-center max-w-4xl text-center z-10 animate-fade-slide-up select-text">
         {/* Top Center Floating Brand Logo */}
         <div className="mb-6 animate-float" style={{ animationDuration: '4s' }}>
-          <img
-            src="/logo.jpeg"
-            alt="Bam's Delicacies Logo"
-            className="w-28 md:w-32 h-28 md:h-32 rounded-full object-cover border border-border shadow-md"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://placehold.co/120x120/C8511B/FFF8EE?text=Bams+Delicacies';
-            }}
-          />
+          <img src="/logo.jpeg" alt="Bam's Delicacies" style={{ width: '120px' }} />
         </div>
 
         {/* Dynamic Delivery Date & Slots Badge */}
