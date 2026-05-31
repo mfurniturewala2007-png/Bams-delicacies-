@@ -28,12 +28,12 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
         className="absolute inset-0 bg-[#0D0D0D]/70 backdrop-blur-sm transition-opacity duration-300"
       />
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10 pointer-events-none">
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10 pointer-events-none">
         {/* Slide in panel from right */}
         <div className="w-screen max-w-md pointer-events-auto">
           <div className="h-full flex flex-col bg-surface border-l border-border shadow-2xl animate-slide-in-right">
             {/* Header */}
-            <div className="px-6 py-6 border-b border-border flex items-center justify-between">
+            <div className="px-4 py-4 sm:px-6 sm:py-6 border-b border-border flex items-center justify-between">
               <h2 className="font-serif font-black text-2xl text-heading flex items-center gap-2">
                 <span>Your Order</span>
                 <span className="text-xl">🛒</span>
@@ -58,7 +58,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
             </div>
 
             {/* In-Memory Cart List */}
-            <div className="flex-grow overflow-y-auto px-6 py-4 space-y-4">
+            <div className="flex-grow overflow-y-auto px-4 py-3 sm:px-6 sm:py-4 space-y-4">
               {items.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-20 px-4">
                   <span className="text-5xl mb-4 animate-float" style={{ animationDuration: '3s' }}>
@@ -75,7 +75,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                 items.map((item) => (
                   <div
                     key={item.product_id}
-                    className="flex gap-4 p-4 rounded-2xl bg-surface-2 border border-border/60 hover:border-border transition-colors duration-250 items-center justify-between"
+                    className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl bg-surface-2 border border-border/60 hover:border-border transition-colors duration-250 items-center justify-between"
                   >
                     {/* Item Thumbnail & Details */}
                     <div className="flex items-center gap-4 min-w-0">
@@ -144,7 +144,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
 
             {/* Bottom Sticky panel */}
             {items.length > 0 && (
-              <div className="border-t border-border bg-surface-2 p-6 space-y-6">
+              <div className="border-t border-border bg-surface-2 p-4 sm:p-6 space-y-6">
                 <div className="flex items-baseline justify-between">
                   <span className="font-sans font-semibold text-muted text-sm uppercase tracking-wider">
                     Subtotal

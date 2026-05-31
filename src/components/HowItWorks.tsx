@@ -11,7 +11,7 @@ interface HowItWorksCardProps {
 const HowItWorksCard: React.FC<HowItWorksCardProps> = ({ number, icon, title, description, delayMs }) => {
   return (
     <div
-      className="relative bg-surface border border-border hover:border-primary rounded-2xl p-8 pt-10 shadow-card hover:scale-[1.02] transition-all duration-300 group opacity-0 animate-fade-slide-up"
+      className="relative bg-surface border border-border hover:border-primary rounded-2xl p-6 pt-10 md:p-8 md:pt-10 shadow-card hover:scale-[1.02] transition-all duration-300 group opacity-0 animate-fade-slide-up"
       style={{ animationDelay: `${delayMs}ms` }}
     >
       {/* Dynamic Number Badge overlapping the top boundary */}
@@ -61,7 +61,7 @@ const HowItWorks: React.FC = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-24 md:py-32 px-6 md:px-12 bg-bg border-t border-border/40 relative">
+    <section id="how-it-works" className="py-16 md:py-32 px-4 md:px-12 bg-bg border-t border-border/40 relative">
       {/* Background visual detail */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-20"
@@ -72,7 +72,7 @@ const HowItWorks: React.FC = () => {
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Section Title */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-12 md:mb-20">
           <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight drop-shadow">
             How It Works
           </h2>
@@ -83,7 +83,7 @@ const HowItWorks: React.FC = () => {
         </div>
 
         {/* Dynamic 3-Column Stagger-delayed Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 pt-4">
           {steps.map((step) => (
             <HowItWorksCard
               key={step.number}

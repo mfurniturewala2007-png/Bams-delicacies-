@@ -123,7 +123,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       >
 
         {/* ── Header ── */}
-        <div className="px-6 pt-7 pb-4 text-center border-b border-border/40">
+        <div className="px-4 pt-5 pb-3 md:px-6 md:pt-7 md:pb-4 text-center border-b border-border/40">
           <h2 className="font-serif font-black text-[22px] text-heading leading-tight">
             Pay to Confirm Order
           </h2>
@@ -132,7 +132,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           </p>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 py-4 md:px-6 md:py-5 space-y-4">
 
           {/* ── QR Canvas ── */}
           <div className="flex flex-col items-center gap-3">
@@ -150,7 +150,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               ) : (
                 <canvas
                   ref={canvasRef}
-                  style={{ borderRadius: '12px', display: 'block' }}
+                  style={{ borderRadius: '12px', display: 'block', maxWidth: '100%', height: 'auto' }}
                 />
               )}
             </div>

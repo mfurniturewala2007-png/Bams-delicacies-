@@ -76,7 +76,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
         </div>
 
         {/* Card Details Body */}
-        <div className="p-6 flex flex-col flex-grow justify-between">
+        <div className="p-4 md:p-6 flex flex-col flex-grow justify-between">
           <div className="text-left">
             {/* Product Name */}
             <h3 className="font-sans font-bold text-lg text-heading leading-snug group-hover:text-primary transition-colors duration-200">
@@ -90,7 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
           </div>
 
           {/* Price & Purchase CTA */}
-          <div className="mt-6 flex flex-col gap-4 text-left">
+          <div className="mt-4 md:mt-6 flex flex-col gap-4 text-left">
             <div className="flex items-baseline gap-1">
               <span className="font-serif text-2xl font-semibold text-yellow">
                 ₹{product.price}
@@ -144,7 +144,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
           />
 
           <div
-            className="relative z-10 w-full bg-surface border border-border rounded-2xl p-6 shadow-2xl text-center animate-fade-slide-up flex flex-col items-center gap-5"
+            className="relative z-10 w-full bg-surface border border-border rounded-2xl p-5 md:p-6 shadow-2xl text-center animate-fade-slide-up flex flex-col items-center gap-5"
             style={{ maxWidth: '380px' }}
           >
             {/* Header */}

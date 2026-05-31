@@ -171,49 +171,49 @@ const Hero: React.FC = () => {
       {/* Content Container */}
       <div className="flex flex-col items-center max-w-4xl text-center z-10 animate-fade-slide-up select-text">
         {/* Top Center Floating Brand Logo */}
-        <div className="mb-6 animate-float" style={{ animationDuration: '4s' }}>
-          <img src="/logo.jpeg" alt="Bam's Delicacies" style={{ width: '120px' }} />
+        <div className="mb-5 animate-float" style={{ animationDuration: '4s' }}>
+          <img src="/logo.jpeg" alt="Bam's Delicacies" className="w-20 md:w-28 rounded-full" />
         </div>
 
         {/* Dynamic Delivery Date & Slots Badge */}
         <div
-          className={`mb-6 inline-flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-full bg-surface-2 border border-border text-xs md:text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
+          className={`mb-5 inline-flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-2.5 rounded-full bg-surface-2 border border-border text-[11px] md:text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
             isLowSlots
               ? 'border-error/50 text-error animate-pulse-glow shadow-primary-strong bg-surface'
               : 'text-yellow shadow-yellow'
           }`}
         >
           <span>🗓</span>
-          <span>
-            Next delivery: <strong>{formattedDeliveryDate}</strong>
+          <span className="whitespace-nowrap">
+            Next: <strong>{formattedDeliveryDate}</strong>
           </span>
           <span className="text-text/30">•</span>
           {loading ? (
-            <span className="inline-block w-16 h-4 bg-text/10 animate-pulse rounded"></span>
+            <span className="inline-block w-12 h-3.5 bg-text/10 animate-pulse rounded"></span>
           ) : (
-            <span className={isLowSlots ? 'font-bold text-error' : 'text-text'}>
+            <span className={`whitespace-nowrap ${isLowSlots ? 'font-bold text-error' : 'text-text'}`}>
               {slotsLeft} slots left
             </span>
           )}
         </div>
 
         {/* Primary Hero Heading */}
-        <h1 className="font-serif font-black text-5xl md:text-8xl text-heading leading-tight tracking-tight drop-shadow-md">
+        <h1 className="font-serif font-black text-4xl sm:text-5xl md:text-8xl text-heading leading-tight tracking-tight drop-shadow-md">
           Bam's Delicacies
         </h1>
 
         {/* Catchy Subheading */}
-        <p className="font-sans font-medium text-text/90 text-lg md:text-2xl mt-4 max-w-2xl leading-relaxed">
+        <p className="font-sans font-medium text-text/90 text-base md:text-2xl mt-3 max-w-2xl leading-relaxed">
           Homemade. Delivered with love.
         </p>
 
         {/* Subtext explaining booking cutoff */}
-        <p className="text-muted text-xs md:text-sm mt-2 max-w-md">
+        <p className="text-muted text-xs md:text-sm mt-2 max-w-sm px-2">
           Pre-orders open weekly. Cut-off every Thursday night for weekend delivery.
         </p>
 
         {/* CTA Action Button */}
-        <div className="mt-10 flex flex-col items-center gap-4">
+        <div className="mt-8 flex flex-col items-center gap-4">
           <a
             href="#menu"
             className="group inline-flex items-center gap-3 bg-primary text-white font-sans font-bold text-sm md:text-base px-8 md:px-10 py-4 rounded-full shadow-primary hover:bg-primary-hover hover:scale-105 hover:shadow-primary-strong transition-all duration-300 ease-out cursor-pointer"

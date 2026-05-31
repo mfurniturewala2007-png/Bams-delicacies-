@@ -61,7 +61,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
         {/* Left: Brand Logo & Title */}
         <a href="#" className="flex items-center gap-3 group">
           <img src="/logo.jpeg" alt="Bam's Delicacies" style={{ height: '40px' }} />
-          <span className="font-serif font-black text-xl md:text-2xl text-heading tracking-tight group-hover:text-primary transition-colors duration-200">
+          <span className="font-serif font-black text-lg sm:text-xl md:text-2xl text-heading tracking-tight group-hover:text-primary transition-colors duration-200">
             Bam's Delicacies
           </span>
         </a>

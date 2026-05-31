@@ -161,7 +161,7 @@ const AuthModal: React.FC = () => {
       />
 
       {/* Modal Card */}
-      <div className="w-full max-w-[440px] bg-surface border border-border p-8 rounded-2xl shadow-2xl relative z-10 text-center animate-fade-slide-up flex flex-col max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-[440px] bg-surface border border-border p-5 md:p-8 rounded-2xl shadow-2xl relative z-10 text-center animate-fade-slide-up flex flex-col max-h-[90vh] overflow-y-auto">
 
         {/* Close Button — only when logged in and editing */}
         {profile && (

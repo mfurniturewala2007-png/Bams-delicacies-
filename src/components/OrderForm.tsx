@@ -216,7 +216,7 @@ const OrderForm: React.FC = () => {
   // If cart is empty, show user friendly helper warning
   if (items.length === 0) {
     return (
-      <section id="order" className="py-24 px-6 md:px-12 bg-surface-2 border-t border-border/40 text-center relative">
+      <section id="order" className="py-16 px-4 md:py-24 md:px-12 bg-surface-2 border-t border-border/40 text-center relative">
         <div className="max-w-md mx-auto p-8 border border-dashed border-border bg-bg/50 rounded-2xl animate-fade-slide-up">
           <span className="text-4xl">🛒</span>
           <h2 className="font-serif font-bold text-xl text-heading mt-4">
@@ -239,7 +239,7 @@ const OrderForm: React.FC = () => {
   // If user is not logged in, show mandatory "Sign in to order" prompt card
   if (!profile) {
     return (
-      <section id="order" className="py-24 px-6 md:px-12 bg-surface-2 border-t border-border/40 text-center relative">
+      <section id="order" className="py-16 px-4 md:py-24 md:px-12 bg-surface-2 border-t border-border/40 text-center relative">
         <div className="max-w-md mx-auto p-8 border border-border bg-surface rounded-2xl shadow-card animate-fade-slide-up">
           <span className="text-4xl animate-float" style={{ animationDuration: '4s' }}>👋</span>
           <h2 className="font-serif font-black text-2xl text-heading mt-4">
@@ -260,7 +260,7 @@ const OrderForm: React.FC = () => {
   }
 
   return (
-    <section id="order" className="py-24 px-6 md:px-12 bg-surface-2 border-t border-border/40 relative">
+    <section id="order" className="py-16 px-4 md:py-24 md:px-12 bg-surface-2 border-t border-border/40 relative">
 
       {/* Payment Modal — rendered above everything when order is inserted */}
       {paymentOrderId && (
@@ -295,8 +295,8 @@ const OrderForm: React.FC = () => {
 
       <div className="max-w-6xl mx-auto">
         {/* Section Heading */}
-        <div className="text-center mb-16">
-          <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight">
+        <div className="text-center mb-10 md:mb-16">
+          <h2 className="font-serif font-black text-3xl md:text-6xl text-heading tracking-tight">
             Complete Your Order
           </h2>
           <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded-full shadow-primary" />
@@ -306,10 +306,10 @@ const OrderForm: React.FC = () => {
         </div>
 
         {/* 2 Column Form + Summary Split Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start pt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start pt-4">
           
           {/* Column 1: Client Fields (7 spans) */}
-          <div className="lg:col-span-7 space-y-6 bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-card">
+          <div className="lg:col-span-7 space-y-6 bg-surface border border-border rounded-2xl p-5 md:p-8 shadow-card">
             
             {/* Full Name field */}
             <div className="text-left">
@@ -405,7 +405,7 @@ const OrderForm: React.FC = () => {
           </div>
 
           {/* Column 2: Order Summary card (5 spans) */}
-          <div className="lg:col-span-5 bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-card flex flex-col justify-between self-start">
+          <div className="lg:col-span-5 bg-surface border border-border rounded-2xl p-5 md:p-8 shadow-card flex flex-col justify-between self-start">
             <div>
               <h3 className="font-serif font-bold text-xl text-heading border-b border-border pb-4 text-left">
                 Order Summary

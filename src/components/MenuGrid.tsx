@@ -106,10 +106,10 @@ const MenuGrid: React.FC = () => {
     : products.filter(p => p.category === activeCategory);
 
   return (
-    <section id="menu" className="py-24 px-6 md:px-12 bg-surface border-t border-border/40 relative">
+    <section id="menu" className="py-16 md:py-24 px-4 md:px-12 bg-surface border-t border-border/40 relative">
       <div className="max-w-7xl mx-auto">
         {/* Section Heading */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 md:mb-16">
           <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight">
             This Week's Menu
           </h2>
@@ -120,7 +120,7 @@ const MenuGrid: React.FC = () => {
         </div>
 
         {/* Dynamic Category Filtering Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        <div className="flex flex-wrap justify-center gap-3 mb-8 md:mb-12">
           {categories.map((cat) => (
             <button
               key={cat}
