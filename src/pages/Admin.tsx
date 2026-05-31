@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { format, addDays } from 'date-fns';
 import { Product, Order } from '../types';
 import { supabase } from '../utils/supabase';
-import { getAvailableDeliveryDates, MAX_ORDERS_PER_DAY } from '../utils/deliveryDates';
+import { getAvailableDeliveryDates } from '../utils/deliveryDates';
 import { BAMS_MENU } from '../utils/seedMenu';
 
 // Default mock menu list as fallback if Supabase returns empty
@@ -52,6 +52,23 @@ const Admin: React.FC = () => {
   const [newProdUnit, setNewProdUnit] = useState('12 pcs');
   const [newProdStock, setNewProdStock] = useState(true);
   
+  // Edit Product Modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editProdName, setEditProdName] = useState('');
+  const [editProdDesc, setEditProdDesc] = useState('');
+  const [editProdPrice, setEditProdPrice] = useState('');
+  const [editProdCat, setEditProdCat] = useState('Non-Veg');
+  const [editProdUnit, setEditProdUnit] = useState('12 pcs');
+  const [editProdStock, setEditProdStock] = useState(true);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [editUploadedImageUrl, setEditUploadedImageUrl] = useState<string | null>(null);
+  const [isUploadingEditImage, setIsUploadingEditImage] = useState(false);
+
+  // Max orders settings state
+  const [maxOrdersInput, setMaxOrdersInput] = useState('15');
+  const [isSavingMaxOrders, setIsSavingMaxOrders] = useState(false);
+
   // Image Upload States
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -149,6 +166,22 @@ const Admin: React.FC = () => {
     }
   };
 
+  const loadMaxOrders = async () => {
+    try {
+      const { data } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'max_orders_per_day')
+        .maybeSingle();
+
+      if (data && data.value) {
+        setMaxOrdersInput(data.value);
+      }
+    } catch (e) {
+      console.warn('Failed to load settings.');
+    }
+  };
+
   // Logging for mounting confirmation
   useEffect(() => {
     console.log("Admin component mounted at:", window.location.href);
@@ -158,6 +191,7 @@ const Admin: React.FC = () => {
     if (isAuthenticated) {
       loadProducts();
       loadOrders();
+      loadMaxOrders();
     }
   }, [isAuthenticated]);
 
@@ -363,6 +397,125 @@ const Admin: React.FC = () => {
       alert(`Seed Menu failed.\n\nError: ${errMsg}${errDetails}${errHint}${errCode}\n\nFull Object: ${JSON.stringify(err, null, 2)}`);
     } finally {
       setIsSeeding(false);
+    }
+  };
+
+  // Products CRUD: Open Edit Modal
+  const handleOpenEditModal = (prod: Product) => {
+    setEditingProduct(prod);
+    setEditProdName(prod.name);
+    setEditProdDesc(prod.description || '');
+    setEditProdPrice(String(prod.price));
+    setEditProdCat(prod.category || 'Non-Veg');
+    setEditProdUnit(prod.unit_label || '12 pcs');
+    setEditProdStock(prod.in_stock);
+    setEditImagePreview(prod.image_url);
+    setEditUploadedImageUrl(prod.image_url);
+    setIsEditModalOpen(true);
+  };
+
+  // Products CRUD: Upload Image for Editing
+  const handleEditImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      setIsUploadingEditImage(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `menu-images/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      setEditUploadedImageUrl(urlData.publicUrl);
+    } catch (err) {
+      console.warn('Storage upload failed, using local preview.', err);
+    } finally {
+      setIsUploadingEditImage(false);
+    }
+  };
+
+  // Products CRUD: Save Edited Product
+  const handleUpdateProduct = async () => {
+    if (!editingProduct) return;
+    const errors: { [key: string]: string } = {};
+    if (!editProdName.trim()) errors.name = 'Product name is required';
+    if (!editProdPrice.trim() || isNaN(Number(editProdPrice))) {
+      errors.price = 'Enter a valid numeric price';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
+
+    try {
+      const finalImgUrl = editUploadedImageUrl || editImagePreview || null;
+
+      const updatedProduct = {
+        name: editProdName.trim(),
+        description: editProdDesc.trim() || null,
+        price: Number(editProdPrice),
+        category: editProdCat,
+        in_stock: editProdStock,
+        unit_label: editProdUnit.trim() || '12 pcs',
+        image_url: finalImgUrl,
+      };
+
+      const { error } = await supabase
+        .from('products')
+        .update(updatedProduct)
+        .eq('id', editingProduct.id);
+
+      if (error) throw error;
+
+      showToast("Product updated successfully! ✓", "success");
+      await loadProducts();
+      setIsEditModalOpen(false);
+      setEditingProduct(null);
+    } catch (err: any) {
+      console.error('Failed to update product:', err);
+      alert(`Error: ${err?.message || 'Please try again.'}`);
+    }
+  };
+
+  // Settings: Save Max Orders per weekend day
+  const handleSaveMaxOrders = async () => {
+    try {
+      setIsSavingMaxOrders(true);
+      const val = Number(maxOrdersInput);
+      if (isNaN(val) || val <= 0) {
+        alert('Please enter a valid positive capacity.');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('settings')
+        .upsert({ key: 'max_orders_per_day', value: String(val) });
+
+      if (error) throw error;
+      showToast(`Order capacity updated to ${val} slots! ✓`, 'success');
+    } catch (err: any) {
+      console.error(err);
+      alert(`Failed to save capacity settings. Make sure you have created the settings table. Error: ${err.message}`);
+    } finally {
+      setIsSavingMaxOrders(false);
     }
   };
 
@@ -656,29 +809,53 @@ const Admin: React.FC = () => {
                             </button>
                           </td>
 
-                          {/* Delete Action button */}
+                          {/* Actions buttons */}
                           <td className="py-4 px-6 text-center select-none">
-                            <button
-                              onClick={() => handleDeleteProduct(prod.id, prod.name)}
-                              className="p-2 text-error hover:bg-error/10 border border-transparent hover:border-error/20 rounded-xl transition-all duration-200"
-                              title="Delete Item"
-                            >
-                              {/* SVG Trash Icon */}
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                                stroke="currentColor"
-                                className="w-4 h-4"
+                            <div className="flex items-center justify-center gap-1">
+                              {/* Edit Button */}
+                              <button
+                                onClick={() => handleOpenEditModal(prod)}
+                                className="p-2 text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 rounded-xl transition-all duration-200"
+                                title="Edit Item"
                               >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-1.816A2.25 2.25 0 0122.167 2h-4.333a2.25 2.25 0 01-2.244 2.077v1.816m-7.5 0V4a2.25 2.25 0 012.244-2.243h4.333M19 19H5"
-                                />
-                              </svg>
-                            </button>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                  stroke="currentColor"
+                                  className="w-4 h-4"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                                  />
+                                </svg>
+                              </button>
+
+                              {/* Delete Button */}
+                              <button
+                                onClick={() => handleDeleteProduct(prod.id, prod.name)}
+                                className="p-2 text-error hover:bg-error/10 border border-transparent hover:border-error/20 rounded-xl transition-all duration-200"
+                                title="Delete Item"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                  stroke="currentColor"
+                                  className="w-4 h-4"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-1.816A2.25 2.25 0 0122.167 2h-4.333a2.25 2.25 0 01-2.244 2.077v1.816m-7.5 0V4a2.25 2.25 0 012.244-2.243h4.333M19 19H5"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -878,6 +1055,197 @@ const Admin: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* "Edit Product" Modal overlay popup */}
+            {isEditModalOpen && editingProduct && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 select-text">
+                <div onClick={() => { setIsEditModalOpen(false); setEditingProduct(null); }} className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+                
+                <div className="w-full max-w-xl bg-surface border border-border rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-fade-slide-up flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="px-6 py-5 border-b border-border flex justify-between items-center flex-shrink-0">
+                    <h3 className="font-serif font-bold text-xl text-heading">Edit Delicacy</h3>
+                    <button
+                      onClick={() => { setIsEditModalOpen(false); setEditingProduct(null); }}
+                      className="p-1 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Modal Form scroll container */}
+                  <div className="p-6 overflow-y-auto space-y-5 flex-grow text-left">
+                    {/* Name input */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                        Product Name <span className="text-primary">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editProdName}
+                        onChange={(e) => {
+                          setEditProdName(e.target.value);
+                          if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }));
+                        }}
+                        placeholder="e.g. Chicken Keema Samosa"
+                        className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 ${
+                          formErrors.name ? 'border-error' : 'border-border'
+                        }`}
+                      />
+                      {formErrors.name && (
+                        <span className="text-error text-xs font-sans mt-1 block">{formErrors.name}</span>
+                      )}
+                    </div>
+
+                    {/* Category & Price dual row */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                          Category
+                        </label>
+                        <select
+                          value={editProdCat}
+                          onChange={(e) => setEditProdCat(e.target.value)}
+                          className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250"
+                        >
+                          <option value="Non-Veg">Non-Veg</option>
+                          <option value="Veg">Veg</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                          Price (₹) <span className="text-primary">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={editProdPrice}
+                          onChange={(e) => {
+                            setEditProdPrice(e.target.value);
+                            if (formErrors.price) setFormErrors((prev) => ({ ...prev, price: '' }));
+                          }}
+                          placeholder="e.g. 360"
+                          className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 ${
+                            formErrors.price ? 'border-error' : 'border-border'
+                          }`}
+                        />
+                        {formErrors.price && (
+                          <span className="text-error text-xs font-sans mt-1 block">{formErrors.price}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Unit Label Field */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                        Unit Label (e.g. 12 pcs, 6 pcs)
+                      </label>
+                      <input
+                        type="text"
+                        value={editProdUnit}
+                        onChange={(e) => setEditProdUnit(e.target.value)}
+                        placeholder="e.g. 12 pcs"
+                        className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250"
+                      />
+                    </div>
+
+                    {/* Description field */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={editProdDesc}
+                        onChange={(e) => setEditProdDesc(e.target.value)}
+                        placeholder="Provide details about flavors, portion, ingredients..."
+                        rows={3}
+                        className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 resize-none"
+                      />
+                    </div>
+
+                    {/* Image Upload Input Area */}
+                    <div>
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                        Product Image
+                      </label>
+                      <div className="flex gap-4 items-center">
+                        <label className="bg-surface-2 border border-border border-dashed hover:border-primary rounded-xl px-4 py-3 cursor-pointer text-xs font-bold text-text hover:text-primary transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleEditImageFileChange}
+                            className="hidden"
+                          />
+                          <span>📂 Choose Image File</span>
+                        </label>
+                        
+                        {/* Status indicator */}
+                        {isUploadingEditImage && (
+                          <span className="text-xs text-primary animate-pulse">Uploading file...</span>
+                        )}
+                        {editUploadedImageUrl && (
+                          <span className="text-xs text-success">✓ Upload success!</span>
+                        )}
+                      </div>
+
+                      {/* Preview box */}
+                      {editImagePreview && (
+                        <div className="mt-3 relative h-28 w-28 rounded-xl border border-border overflow-hidden bg-bg/50 flex items-center justify-center">
+                          <img src={editImagePreview} alt="Preview" className="h-full w-full object-cover" />
+                          <button
+                            onClick={() => {
+                              setEditImagePreview(null);
+                              setEditUploadedImageUrl(null);
+                            }}
+                            className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-black/80 rounded-full text-white text-[10px]"
+                            title="Remove file"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Stock switch toggle */}
+                    <div className="flex items-center gap-4 bg-surface-2/30 border border-border/40 p-4 rounded-xl select-none">
+                      <div className="text-left flex-grow">
+                        <span className="block text-sm font-bold text-text">Stock Status</span>
+                        <span className="text-muted text-xs block mt-0.5">Toggle whether customers can order this instantly.</span>
+                      </div>
+                      <button
+                        onClick={() => setEditProdStock(!editProdStock)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                          editProdStock ? 'bg-primary shadow-primary' : 'bg-surface-2 border border-border'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                            editProdStock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Modal Sticky Footer buttons */}
+                  <div className="px-6 py-4 border-t border-border bg-surface-2/65 flex justify-end gap-3 flex-shrink-0 select-none">
+                    <button
+                      onClick={() => { setIsEditModalOpen(false); setEditingProduct(null); }}
+                      className="px-5 py-2.5 border border-border rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-surface-2 transition-all duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpdateProduct}
+                      disabled={isUploadingEditImage}
+                      className="bg-primary text-white font-sans font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-primary hover:bg-primary-hover transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -909,9 +1277,33 @@ const Admin: React.FC = () => {
                 <div className="self-start inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-surface border border-border">
                   <span className="text-yellow text-xs font-bold uppercase tracking-wider">Slot Tally:</span>
                   <span className="bg-yellow text-bg font-sans font-black text-xs px-2.5 py-0.5 rounded-full shadow-yellow">
-                    {slotsCount} / {MAX_ORDERS_PER_DAY} bookings
+                    {slotsCount} / {maxOrdersInput} bookings
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Dynamic Orders Limit Configuration Card */}
+            <div className="bg-surface border border-border p-6 rounded-2xl mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-card text-left select-none animate-fade-slide-up">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-heading">Weekend Order Capacity</h3>
+                <p className="text-muted text-xs font-sans mt-1">Set the maximum slots available for weekend deliveries. This is instantly shared with checkout customers.</p>
+              </div>
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <input
+                  type="number"
+                  value={maxOrdersInput}
+                  onChange={(e) => setMaxOrdersInput(e.target.value)}
+                  className="w-24 bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans font-bold focus:outline-none focus:border-primary text-center"
+                  min={1}
+                />
+                <button
+                  onClick={handleSaveMaxOrders}
+                  disabled={isSavingMaxOrders}
+                  className="flex-1 md:flex-initial bg-primary text-white font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-primary hover:bg-primary-hover active:scale-95 transition-all duration-300"
+                >
+                  {isSavingMaxOrders ? 'Saving...' : 'Update Capacity'}
+                </button>
               </div>
             </div>
 

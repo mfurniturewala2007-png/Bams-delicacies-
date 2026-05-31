@@ -1,14 +1,20 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { getAvailableDeliveryDates, getSlotsLeft } from '../utils/deliveryDates';
+import { getAvailableDeliveryDates } from '../utils/deliveryDates';
 
 interface DeliveryPickerProps {
   selectedDate: Date | null;
   onSelect: (date: Date) => void;
   orders: { delivery_date: string }[];
+  maxOrdersLimit?: number; // Dynamic limit passed from OrderForm
 }
 
-const DeliveryPicker: React.FC<DeliveryPickerProps> = ({ selectedDate, onSelect, orders }) => {
+const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
+  selectedDate,
+  onSelect,
+  orders,
+  maxOrdersLimit = 15,
+}) => {
   const { saturday, sunday } = getAvailableDeliveryDates();
 
   const options = [
@@ -29,7 +35,10 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({ selectedDate, onSelect,
         {options.map(({ date, label }) => {
           const cardStr = format(date, 'yyyy-MM-dd');
           const isSelected = cardStr === selectedStr;
-          const slotsLeft = getSlotsLeft(date, orders);
+          
+          // Calculate slots dynamically based on the passed maxOrdersLimit
+          const count = orders.filter((o) => o.delivery_date === cardStr).length;
+          const slotsLeft = Math.max(0, maxOrdersLimit - count);
 
           const isFull = slotsLeft === 0;
           const isLowSlots = slotsLeft > 0 && slotsLeft <= 5;
@@ -88,7 +97,7 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({ selectedDate, onSelect,
       </div>
       
       <p className="text-muted text-[11px] font-sans text-left mt-2 leading-relaxed">
-        * Orders close once a day reaches its cap of 15 orders to maintain supreme home-cooked quality.
+        * Orders close once a day reaches its cap of {maxOrdersLimit} orders to maintain supreme home-cooked quality.
       </p>
     </div>
   );

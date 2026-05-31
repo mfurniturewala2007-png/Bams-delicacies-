@@ -58,6 +58,8 @@ const OrderForm: React.FC = () => {
   const dbSatStr = format(saturday, 'yyyy-MM-dd');
   const dbSunStr = format(sunday, 'yyyy-MM-dd');
 
+  const [maxOrdersLimit, setMaxOrdersLimit] = useState(15);
+
   // Fetch orders count on mount to populate slot calculations
   const fetchOrdersForWeekend = async () => {
     try {
@@ -74,6 +76,26 @@ const OrderForm: React.FC = () => {
       console.warn('Failed to load slots count. Falling back to default simulated capacities.');
     }
   };
+
+  const fetchMaxOrders = async () => {
+    try {
+      const { data } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'max_orders_per_day')
+        .maybeSingle();
+
+      if (data && data.value) {
+        setMaxOrdersLimit(Number(data.value));
+      }
+    } catch (err) {
+      console.warn('Failed to fetch settings from Supabase. Falling back to 15.');
+    }
+  };
+
+  useEffect(() => {
+    fetchMaxOrders();
+  }, []);
 
   useEffect(() => {
     if (items.length > 0) {
@@ -365,6 +387,7 @@ const OrderForm: React.FC = () => {
                   if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
                 }}
                 orders={orders}
+                maxOrdersLimit={maxOrdersLimit}
               />
               {fieldErrors.date && (
                 <span className="text-error text-xs font-sans font-semibold text-left mt-2 block">
