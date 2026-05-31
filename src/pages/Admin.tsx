@@ -3,6 +3,7 @@ import { format, addDays } from 'date-fns';
 import { Product, Order } from '../types';
 import { supabase } from '../utils/supabase';
 import { getAvailableDeliveryDates, MAX_ORDERS_PER_DAY } from '../utils/deliveryDates';
+import { BAMS_MENU } from '../utils/seedMenu';
 
 // Default mock menu list as fallback if Supabase returns empty
 const DEFAULT_PRODUCTS: Product[] = [
@@ -53,6 +54,28 @@ const Admin: React.FC = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
+  // Seeding states
+  const [isSeeded, setIsSeeded] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+    visible: boolean;
+  }>({
+    message: '',
+    type: 'success',
+    visible: false,
+  });
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type, visible: true });
+    setTimeout(() => {
+      setToast((prev) => ({ ...prev, visible: false }));
+    }, 5000);
+  };
 
   // Orders Tab States
   const [orders, setOrders] = useState<Order[]>([]);
@@ -297,6 +320,47 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Products CRUD: Seed default gourmet BAMS menu
+  const handleSeedMenu = async () => {
+    const confirmSeed = window.confirm("This will delete ALL existing products and replace with default menu. Continue?");
+    if (!confirmSeed) return;
+
+    try {
+      setIsSeeding(true);
+
+      // 1. Delete all existing products in Supabase
+      const { error: deleteError } = await supabase
+        .from('products')
+        .delete()
+        .neq('id', '');
+
+      if (deleteError) throw deleteError;
+
+      // 2. Batch insert the BAMS_MENU seed array
+      const { error: insertError } = await supabase
+        .from('products')
+        .insert(BAMS_MENU);
+
+      if (insertError) throw insertError;
+
+      // 3. Mark seeded and reload products to show real new menu
+      setIsSeeded(true);
+      showToast("Menu seeded! Update prices in the admin panel.", "success");
+      await loadProducts();
+
+    } catch (err: any) {
+      console.error('Seed Menu failed. Full error object:', err);
+      const errMsg = err?.message || 'Please try again.';
+      const errDetails = err?.details ? `\nDetails: ${err.details}` : '';
+      const errHint = err?.hint ? `\nHint: ${err.hint}` : '';
+      const errCode = err?.code ? `\nCode: ${err.code}` : '';
+      showToast(`Error seeding menu: ${errMsg}`, 'error');
+      alert(`Seed Menu failed.\n\nError: ${errMsg}${errDetails}${errHint}${errCode}\n\nFull Object: ${JSON.stringify(err, null, 2)}`);
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   // Orders CRUD: Update Status dropdown
   const handleUpdateStatus = async (orderId: string, newStatus: 'pending' | 'confirmed' | 'delivered') => {
     try {
@@ -485,12 +549,23 @@ const Admin: React.FC = () => {
                 <h2 className="font-serif font-black text-3xl text-heading">Menu Catalog</h2>
                 <p className="text-muted text-xs font-sans mt-1">Add, update stock status, or remove delicacies.</p>
               </div>
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-primary text-white font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                + Add Product
-              </button>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="bg-primary text-white font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all duration-300"
+                >
+                  + Add Product
+                </button>
+                {!isSeeded && (
+                  <button
+                    onClick={handleSeedMenu}
+                    disabled={isSeeding}
+                    className="text-[11px] font-sans font-semibold text-muted hover:text-text bg-surface-2 hover:bg-border/30 px-3 py-1.5 rounded-lg border border-border/50 transition-all duration-200 select-none disabled:opacity-50"
+                  >
+                    {isSeeding ? 'Seeding...' : 'Seed Default Menu'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Catalog list grid view */}
@@ -1022,6 +1097,27 @@ const Admin: React.FC = () => {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Alert Box */}
+      {toast.visible && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 p-5 rounded-2xl shadow-xl flex items-center gap-3 border transition-all duration-300 animate-slide-in-right ${
+            toast.type === 'success'
+              ? 'bg-surface border-primary text-text shadow-primary'
+              : 'bg-surface border-error/50 text-error shadow-lg'
+          }`}
+        >
+          <span className="text-xl">{toast.type === 'success' ? '🎉' : '❌'}</span>
+          <div className="flex flex-col text-left">
+            <span className="font-sans font-bold text-sm">
+              {toast.type === 'success' ? 'Success!' : 'Error'}
+            </span>
+            <span className="font-sans text-xs text-text/80 mt-0.5">
+              {toast.message}
+            </span>
           </div>
         </div>
       )}
