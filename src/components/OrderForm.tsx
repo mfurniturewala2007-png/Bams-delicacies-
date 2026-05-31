@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
 import { supabase } from '../utils/supabase';
 import { getAvailableDeliveryDates } from '../utils/deliveryDates';
@@ -13,11 +14,25 @@ interface ToastState {
 
 const OrderForm: React.FC = () => {
   const { items, totalAmount, clearCart } = useCart();
+  const { user, profile, openAuthModal } = useAuth();
 
   // Inputs state
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
+
+  // Prefill fields when profile details load
+  useEffect(() => {
+    if (profile) {
+      setCustomerName(profile.name || '');
+      setCustomerPhone(profile.phone || '');
+      setCustomerAddress(profile.address || '');
+    } else {
+      setCustomerName('');
+      setCustomerPhone('');
+      setCustomerAddress('');
+    }
+  }, [profile]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Database slots states
@@ -165,6 +180,29 @@ const OrderForm: React.FC = () => {
           >
             Browse Menu
           </a>
+        </div>
+      </section>
+    );
+  }
+
+  // If user is not logged in, show mandatory "Sign in to order" prompt card
+  if (!user) {
+    return (
+      <section id="order" className="py-24 px-6 md:px-12 bg-surface-2 border-t border-border/40 text-center relative">
+        <div className="max-w-md mx-auto p-8 border border-border bg-surface rounded-2xl shadow-card animate-fade-slide-up">
+          <span className="text-4xl animate-float" style={{ animationDuration: '4s' }}>👋</span>
+          <h2 className="font-serif font-black text-2xl text-heading mt-4">
+            Sign In to Complete Your Order
+          </h2>
+          <p className="text-muted text-sm mt-2 mb-6 leading-relaxed font-sans">
+            To place your order and reserve a gourmet weekend delivery slot, please sign in or create an account with us. We will securely save your details for all future orders!
+          </p>
+          <button
+            onClick={openAuthModal}
+            className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-3.5 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 select-none focus:outline-none"
+          >
+            Sign In to Order
+          </button>
         </div>
       </section>
     );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   onCartOpen: () => void;
@@ -7,6 +8,8 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
   const { totalCount, lastAddedAt } = useCart();
+  const { user, profile, signOut, openAuthModal } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const badgeRef = useRef<HTMLSpanElement>(null);
@@ -77,7 +80,76 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
         </div>
 
         {/* Right: Cart Button & Mobile Hamburger */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 relative">
+          {/* Authentication State Section */}
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 p-1 rounded-full bg-surface-2 border border-border hover:border-primary transition-all duration-200 select-none focus:outline-none"
+              >
+                {/* User's Initials Avatar */}
+                <div className="h-8 w-8 rounded-full bg-yellow text-bg font-sans font-black flex items-center justify-center text-xs shadow-md select-none">
+                  {profile?.name
+                    ? profile.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)
+                    : user.email?.slice(0, 2).toUpperCase() || 'U'}
+                </div>
+                {/* Small Arrow Icon */}
+                <svg
+                  className={`w-3.5 h-3.5 text-muted/80 transition-transform duration-250 ${
+                    isDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {isDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setIsDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2.5 w-48 bg-surface border border-border rounded-xl shadow-2xl py-2 z-40 animate-fade-slide-up text-left">
+                    <div className="px-4 py-2 border-b border-border/40 select-none">
+                      <p className="font-sans font-bold text-xs text-heading truncate">
+                        {profile?.name || 'My Profile'}
+                      </p>
+                      <p className="font-sans text-[10px] text-muted truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        signOut();
+                      }}
+                      className="w-full text-left font-sans font-bold text-xs text-error hover:bg-error/10 px-4 py-2.5 transition-all duration-150 uppercase tracking-wider"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={openAuthModal}
+              className="px-4 py-2 rounded-full border-2 border-yellow text-heading hover:bg-yellow hover:text-bg font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 select-none focus:outline-none"
+            >
+              Sign In
+            </button>
+          )}
+
           {/* Cart Icon Toggle Button */}
           <button
             onClick={onCartOpen}

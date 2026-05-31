@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
+import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 
@@ -75,17 +77,20 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const App: React.FC = () => {
   return (
-    <CartProvider>
-      <Router>
-        {/* PageWrapper re-mounts on route change → triggers fade-in animation */}
-        <PageWrapper>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </PageWrapper>
-      </Router>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <AuthModal />
+          {/* PageWrapper re-mounts on route change → triggers fade-in animation */}
+          <PageWrapper>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/admin" element={<Admin />} />
+            </Routes>
+          </PageWrapper>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 };
 

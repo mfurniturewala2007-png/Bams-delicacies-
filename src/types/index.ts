@@ -44,3 +44,13 @@ export interface PushSubscriptionJSON {
     auth: string;
   };
 }
+
+export interface UserProfile {
+  id: string;
+  name: string | null;
+  phone: string | null;
+  address: string | null;
+  pincode: string | null;
+  email: string | null;
+  created_at?: string;
+}
