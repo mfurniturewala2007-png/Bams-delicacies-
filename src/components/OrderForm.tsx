@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { supabase } from '../utils/supabase';
 import { getAvailableDeliveryDates } from '../utils/deliveryDates';
 import DeliveryPicker from './DeliveryPicker';
+import PaymentModal from './PaymentModal';
 
 interface ToastState {
   message: string;
@@ -33,12 +34,18 @@ const OrderForm: React.FC = () => {
       setCustomerAddress('');
     }
   }, [profile]);
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Database slots states
   const [orders, setOrders] = useState<{ delivery_date: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+
+  // Payment modal state
+  const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null);
+  const [paymentTotal, setPaymentTotal] = useState<number>(0);
+  const [paymentSelectedDate, setPaymentSelectedDate] = useState<Date | null>(null);
 
   // Dynamic self-contained Toast notifications state
   const [toast, setToast] = useState<ToastState>({
@@ -115,41 +122,29 @@ const OrderForm: React.FC = () => {
     try {
       const deliveryDateStr = format(selectedDate!, 'yyyy-MM-dd');
 
-      // 2. Prepare payload exactly matching Supabase Orders Table Schema
+      // 2. Insert order with status: "payment_pending" — get back the id
       const newOrder = {
         customer_name: customerName.trim(),
         customer_phone: customerPhone.trim(),
         customer_address: customerAddress.trim(),
         delivery_date: deliveryDateStr,
-        items: items, // CartItem[] array
+        items: items,
         total: totalAmount,
-        status: 'pending',
+        status: 'payment_pending',
       };
 
-      // 3. Insert record into Supabase orders
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
-        .insert([newOrder]);
+        .insert([newOrder])
+        .select('id')
+        .single();
 
       if (error) throw error;
 
-      // 4. Successful checkout operations
-      showToast(
-        `Order placed! See you ${format(selectedDate!, 'EEE, MMM d')} 🎉`,
-        'success'
-      );
-
-      // Reset local fields & Cart state
-      setCustomerName('');
-      setCustomerPhone('');
-      setCustomerAddress('');
-      setSelectedDate(null);
-      
-      // Clear Cart Context
-      clearCart();
-
-      // Scroll smoothly to top of window
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // 3. Store selected date for post-payment success toast, open PaymentModal
+      setPaymentSelectedDate(selectedDate);
+      setPaymentTotal(totalAmount);
+      setPaymentOrderId(data.id);
 
     } catch (err: any) {
       console.error('Error inserting order to Supabase:', err);
@@ -160,6 +155,35 @@ const OrderForm: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Called when user clicks "I've Paid ✓" in PaymentModal
+  const handlePaymentConfirmed = () => {
+    setPaymentOrderId(null);
+
+    // Show success toast
+    showToast(
+      `Payment received! Order confirmed for ${format(paymentSelectedDate!, 'EEE, MMM d')} 🎉`,
+      'success'
+    );
+
+    // Reset local fields
+    setCustomerName('');
+    setCustomerPhone('');
+    setCustomerAddress('');
+    setSelectedDate(null);
+
+    // Clear Cart Context
+    clearCart();
+
+    // Scroll smoothly to top of window
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Called when user clicks "Cancel Order" in PaymentModal
+  const handlePaymentCancelled = () => {
+    setPaymentOrderId(null);
+    showToast('Order cancelled. Your cart is still saved.', 'error');
   };
 
   // If cart is empty, show user friendly helper warning
@@ -210,6 +234,17 @@ const OrderForm: React.FC = () => {
 
   return (
     <section id="order" className="py-24 px-6 md:px-12 bg-surface-2 border-t border-border/40 relative">
+
+      {/* Payment Modal — rendered above everything when order is inserted */}
+      {paymentOrderId && (
+        <PaymentModal
+          orderId={paymentOrderId}
+          totalAmount={paymentTotal}
+          onConfirmed={handlePaymentConfirmed}
+          onCancel={handlePaymentCancelled}
+        />
+      )}
+
       {/* Toast Alert Box */}
       {toast.visible && (
         <div
@@ -376,6 +411,12 @@ const OrderForm: React.FC = () => {
                 <span className="font-serif text-3xl font-black text-yellow">
                   ₹{totalAmount}
                 </span>
+              </div>
+
+              {/* UPI payment badge */}
+              <div className="flex items-center gap-2 text-muted text-xs font-sans bg-surface-2 border border-border rounded-xl px-4 py-2.5">
+                <span className="text-base">📲</span>
+                <span>Pay via UPI QR after clicking Place Order</span>
               </div>
 
               <button

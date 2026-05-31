@@ -25,7 +25,8 @@ export interface Order {
   delivery_date: string; // stored as YYYY-MM-DD string
   items: CartItem[];
   total: number;
-  status: 'pending' | 'confirmed' | 'delivered';
+  status: 'payment_pending' | 'pending' | 'confirmed' | 'delivered' | 'cancelled';
+  upi_transaction_id?: string | null;
   created_at?: string;
 }
 

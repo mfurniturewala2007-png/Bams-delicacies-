@@ -362,7 +362,7 @@ const Admin: React.FC = () => {
   };
 
   // Orders CRUD: Update Status dropdown
-  const handleUpdateStatus = async (orderId: string, newStatus: 'pending' | 'confirmed' | 'delivered') => {
+  const handleUpdateStatus = async (orderId: string, newStatus: 'payment_pending' | 'pending' | 'confirmed' | 'delivered' | 'cancelled') => {
     try {
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
@@ -419,8 +419,14 @@ const Admin: React.FC = () => {
     }
   };
 
-  // Filter orders matching selected date
-  const filteredOrders = orders.filter((o) => o.delivery_date === activeFilterDateStr);
+  // Filter orders matching selected date — payment_pending shown first
+  const filteredOrders = orders
+    .filter((o) => o.delivery_date === activeFilterDateStr)
+    .sort((a, b) => {
+      if (a.status === 'payment_pending' && b.status !== 'payment_pending') return -1;
+      if (b.status === 'payment_pending' && a.status !== 'payment_pending') return 1;
+      return 0;
+    });
   const slotsCount = filteredOrders.length;
 
   // Gate view
@@ -944,14 +950,23 @@ const Admin: React.FC = () => {
                         <th className="py-4 px-6">Address</th>
                         <th className="py-4 px-6">Items Order</th>
                         <th className="py-4 px-6">Total Amount</th>
+                        <th className="py-4 px-6">Txn ID</th>
                         <th className="py-4 px-6">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/60 text-sm font-sans">
                       {filteredOrders.map((ord, idx) => (
-                        <tr key={ord.id} className="hover:bg-surface-2/30 transition-colors duration-150">
+                        <tr
+                          key={ord.id}
+                          className={`hover:bg-surface-2/30 transition-colors duration-150 ${
+                            ord.status === 'payment_pending' ? 'bg-warning/5 border-l-2 border-warning' : ''
+                          }`}
+                        >
                           {/* Row Number */}
                           <td className="py-4 px-6 font-mono text-muted/80">
+                            {ord.status === 'payment_pending' && (
+                              <span className="mr-1" title="Awaiting payment">⚠️</span>
+                            )}
                             {idx + 1}
                           </td>
 
@@ -987,6 +1002,20 @@ const Admin: React.FC = () => {
                             ₹{ord.total}
                           </td>
 
+                          {/* UPI Transaction ID */}
+                          <td className="py-4 px-6">
+                            {ord.upi_transaction_id ? (
+                              <span
+                                className="font-mono text-xs text-text/80 bg-surface-2 border border-border px-2 py-1 rounded-lg"
+                                title={ord.upi_transaction_id}
+                              >
+                                {ord.upi_transaction_id.slice(0, 12)}
+                              </span>
+                            ) : (
+                              <span className="text-muted/50 text-xs font-sans">—</span>
+                            )}
+                          </td>
+
                           {/* Live Dropdown Status Select */}
                           <td className="py-4 px-6 select-none">
                             <select
@@ -994,20 +1023,26 @@ const Admin: React.FC = () => {
                               onChange={(e) =>
                                 handleUpdateStatus(
                                   ord.id,
-                                  e.target.value as 'pending' | 'confirmed' | 'delivered'
+                                  e.target.value as 'payment_pending' | 'pending' | 'confirmed' | 'delivered' | 'cancelled'
                                 )
                               }
                               className={`px-3 py-1.5 rounded-lg border text-xs font-bold focus:outline-none transition-colors duration-250 cursor-pointer ${
-                                ord.status === 'pending'
+                                ord.status === 'payment_pending'
+                                  ? 'bg-muted/10 border-muted/35 text-muted'
+                                  : ord.status === 'pending'
                                   ? 'bg-warning/10 border-warning/35 text-warning'
                                   : ord.status === 'confirmed'
-                                  ? 'bg-muted/10 border-muted/35 text-muted'
-                                  : 'bg-success/10 border-success/35 text-success'
+                                  ? 'bg-yellow/10 border-yellow/35 text-yellow'
+                                  : ord.status === 'delivered'
+                                  ? 'bg-success/10 border-success/35 text-success'
+                                  : 'bg-error/10 border-error/35 text-error'
                               }`}
                             >
-                              <option value="pending" className="bg-surface text-warning font-bold">Pending</option>
-                              <option value="confirmed" className="bg-surface text-muted font-bold">Confirmed</option>
-                              <option value="delivered" className="bg-surface text-success font-bold">Delivered</option>
+                              <option value="payment_pending" className="bg-surface text-muted font-bold">⏳ Payment Pending</option>
+                              <option value="pending" className="bg-surface text-warning font-bold">🟠 Pending</option>
+                              <option value="confirmed" className="bg-surface text-yellow font-bold">🟡 Confirmed</option>
+                              <option value="delivered" className="bg-surface text-success font-bold">✅ Delivered</option>
+                              <option value="cancelled" className="bg-surface text-error font-bold">❌ Cancelled</option>
                             </select>
                           </td>
                         </tr>
