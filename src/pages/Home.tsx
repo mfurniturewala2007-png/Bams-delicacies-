@@ -10,7 +10,7 @@ const Home: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-bg text-white relative">
+    <div className="min-h-screen bg-bg text-text relative">
       {/* 1. Header glassmorphism Navigation */}
       <Navbar onCartOpen={() => setIsCartOpen(true)} />
 
@@ -38,20 +38,20 @@ const Home: React.FC = () => {
               alt="Bam's Delicacies"
               className="h-8 w-8 rounded-full object-cover border border-border"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://placehold.co/32x32/f5c200/1e1e1e?text=BD';
+                (e.target as HTMLImageElement).src = 'https://placehold.co/32x32/C8511B/FFF8EE?text=BD';
               }}
             />
-            <span className="font-serif font-black text-yellow text-lg tracking-tight">
+            <span className="font-serif font-black text-heading text-lg tracking-tight">
               Bam's Delicacies
             </span>
           </div>
           <p className="md:order-last text-xs">
             © {new Date().getFullYear()} Bam's Delicacies. All rights reserved.
           </p>
-          <div className="flex gap-6 text-white/70">
-            <a href="#how-it-works" className="hover:text-yellow transition-colors duration-200">About</a>
-            <a href="#menu" className="hover:text-yellow transition-colors duration-200">Our Menu</a>
-            <a href="#order" className="hover:text-yellow transition-colors duration-200">Order Online</a>
+          <div className="flex gap-6 text-text/70">
+            <a href="#how-it-works" className="hover:text-primary transition-colors duration-200">About</a>
+            <a href="#menu" className="hover:text-primary transition-colors duration-200">Our Menu</a>
+            <a href="#order" className="hover:text-primary transition-colors duration-200">Order Online</a>
           </div>
         </div>
       </footer>

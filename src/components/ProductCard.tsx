@@ -29,7 +29,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
 
   return (
     <div
-      className="bg-surface rounded-2xl border border-border hover:border-yellow shadow-card hover:shadow-yellow hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group overflow-hidden opacity-0 animate-fade-slide-up"
+      className="bg-surface rounded-2xl border border-border hover:border-primary shadow-card hover:shadow-primary hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group overflow-hidden opacity-0 animate-fade-slide-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {/* Product Image Cover (Aspect Square) */}
@@ -60,7 +60,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
 
         {/* Dynamic Category Pill Badge */}
         {product.category && (
-          <span className="absolute top-4 right-4 bg-bg/85 backdrop-blur-md border border-border text-yellow text-xs font-semibold px-3 py-1 rounded-full shadow-md capitalize">
+          <span className="absolute top-4 right-4 bg-bg/85 backdrop-blur-md border border-border text-primary text-xs font-semibold px-3 py-1 rounded-full shadow-md capitalize">
             {product.category}
           </span>
         )}
@@ -70,7 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
       <div className="p-6 flex flex-col flex-grow justify-between">
         <div>
           {/* Product Name */}
-          <h3 className="font-sans font-bold text-lg text-white/95 leading-snug group-hover:text-yellow transition-colors duration-200">
+          <h3 className="font-sans font-bold text-lg text-heading leading-snug group-hover:text-primary transition-colors duration-200">
             {product.name}
           </h3>
 
@@ -96,8 +96,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
               !product.in_stock
                 ? 'bg-surface-2 text-muted/50 border border-border cursor-not-allowed shadow-none'
                 : isAdded
-                ? 'bg-success text-bg font-extrabold hover:scale-100 shadow-yellow'
-                : 'bg-yellow text-bg hover:bg-yellow-dim hover:scale-[1.03] hover:shadow-yellow-strong active:scale-95'
+                ? 'bg-success text-white font-extrabold hover:scale-100 shadow-primary'
+                : 'bg-primary text-white hover:bg-primary-hover hover:scale-[1.03] hover:shadow-primary-strong active:scale-95'
             }`}
           >
             {isAdded ? (

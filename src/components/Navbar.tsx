@@ -60,13 +60,13 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           <img
             src="/logo.jpeg"
             alt="Bam's Delicacies"
-            className="h-10 w-10 rounded-full object-cover border border-border group-hover:border-yellow transition-all duration-300"
+            className="h-10 w-10 rounded-full object-cover border border-border group-hover:border-primary transition-all duration-300"
             onError={(e) => {
               // Fallback if image isn't available yet
-              (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/f5c200/1e1e1e?text=BD';
+              (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/C8511B/FFF8EE?text=BD';
             }}
           />
-          <span className="font-serif font-black text-xl md:text-2xl text-yellow tracking-tight group-hover:text-yellow-dim transition-colors duration-200">
+          <span className="font-serif font-black text-xl md:text-2xl text-heading tracking-tight group-hover:text-primary transition-colors duration-200">
             Bam's Delicacies
           </span>
         </a>
@@ -77,7 +77,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
             <a
               key={link.label}
               href={link.href}
-              className="font-sans font-medium text-white/90 hover:text-yellow transition-colors duration-200 text-sm tracking-wide uppercase"
+              className="font-sans font-medium text-text/90 hover:text-primary transition-colors duration-200 text-sm tracking-wide uppercase"
             >
               {link.label}
             </a>
@@ -89,7 +89,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           {/* Cart Icon Toggle Button */}
           <button
             onClick={onCartOpen}
-            className="relative p-2.5 rounded-full bg-surface-2 border border-border text-white hover:text-yellow hover:border-yellow hover:scale-105 transition-all duration-200 focus:outline-none"
+            className="relative p-2.5 rounded-full bg-surface-2 border border-border text-text hover:text-primary hover:border-primary hover:scale-105 transition-all duration-200 focus:outline-none"
             aria-label="Open Shopping Cart"
           >
             {/* SVG Shopping Cart Icon */}
@@ -108,11 +108,11 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               />
             </svg>
 
-            {/* Redesigned Yellow Item Count Badge */}
+            {/* Redesigned Orange Item Count Badge */}
             {totalCount > 0 && (
               <span
                 ref={badgeRef}
-                className="absolute -top-1.5 -right-1.5 h-5 w-5 bg-yellow text-bg font-sans font-bold text-xs rounded-full flex items-center justify-center border border-bg shadow-yellow"
+                className="absolute -top-1.5 -right-1.5 h-5 w-5 bg-primary text-white font-sans font-bold text-xs rounded-full flex items-center justify-center border border-bg shadow-primary"
               >
                 {totalCount}
               </span>
@@ -122,7 +122,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           {/* Mobile Menu Hamburger Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl bg-surface-2 border border-border text-white hover:text-yellow hover:border-yellow focus:outline-none transition-all duration-200"
+            className="md:hidden p-2 rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary focus:outline-none transition-all duration-200"
             aria-label="Toggle Navigation Menu"
           >
             {isMobileMenuOpen ? (
@@ -162,7 +162,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               key={link.label}
               href={link.href}
               onClick={handleLinkClick}
-              className="font-sans font-medium text-white/90 hover:text-yellow hover:bg-surface-2 px-4 py-3 rounded-xl transition-all duration-200 text-base border border-transparent hover:border-border"
+              className="font-sans font-medium text-text/90 hover:text-primary hover:bg-surface-2 px-4 py-3 rounded-xl transition-all duration-200 text-base border border-transparent hover:border-border"
             >
               {link.label}
             </a>

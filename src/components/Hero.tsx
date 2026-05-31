@@ -112,11 +112,11 @@ const Hero: React.FC = () => {
 
   return (
     <section className="min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden bg-bg">
-      {/* Premium Ambient Yellow Glow Background (Radial Gradient) */}
+      {/* Premium Ambient Orange Glow Background (Radial Gradient) */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(245,194,0,0.06) 0%, rgba(43,43,43,0) 75%)'
+          background: 'radial-gradient(circle, rgba(200,81,27,0.05) 0%, rgba(255,248,238,0) 75%)'
         }}
       />
 
@@ -159,9 +159,9 @@ const Hero: React.FC = () => {
           <img
             src="/logo.jpeg"
             alt="Bam's Delicacies Logo"
-            className="w-28 md:w-32 h-28 md:h-32 rounded-full object-cover border-2 border-yellow shadow-yellow shadow-lg"
+            className="w-28 md:w-32 h-28 md:h-32 rounded-full object-cover border border-border shadow-md"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://placehold.co/120x120/f5c200/1e1e1e?text=Bams+Delicacies';
+              (e.target as HTMLImageElement).src = 'https://placehold.co/120x120/C8511B/FFF8EE?text=Bams+Delicacies';
             }}
           />
         </div>
@@ -170,7 +170,7 @@ const Hero: React.FC = () => {
         <div
           className={`mb-6 inline-flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-full bg-surface-2 border border-border text-xs md:text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
             isLowSlots
-              ? 'border-error/50 text-error animate-pulse-glow shadow-yellow-strong bg-surface'
+              ? 'border-error/50 text-error animate-pulse-glow shadow-primary-strong bg-surface'
               : 'text-yellow shadow-yellow'
           }`}
         >
@@ -178,23 +178,23 @@ const Hero: React.FC = () => {
           <span>
             Next delivery: <strong>{formattedDeliveryDate}</strong>
           </span>
-          <span className="text-white/30">•</span>
+          <span className="text-text/30">•</span>
           {loading ? (
-            <span className="inline-block w-16 h-4 bg-white/10 animate-pulse rounded"></span>
+            <span className="inline-block w-16 h-4 bg-text/10 animate-pulse rounded"></span>
           ) : (
-            <span className={isLowSlots ? 'font-bold text-error' : 'text-white'}>
+            <span className={isLowSlots ? 'font-bold text-error' : 'text-text'}>
               {slotsLeft} slots left
             </span>
           )}
         </div>
 
         {/* Primary Hero Heading */}
-        <h1 className="font-serif font-black text-5xl md:text-8xl text-yellow leading-tight tracking-tight drop-shadow-md">
+        <h1 className="font-serif font-black text-5xl md:text-8xl text-heading leading-tight tracking-tight drop-shadow-md">
           Bam's Delicacies
         </h1>
 
         {/* Catchy Subheading */}
-        <p className="font-sans font-medium text-white/90 text-lg md:text-2xl mt-4 max-w-2xl leading-relaxed">
+        <p className="font-sans font-medium text-text/90 text-lg md:text-2xl mt-4 max-w-2xl leading-relaxed">
           Homemade. Delivered with love.
         </p>
 
@@ -207,7 +207,7 @@ const Hero: React.FC = () => {
         <div className="mt-10 flex flex-col items-center gap-4">
           <a
             href="#menu"
-            className="group inline-flex items-center gap-3 bg-yellow text-bg font-sans font-bold text-sm md:text-base px-8 md:px-10 py-4 rounded-full shadow-yellow hover:bg-yellow-dim hover:scale-105 hover:shadow-yellow-strong transition-all duration-300 ease-out cursor-pointer"
+            className="group inline-flex items-center gap-3 bg-primary text-white font-sans font-bold text-sm md:text-base px-8 md:px-10 py-4 rounded-full shadow-primary hover:bg-primary-hover hover:scale-105 hover:shadow-primary-strong transition-all duration-300 ease-out cursor-pointer"
           >
             <span>Order Now</span>
             <svg
@@ -227,11 +227,11 @@ const Hero: React.FC = () => {
             <button
               onClick={handlePushSubscribe}
               disabled={pushState === 'requesting'}
-              className="inline-flex items-center gap-2 text-xs font-sans font-medium text-muted hover:text-yellow transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 text-xs font-sans font-medium text-muted hover:text-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {pushState === 'requesting' ? (
                 <>
-                  <span className="w-3.5 h-3.5 rounded-full border-2 border-yellow border-t-transparent animate-spin" />
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                   <span>Enabling notifications...</span>
                 </>
               ) : (

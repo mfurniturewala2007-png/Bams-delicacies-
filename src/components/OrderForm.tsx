@@ -153,7 +153,7 @@ const OrderForm: React.FC = () => {
       <section id="order" className="py-24 px-6 md:px-12 bg-surface-2 border-t border-border/40 text-center relative">
         <div className="max-w-md mx-auto p-8 border border-dashed border-border bg-bg/50 rounded-2xl animate-fade-slide-up">
           <span className="text-4xl">🛒</span>
-          <h2 className="font-serif font-bold text-xl text-yellow mt-4">
+          <h2 className="font-serif font-bold text-xl text-heading mt-4">
             Your Cart is Empty
           </h2>
           <p className="text-muted text-sm mt-2 mb-6 leading-relaxed">
@@ -161,7 +161,7 @@ const OrderForm: React.FC = () => {
           </p>
           <a
             href="#menu"
-            className="inline-flex bg-yellow text-bg font-sans font-bold text-sm px-6 py-3 rounded-full hover:bg-yellow-dim transition-all duration-300"
+            className="inline-flex bg-primary text-white font-sans font-bold text-sm px-6 py-3 rounded-full shadow-primary hover:bg-primary-hover transition-all duration-300"
           >
             Browse Menu
           </a>
@@ -177,7 +177,7 @@ const OrderForm: React.FC = () => {
         <div
           className={`fixed bottom-6 right-6 z-50 p-5 rounded-2xl shadow-xl flex items-center gap-3 border transition-all duration-300 animate-slide-in-right ${
             toast.type === 'success'
-              ? 'bg-surface border-yellow text-white shadow-yellow'
+              ? 'bg-surface border-primary text-text shadow-primary'
               : 'bg-surface border-error/50 text-error shadow-lg'
           }`}
         >
@@ -186,7 +186,7 @@ const OrderForm: React.FC = () => {
             <span className="font-sans font-bold text-sm">
               {toast.type === 'success' ? 'Success!' : 'Error'}
             </span>
-            <span className="font-sans text-xs text-white/80 mt-0.5">
+            <span className="font-sans text-xs text-text/80 mt-0.5">
               {toast.message}
             </span>
           </div>
@@ -196,10 +196,10 @@ const OrderForm: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Section Heading */}
         <div className="text-center mb-16">
-          <h2 className="font-serif font-black text-4xl md:text-6xl text-white tracking-tight">
+          <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight">
             Complete Your Order
           </h2>
-          <div className="w-20 h-1 bg-yellow mx-auto mt-4 rounded-full shadow-yellow" />
+          <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded-full shadow-primary" />
           <p className="text-muted text-sm md:text-base mt-4 max-w-md mx-auto leading-relaxed">
             Please fill in your delivery details and choose a convenient weekend slot to reserve.
           </p>
@@ -213,8 +213,8 @@ const OrderForm: React.FC = () => {
             
             {/* Full Name field */}
             <div className="text-left">
-              <label className="block text-sm font-sans font-semibold text-white/90 uppercase tracking-wider mb-2">
-                Full Name <span className="text-yellow">*</span>
+              <label className="block text-sm font-sans font-semibold text-text uppercase tracking-wider mb-2">
+                Full Name <span className="text-primary">*</span>
               </label>
               <input
                 type="text"
@@ -224,7 +224,7 @@ const OrderForm: React.FC = () => {
                   if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
                 }}
                 placeholder="Enter your full name"
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-white font-sans placeholder:text-muted focus:outline-none focus:border-yellow focus:ring-2 focus:ring-yellow-glow transition-all duration-200 ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                   fieldErrors.name ? 'border-error' : 'border-border'
                 }`}
               />
@@ -237,8 +237,8 @@ const OrderForm: React.FC = () => {
 
             {/* Phone Number field */}
             <div className="text-left">
-              <label className="block text-sm font-sans font-semibold text-white/90 uppercase tracking-wider mb-2">
-                Phone Number <span className="text-yellow">*</span>
+              <label className="block text-sm font-sans font-semibold text-text uppercase tracking-wider mb-2">
+                Phone Number <span className="text-primary">*</span>
               </label>
               <input
                 type="tel"
@@ -248,7 +248,7 @@ const OrderForm: React.FC = () => {
                   if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
                 }}
                 placeholder="Enter 10-digit contact number"
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-white font-sans placeholder:text-muted focus:outline-none focus:border-yellow focus:ring-2 focus:ring-yellow-glow transition-all duration-200 ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                   fieldErrors.phone ? 'border-error' : 'border-border'
                 }`}
               />
@@ -261,8 +261,8 @@ const OrderForm: React.FC = () => {
 
             {/* Address field */}
             <div className="text-left">
-              <label className="block text-sm font-sans font-semibold text-white/90 uppercase tracking-wider mb-2">
-                Delivery Address <span className="text-yellow">*</span>
+              <label className="block text-sm font-sans font-semibold text-text uppercase tracking-wider mb-2">
+                Delivery Address <span className="text-primary">*</span>
               </label>
               <textarea
                 value={customerAddress}
@@ -272,7 +272,7 @@ const OrderForm: React.FC = () => {
                 }}
                 placeholder="Provide detailed house number, landmark, street, and area info"
                 rows={3}
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-white font-sans placeholder:text-muted focus:outline-none focus:border-yellow focus:ring-2 focus:ring-yellow-glow transition-all duration-200 resize-none ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none ${
                   fieldErrors.address ? 'border-error' : 'border-border'
                 }`}
               />
@@ -305,7 +305,7 @@ const OrderForm: React.FC = () => {
           {/* Column 2: Order Summary card (5 spans) */}
           <div className="lg:col-span-5 bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-card flex flex-col justify-between self-start">
             <div>
-              <h3 className="font-serif font-bold text-xl text-yellow border-b border-border pb-4 text-left">
+              <h3 className="font-serif font-bold text-xl text-heading border-b border-border pb-4 text-left">
                 Order Summary
               </h3>
 
@@ -314,14 +314,14 @@ const OrderForm: React.FC = () => {
                 {items.map((item) => (
                   <div key={item.product_id} className="py-3 flex items-center justify-between gap-4">
                     <div className="text-left min-w-0">
-                      <span className="font-sans font-bold text-sm text-white/95 block truncate">
+                      <span className="font-sans font-bold text-sm text-text block truncate">
                         {item.name}
                       </span>
                       <span className="text-muted text-xs font-sans mt-0.5 block">
                         ₹{item.price} × {item.quantity}
                       </span>
                     </div>
-                    <span className="font-serif text-sm font-bold text-white/90 flex-shrink-0">
+                    <span className="font-serif text-sm font-bold text-text flex-shrink-0">
                       ₹{item.price * item.quantity}
                     </span>
                   </div>
@@ -343,10 +343,10 @@ const OrderForm: React.FC = () => {
               <button
                 onClick={handlePlaceOrder}
                 disabled={isSubmitting}
-                className={`w-full py-4 rounded-full font-sans font-bold text-base shadow-yellow transition-all duration-300 flex items-center justify-center gap-2 select-none ${
+                className={`w-full py-4 rounded-full font-sans font-bold text-base shadow-primary transition-all duration-300 flex items-center justify-center gap-2 select-none ${
                   isSubmitting
                     ? 'bg-surface-2 text-muted/50 border border-border cursor-not-allowed shadow-none'
-                    : 'bg-yellow text-bg hover:bg-yellow-dim hover:scale-[1.02] hover:shadow-yellow-strong active:scale-98'
+                    : 'bg-primary text-white hover:bg-primary-hover hover:scale-[1.02] hover:shadow-primary-strong'
                 }`}
               >
                 {isSubmitting ? (

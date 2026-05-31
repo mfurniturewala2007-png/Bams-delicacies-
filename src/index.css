@@ -3,18 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --color-bg:         #2B2B2B;   /* Main background — dark charcoal (matches logo) */
-  --color-surface:    #1E1E1E;   /* Cards, modals, panels */
-  --color-surface-2:  #333333;   /* Elevated surfaces, inputs */
-  --color-border:     #3D3D3D;   /* Borders, dividers */
-  --color-yellow:     #F5C200;   /* Primary brand yellow (exact logo match) */
+  --color-bg:         #FFF8EE;   /* Main background — warm cream */
+  --color-surface:    #FFFAF4;   /* Cards, modals, panels */
+  --color-surface-2:  #F5ECD8;   /* Elevated surfaces, inputs */
+  --color-border:     #E8D5BE;   /* Borders, dividers */
+  --color-yellow:     #F5C200;   /* Primary brand yellow (saffron badge only) */
   --color-yellow-dim: #C49A00;   /* Hover state for yellow */
   --color-yellow-glow:#F5C20033; /* Yellow glow (20% opacity) */
-  --color-white:      #F5F5F5;   /* Primary text */
-  --color-muted:      #999999;   /* Secondary text, placeholders */
-  --color-success:    #4CAF50;   /* Order confirmed */
-  --color-error:      #EF4444;   /* Errors, full slots */
-  --color-warning:    #FB923C;   /* Low slots warning */
+  --color-primary:    #C8511B;   /* Tandoor orange for CTAs */
+  --color-primary-hover: #A03D12; /* CTA hover */
+  --color-heading:    #8B3A00;   /* Dark spice for headings */
+  --color-text:       #3D2000;   /* Espresso for body text */
+  --color-muted:      #A07850;   /* Cinnamon for secondary text */
+  --color-success:    #2D6A4F;   /* Order confirmed */
+  --color-error:      #B91C1C;   /* Errors, full slots */
+  --color-warning:    #C8511B;   /* Low slots warning */
 }
 
 /* Global resets & scroll dynamics */
@@ -31,7 +34,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--color-bg);
-  color: var(--color-white);
+  color: var(--color-text);
   font-family: 'DM Sans', sans-serif;
   overflow-x: hidden;
 }
@@ -39,6 +42,7 @@ body {
 /* Headings typography default */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', serif;
+  color: var(--color-heading);
 }
 
 /* Custom scrollbars */
@@ -61,7 +65,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Design System Utilities */
 .shadow-card {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 24px rgba(61, 32, 0, 0.08);
 }
 
 .shadow-yellow {
@@ -70,6 +74,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .shadow-yellow-strong {
   box-shadow: 0 0 32px rgba(245, 194, 0, 0.35);
+}
+
+.shadow-primary {
+  box-shadow: 0 0 20px rgba(200, 81, 27, 0.2);
+}
+
+.shadow-primary-strong {
+  box-shadow: 0 0 32px rgba(200, 81, 27, 0.35);
 }
 
 /* Keyframes & Custom Animations from Section 5 */

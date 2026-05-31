@@ -124,10 +124,10 @@ const MenuGrid: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Section Heading */}
         <div className="text-center mb-16">
-          <h2 className="font-serif font-black text-4xl md:text-6xl text-white tracking-tight">
+          <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight">
             This Week's Menu
           </h2>
-          <div className="w-24 h-1 bg-yellow mx-auto mt-4 rounded-full shadow-yellow" />
+          <div className="w-24 h-1 bg-primary mx-auto mt-4 rounded-full shadow-primary" />
           <p className="text-muted text-sm md:text-base mt-4 max-w-md mx-auto leading-relaxed">
             Freshly prepared, small-batch homemade courses. Choose your favorites below!
           </p>
@@ -141,8 +141,8 @@ const MenuGrid: React.FC = () => {
               onClick={() => setActiveCategory(cat)}
               className={`px-5 py-2 rounded-full font-sans text-xs md:text-sm font-semibold tracking-wider uppercase transition-all duration-300 border ${
                 activeCategory === cat
-                  ? 'bg-yellow border-yellow text-bg shadow-yellow'
-                  : 'bg-surface-2 border-border text-white/80 hover:text-yellow hover:border-yellow'
+                  ? 'bg-primary border-primary text-white shadow-primary'
+                  : 'bg-surface-2 border-border text-text/80 hover:text-primary hover:border-primary'
               }`}
             >
               {cat}
@@ -166,7 +166,7 @@ const MenuGrid: React.FC = () => {
         ) : (
           <div className="text-center py-16 border border-dashed border-border rounded-2xl bg-bg/50">
             <span className="text-4xl">🥘</span>
-            <h3 className="font-serif font-bold text-xl text-yellow mt-4">No Items Available</h3>
+            <h3 className="font-serif font-bold text-xl text-heading mt-4">No Items Available</h3>
             <p className="text-muted text-sm mt-2">Check back shortly as we prepare fresh recipes.</p>
           </div>
         )}

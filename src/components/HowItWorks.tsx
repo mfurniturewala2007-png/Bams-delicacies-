@@ -11,11 +11,11 @@ interface HowItWorksCardProps {
 const HowItWorksCard: React.FC<HowItWorksCardProps> = ({ number, icon, title, description, delayMs }) => {
   return (
     <div
-      className="relative bg-surface border border-border hover:border-yellow rounded-2xl p-8 pt-10 shadow-card hover:scale-[1.02] transition-all duration-300 group opacity-0 animate-fade-slide-up"
+      className="relative bg-surface border border-border hover:border-primary rounded-2xl p-8 pt-10 shadow-card hover:scale-[1.02] transition-all duration-300 group opacity-0 animate-fade-slide-up"
       style={{ animationDelay: `${delayMs}ms` }}
     >
       {/* Dynamic Number Badge overlapping the top boundary */}
-      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-yellow text-bg font-sans font-black text-lg flex items-center justify-center border-4 border-bg shadow-yellow group-hover:scale-110 transition-transform duration-300">
+      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-primary text-white font-sans font-black text-lg flex items-center justify-center border-4 border-bg shadow-primary group-hover:scale-110 transition-transform duration-300">
         {number}
       </div>
 
@@ -25,10 +25,10 @@ const HowItWorksCard: React.FC<HowItWorksCardProps> = ({ number, icon, title, de
       </div>
 
       {/* Card Content */}
-      <h3 className="font-serif font-bold text-xl text-yellow text-center mb-3">
+      <h3 className="font-serif font-bold text-xl text-heading text-center mb-3">
         {title}
       </h3>
-      <p className="font-sans font-medium text-white/70 text-sm md:text-base text-center leading-relaxed">
+      <p className="font-sans font-medium text-text/75 text-sm md:text-base text-center leading-relaxed">
         {description}
       </p>
     </div>
@@ -66,17 +66,17 @@ const HowItWorks: React.FC = () => {
       <div 
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
-          background: 'radial-gradient(circle at 80% 20%, rgba(245,194,0,0.03) 0%, rgba(43,43,43,0) 50%)'
+          background: 'radial-gradient(circle at 80% 20%, rgba(200,81,27,0.02) 0%, rgba(255,248,238,0) 50%)'
         }}
       />
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Section Title */}
         <div className="text-center mb-20">
-          <h2 className="font-serif font-black text-4xl md:text-6xl text-white tracking-tight drop-shadow">
+          <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight drop-shadow">
             How It Works
           </h2>
-          <div className="w-20 h-1 bg-yellow mx-auto mt-4 rounded-full shadow-yellow" />
+          <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded-full shadow-primary" />
           <p className="text-muted text-sm md:text-base mt-4 max-w-md mx-auto leading-relaxed">
             Three simple steps to bring mom's homemade delicacies straight to your dining table.
           </p>

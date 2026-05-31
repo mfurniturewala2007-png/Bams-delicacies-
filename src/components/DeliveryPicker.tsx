@@ -20,8 +20,8 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({ selectedDate, onSelect,
 
   return (
     <div className="w-full">
-      <label className="block text-left text-sm font-sans font-semibold text-white/90 uppercase tracking-wider mb-3">
-        Select Delivery Date <span className="text-yellow">*</span>
+      <label className="block text-left text-sm font-sans font-semibold text-text uppercase tracking-wider mb-3">
+        Select Delivery Date <span className="text-primary">*</span>
       </label>
 
       {/* Side-by-Side (2 cols) Weekend Picker Grid */}
@@ -44,8 +44,8 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({ selectedDate, onSelect,
                 isFull
                   ? 'bg-surface border-border opacity-50 cursor-not-allowed pointer-events-none'
                   : isSelected
-                  ? 'bg-surface-2 border-yellow shadow-yellow text-white hover:scale-[1.01]'
-                  : 'bg-surface border-border hover:border-yellow/50 text-white/80 hover:scale-[1.01]'
+                  ? 'bg-surface-2 border-primary shadow-primary text-text hover:scale-[1.01]'
+                  : 'bg-surface border-border hover:border-primary/50 text-text/80 hover:scale-[1.01]'
               }`}
             >
               {/* Day & Date Header */}
@@ -72,7 +72,7 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({ selectedDate, onSelect,
                     0 slots left — Booking Closed
                   </span>
                 ) : isLowSlots ? (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/15 border border-warning text-warning text-xs font-bold animate-pulse-glow shadow-yellow">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/15 border border-warning text-warning text-xs font-bold animate-pulse-glow shadow-primary">
                     <span>⚠️</span>
                     <span>Only {slotsLeft} left!</span>
                   </div>

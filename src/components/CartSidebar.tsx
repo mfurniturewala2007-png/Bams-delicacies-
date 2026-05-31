@@ -34,13 +34,13 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
           <div className="h-full flex flex-col bg-surface border-l border-border shadow-2xl animate-slide-in-right">
             {/* Header */}
             <div className="px-6 py-6 border-b border-border flex items-center justify-between">
-              <h2 className="font-serif font-black text-2xl text-yellow flex items-center gap-2">
+              <h2 className="font-serif font-black text-2xl text-heading flex items-center gap-2">
                 <span>Your Order</span>
                 <span className="text-xl">🛒</span>
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl bg-surface-2 border border-border text-white hover:text-yellow hover:border-yellow focus:outline-none transition-all duration-200"
+                className="p-2 rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary focus:outline-none transition-all duration-200"
                 aria-label="Close Shopping Cart"
               >
                 {/* SVG Close Cross */}
@@ -64,7 +64,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                   <span className="text-5xl mb-4 animate-float" style={{ animationDuration: '3s' }}>
                     🍛
                   </span>
-                  <h3 className="font-serif font-bold text-lg text-yellow">
+                  <h3 className="font-serif font-bold text-lg text-heading">
                     Nothing here yet
                   </h3>
                   <p className="text-muted text-sm mt-2 max-w-xs">
@@ -100,7 +100,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                         </span>
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-sans font-bold text-sm text-white/95 truncate">
+                        <h4 className="font-sans font-bold text-sm text-text truncate">
                           {item.name}
                         </h4>
                         <p className="font-serif text-xs text-yellow font-semibold mt-1">
@@ -114,21 +114,21 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                       <div className="flex items-center gap-1.5 bg-bg border border-border rounded-lg p-1">
                         <button
                           onClick={() => updateQty(item.product_id, item.quantity - 1)}
-                          className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-white hover:text-yellow transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
+                          className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
                         >
                           −
                         </button>
-                        <span className="font-sans font-bold text-xs px-2 w-5 text-center text-white select-none">
+                        <span className="font-sans font-bold text-xs px-2 w-5 text-center text-text select-none">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQty(item.product_id, item.quantity + 1)}
-                          className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-white hover:text-yellow transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
+                          className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
                         >
                           +
                         </button>
                       </div>
-                      <span className="font-serif text-sm font-semibold text-white/90">
+                      <span className="font-serif text-sm font-semibold text-text font-bold">
                         ₹{item.price * item.quantity}
                       </span>
                     </div>
@@ -141,7 +141,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
             {items.length > 0 && (
               <div className="border-t border-border bg-surface-2 p-6 space-y-6">
                 <div className="flex items-baseline justify-between">
-                  <span className="font-sans font-semibold text-white/70 text-sm uppercase tracking-wider">
+                  <span className="font-sans font-semibold text-muted text-sm uppercase tracking-wider">
                     Subtotal
                   </span>
                   <span className="font-serif text-3xl font-black text-yellow">
@@ -151,7 +151,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
 
                 <button
                   onClick={handleProceedToOrder}
-                  className="w-full bg-yellow text-bg font-sans font-bold text-base py-4 rounded-full shadow-yellow hover:bg-yellow-dim hover:scale-[1.02] hover:shadow-yellow-strong active:scale-98 transition-all duration-300"
+                  className="w-full bg-primary text-white font-sans font-bold text-base py-4 rounded-full shadow-primary hover:bg-primary-hover hover:scale-[1.02] hover:shadow-primary-strong active:scale-98 transition-all duration-300"
                 >
                   Proceed to Order
                 </button>

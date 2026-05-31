@@ -359,24 +359,24 @@ const Admin: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg px-4 select-text">
         <div className="absolute inset-0 pointer-events-none opacity-20"
-          style={{ background: 'radial-gradient(circle, rgba(245,194,0,0.06) 0%, rgba(43,43,43,0) 70%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(200,81,27,0.05) 0%, rgba(255,248,238,0) 70%)' }} />
         
         <div
           className={`w-full max-w-md bg-surface border border-border p-8 rounded-2xl shadow-card text-center transition-all duration-300 ${
             isShaking ? 'animate-shake' : ''
           }`}
         >
-          <img src="/logo.jpeg" alt="Bam's Delicacies Logo" className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border border-yellow shadow-yellow"
+          <img src="/logo.jpeg" alt="Bam's Delicacies Logo" className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border border-border shadow-md"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://placehold.co/80x80/f5c200/1e1e1e?text=BD';
+              (e.target as HTMLImageElement).src = 'https://placehold.co/80x80/C8511B/FFF8EE?text=BD';
             }}
           />
-          <h1 className="font-serif font-black text-3xl text-yellow mb-2">Admin Login</h1>
+          <h1 className="font-serif font-black text-3xl text-heading mb-2">Admin Login</h1>
           <p className="font-sans text-muted text-xs mb-8">Manage products, orders, and slot availabilities.</p>
 
           <form onSubmit={handleAuthSubmit} className="space-y-6">
             <div className="text-left">
-              <label className="block text-xs font-sans font-bold text-white/70 uppercase tracking-widest mb-2.5">
+              <label className="block text-xs font-sans font-bold text-text/70 uppercase tracking-widest mb-2.5">
                 Enter Admin Password
               </label>
               <input
@@ -387,7 +387,7 @@ const Admin: React.FC = () => {
                   if (authError) setAuthError('');
                 }}
                 placeholder="••••••••"
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-muted/40 focus:outline-none focus:border-yellow focus:ring-2 focus:ring-yellow-glow transition-all duration-200 ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3.5 text-text font-mono placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                   authError ? 'border-error' : 'border-border'
                 }`}
                 autoFocus
@@ -401,7 +401,7 @@ const Admin: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-yellow text-bg font-sans font-bold py-3.5 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] hover:shadow-yellow shadow-md active:scale-98 transition-all duration-300"
+              className="w-full bg-primary text-white font-sans font-bold py-3.5 rounded-xl hover:bg-primary-hover hover:scale-[1.02] hover:shadow-primary shadow-md active:scale-98 transition-all duration-300"
             >
               Verify Credentials
             </button>
@@ -412,7 +412,7 @@ const Admin: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-bg text-white select-text">
+    <div className="min-h-screen flex bg-bg text-text select-text">
       {/* 1. Sidebar Panel (Fixed left, 240px) */}
       <aside className="w-60 bg-surface border-r border-border h-screen sticky top-0 flex flex-col justify-between flex-shrink-0 z-30 select-none">
         <div>
@@ -423,14 +423,14 @@ const Admin: React.FC = () => {
               alt="Bam's Delicacies"
               className="h-10 w-10 rounded-full object-cover border border-border"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/f5c200/1e1e1e?text=BD';
+                (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/C8511B/FFF8EE?text=BD';
               }}
             />
             <div className="flex flex-col text-left">
-              <span className="font-serif font-black text-yellow text-sm tracking-tight leading-none">
+              <span className="font-serif font-black text-heading text-sm tracking-tight leading-none">
                 Bam's
               </span>
-              <span className="font-serif text-[11px] text-white/50 tracking-wider font-bold mt-1 uppercase">
+              <span className="font-serif text-[11px] text-muted/70 tracking-wider font-bold mt-1 uppercase">
                 Admin Panel
               </span>
             </div>
@@ -442,8 +442,8 @@ const Admin: React.FC = () => {
               onClick={() => setActiveTab(0)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
                 activeTab === 0
-                  ? 'bg-surface-2 border-yellow text-yellow'
-                  : 'border-transparent text-white/70 hover:text-white hover:bg-surface-2/40'
+                  ? 'bg-surface-2 border-primary text-primary'
+                  : 'border-transparent text-text/70 hover:text-text hover:bg-surface-2/40'
               }`}
             >
               <span>🍱</span>
@@ -453,8 +453,8 @@ const Admin: React.FC = () => {
               onClick={() => setActiveTab(1)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
                 activeTab === 1
-                  ? 'bg-surface-2 border-yellow text-yellow'
-                  : 'border-transparent text-white/70 hover:text-white hover:bg-surface-2/40'
+                  ? 'bg-surface-2 border-primary text-primary'
+                  : 'border-transparent text-text/70 hover:text-text hover:bg-surface-2/40'
               }`}
             >
               <span>📋</span>
@@ -485,12 +485,12 @@ const Admin: React.FC = () => {
             {/* Tab Header bar */}
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-border/40 select-none">
               <div className="text-left">
-                <h2 className="font-serif font-black text-3xl text-white">Menu Catalog</h2>
+                <h2 className="font-serif font-black text-3xl text-heading">Menu Catalog</h2>
                 <p className="text-muted text-xs font-sans mt-1">Add, update stock status, or remove delicacies.</p>
               </div>
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="bg-yellow text-bg font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-yellow hover:bg-yellow-dim hover:scale-105 active:scale-95 transition-all duration-300"
+                className="bg-primary text-white font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all duration-300"
               >
                 + Add Product
               </button>
@@ -499,7 +499,7 @@ const Admin: React.FC = () => {
             {/* Catalog list grid view */}
             {productsLoading ? (
               <div className="flex-grow flex items-center justify-center py-20 select-none">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-yellow border-r-2 border-transparent"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-transparent"></div>
               </div>
             ) : (
               <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
@@ -539,7 +539,7 @@ const Admin: React.FC = () => {
                                 🍽️
                               </span>
                             </div>
-                            <div className="text-left font-bold text-white/95">
+                            <div className="text-left font-bold text-text">
                               {prod.name}
                               <span className="block text-xs font-normal text-muted truncate max-w-xs mt-1">
                                 {prod.description || 'No description available'}
@@ -548,7 +548,7 @@ const Admin: React.FC = () => {
                           </td>
 
                           {/* Category Cell */}
-                          <td className="py-4 px-6 capitalize text-white/80">
+                          <td className="py-4 px-6 capitalize text-text/80">
                             {prod.category}
                           </td>
 
@@ -562,7 +562,7 @@ const Admin: React.FC = () => {
                             <button
                               onClick={() => handleToggleStock(prod.id, prod.in_stock)}
                               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-                                prod.in_stock ? 'bg-yellow shadow-yellow' : 'bg-surface-2 border border-border'
+                                prod.in_stock ? 'bg-primary shadow-primary' : 'bg-surface-2 border border-border'
                               }`}
                             >
                               <span
@@ -613,10 +613,10 @@ const Admin: React.FC = () => {
                 <div className="w-full max-w-xl bg-surface border border-border rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-fade-slide-up flex flex-col max-h-[90vh]">
                   {/* Modal Header */}
                   <div className="px-6 py-5 border-b border-border flex justify-between items-center flex-shrink-0">
-                    <h3 className="font-serif font-bold text-xl text-yellow">Add New Delicacy</h3>
+                    <h3 className="font-serif font-bold text-xl text-heading">Add New Delicacy</h3>
                     <button
                       onClick={() => setIsAddModalOpen(false)}
-                      className="p-1 rounded-lg bg-surface-2 border border-border text-white hover:text-yellow transition-all duration-200"
+                      className="p-1 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
                     >
                       ✕
                     </button>
@@ -626,8 +626,8 @@ const Admin: React.FC = () => {
                   <div className="p-6 overflow-y-auto space-y-5 flex-grow text-left">
                     {/* Name input */}
                     <div>
-                      <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
-                        Product Name <span className="text-yellow">*</span>
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                        Product Name <span className="text-primary">*</span>
                       </label>
                       <input
                         type="text"
@@ -637,7 +637,7 @@ const Admin: React.FC = () => {
                           if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }));
                         }}
                         placeholder="e.g. Special Chicken Dum Biryani"
-                        className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 ${
+                        className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 ${
                           formErrors.name ? 'border-error' : 'border-border'
                         }`}
                       />
@@ -649,13 +649,13 @@ const Admin: React.FC = () => {
                     {/* Category & Price dual row */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                        <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
                           Category
                         </label>
                         <select
                           value={newProdCat}
                           onChange={(e) => setNewProdCat(e.target.value)}
-                          className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 capitalize"
+                          className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 capitalize"
                         >
                           <option value="mains">Mains</option>
                           <option value="snacks">Snacks</option>
@@ -665,8 +665,8 @@ const Admin: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
-                          Price (₹) <span className="text-yellow">*</span>
+                        <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
+                          Price (₹) <span className="text-primary">*</span>
                         </label>
                         <input
                           type="text"
@@ -676,7 +676,7 @@ const Admin: React.FC = () => {
                             if (formErrors.price) setFormErrors((prev) => ({ ...prev, price: '' }));
                           }}
                           placeholder="e.g. 250"
-                          className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 ${
+                          className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 ${
                             formErrors.price ? 'border-error' : 'border-border'
                           }`}
                         />
@@ -688,7 +688,7 @@ const Admin: React.FC = () => {
 
                     {/* Description field */}
                     <div>
-                      <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
                         Description
                       </label>
                       <textarea
@@ -696,17 +696,17 @@ const Admin: React.FC = () => {
                         onChange={(e) => setNewProdDesc(e.target.value)}
                         placeholder="Provide details about flavors, portions, preparation, or key ingredients..."
                         rows={3}
-                        className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-white font-sans focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-250 resize-none"
+                        className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250 resize-none"
                       />
                     </div>
 
                     {/* Image Upload Input Area */}
                     <div>
-                      <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                      <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
                         Product Image
                       </label>
                       <div className="flex gap-4 items-center">
-                        <label className="bg-surface-2 border border-border border-dashed hover:border-yellow rounded-xl px-4 py-3 cursor-pointer text-xs font-bold hover:text-yellow transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
+                        <label className="bg-surface-2 border border-border border-dashed hover:border-primary rounded-xl px-4 py-3 cursor-pointer text-xs font-bold text-text hover:text-primary transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
                           <input
                             type="file"
                             accept="image/*"
@@ -718,7 +718,7 @@ const Admin: React.FC = () => {
                         
                         {/* Status indicator */}
                         {isUploadingImage && (
-                          <span className="text-xs text-yellow animate-pulse">Uploading file...</span>
+                          <span className="text-xs text-primary animate-pulse">Uploading file...</span>
                         )}
                         {uploadedImageUrl && (
                           <span className="text-xs text-success">✓ Upload success!</span>
@@ -746,13 +746,13 @@ const Admin: React.FC = () => {
                     {/* Stock switch toggle */}
                     <div className="flex items-center gap-4 bg-surface-2/30 border border-border/40 p-4 rounded-xl select-none">
                       <div className="text-left flex-grow">
-                        <span className="block text-sm font-bold text-white/95">Initial Stock Status</span>
+                        <span className="block text-sm font-bold text-text">Initial Stock Status</span>
                         <span className="text-muted text-xs block mt-0.5">Toggle whether customers can order this instantly on load.</span>
                       </div>
                       <button
                         onClick={() => setNewProdStock(!newProdStock)}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-                          newProdStock ? 'bg-yellow shadow-yellow' : 'bg-surface-2 border border-border'
+                          newProdStock ? 'bg-primary shadow-primary' : 'bg-surface-2 border border-border'
                         }`}
                       >
                         <span
@@ -775,7 +775,7 @@ const Admin: React.FC = () => {
                     <button
                       onClick={handleSaveProduct}
                       disabled={isUploadingImage}
-                      className="bg-yellow text-bg font-sans font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-yellow hover:bg-yellow-dim transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-primary text-white font-sans font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-primary hover:bg-primary-hover transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Save Product
                     </button>
@@ -792,7 +792,7 @@ const Admin: React.FC = () => {
             {/* Header section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-4 border-b border-border/40 select-none">
               <div className="text-left">
-                <h2 className="font-serif font-black text-3xl text-white">Orders Manager</h2>
+                <h2 className="font-serif font-black text-3xl text-heading">Orders Manager</h2>
                 <p className="text-muted text-xs font-sans mt-1">Review weekend deliveries, booking capacities, and statuses.</p>
               </div>
               
@@ -804,7 +804,7 @@ const Admin: React.FC = () => {
                     setNotifyState('idle');
                     setNotifyResult(null);
                   }}
-                  className="inline-flex items-center gap-2 bg-surface border border-border text-yellow font-sans font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl hover:bg-surface-2 hover:border-yellow/50 transition-all duration-200"
+                  className="inline-flex items-center gap-2 bg-surface border border-border text-primary font-sans font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl hover:bg-surface-2 hover:border-primary/50 transition-all duration-200"
                 >
                   <span>🔔</span>
                   <span>Notify All Customers</span>
@@ -830,13 +830,13 @@ const Admin: React.FC = () => {
                     onClick={() => setActiveFilterDateStr(opt.dbStr)}
                     className={`px-5 py-2.5 border rounded-xl font-sans text-xs md:text-sm font-semibold tracking-wider transition-all duration-300 ${
                       isActive
-                        ? 'bg-yellow border-yellow text-bg shadow-yellow hover:scale-[1.02]'
-                        : 'bg-surface border-border text-white/80 hover:text-yellow hover:border-yellow hover:scale-[1.01]'
+                        ? 'bg-primary border-primary text-white shadow-primary hover:scale-[1.02]'
+                        : 'bg-surface border-border text-text/80 hover:text-primary hover:border-primary hover:scale-[1.01]'
                     }`}
                   >
                     <div className="flex flex-col text-left">
                       <span>{opt.label}</span>
-                      <span className={`text-[10px] font-normal mt-0.5 ${isActive ? 'text-bg/75' : 'text-muted'}`}>
+                      <span className={`text-[10px] font-normal mt-0.5 ${isActive ? 'text-white/75' : 'text-muted'}`}>
                         {format(opt.date, 'MMM d, yyyy')}
                       </span>
                     </div>
@@ -848,12 +848,12 @@ const Admin: React.FC = () => {
             {/* Orders Data Table Display grid */}
             {ordersLoading ? (
               <div className="flex-grow flex items-center justify-center py-20 select-none">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-yellow border-r-2 border-transparent"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-transparent"></div>
               </div>
             ) : filteredOrders.length === 0 ? (
               <div className="flex-grow flex flex-col items-center justify-center text-center py-24 border border-dashed border-border rounded-2xl bg-surface/30 select-none">
                 <span className="text-5xl animate-float" style={{ animationDuration: '3.5s' }}>🎉</span>
-                <h3 className="font-serif font-bold text-xl text-yellow mt-4">
+                <h3 className="font-serif font-bold text-xl text-heading mt-4">
                   No orders for this day yet
                 </h3>
                 <p className="text-muted text-sm mt-2 max-w-sm">
@@ -884,17 +884,17 @@ const Admin: React.FC = () => {
                           </td>
 
                           {/* Customer Name */}
-                          <td className="py-4 px-6 font-bold text-white/95 text-left">
+                          <td className="py-4 px-6 font-bold text-text text-left">
                             {ord.customer_name}
                           </td>
 
                           {/* Phone Info */}
-                          <td className="py-4 px-6 font-mono text-white/80 text-left">
+                          <td className="py-4 px-6 font-mono text-text/80 text-left">
                             {ord.customer_phone}
                           </td>
 
                           {/* Address Info */}
-                          <td className="py-4 px-6 max-w-xs truncate text-white/70 text-left" title={ord.customer_address}>
+                          <td className="py-4 px-6 max-w-xs truncate text-text/70 text-left" title={ord.customer_address}>
                             {ord.customer_address}
                           </td>
 
@@ -902,9 +902,9 @@ const Admin: React.FC = () => {
                           <td className="py-4 px-6 text-left">
                             <ul className="list-none space-y-1">
                               {ord.items && ord.items.map((item, keyIdx) => (
-                                <li key={keyIdx} className="text-xs text-white/85">
+                                <li key={keyIdx} className="text-xs text-text/85">
                                   • {item.name}{' '}
-                                  <span className="text-yellow font-bold">×{item.quantity}</span>
+                                  <span className="text-primary font-bold">×{item.quantity}</span>
                                 </li>
                               ))}
                             </ul>
@@ -929,12 +929,12 @@ const Admin: React.FC = () => {
                                 ord.status === 'pending'
                                   ? 'bg-warning/10 border-warning/35 text-warning'
                                   : ord.status === 'confirmed'
-                                  ? 'bg-yellow/10 border-yellow/35 text-yellow'
+                                  ? 'bg-muted/10 border-muted/35 text-muted'
                                   : 'bg-success/10 border-success/35 text-success'
                               }`}
                             >
                               <option value="pending" className="bg-surface text-warning font-bold">Pending</option>
-                              <option value="confirmed" className="bg-surface text-yellow font-bold">Confirmed</option>
+                              <option value="confirmed" className="bg-surface text-muted font-bold">Confirmed</option>
                               <option value="delivered" className="bg-surface text-success font-bold">Delivered</option>
                             </select>
                           </td>
@@ -959,10 +959,10 @@ const Admin: React.FC = () => {
           <div className="relative z-10 w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden animate-fade-slide-up">
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-border flex justify-between items-center">
-              <h3 className="font-serif font-bold text-xl text-yellow">🔔 Notify All Customers</h3>
+              <h3 className="font-serif font-bold text-xl text-heading">🔔 Notify All Customers</h3>
               <button
                 onClick={() => setIsNotifyModalOpen(false)}
-                className="p-1 rounded-lg bg-surface-2 border border-border text-white hover:text-yellow transition-all duration-200"
+                className="p-1 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
               >
                 ✕
               </button>
@@ -975,7 +975,7 @@ const Admin: React.FC = () => {
               </p>
 
               <div>
-                <label className="block text-xs font-sans font-bold text-white/80 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
                   Message
                 </label>
                 <textarea
@@ -984,7 +984,7 @@ const Admin: React.FC = () => {
                   placeholder="e.g. Your delivery is confirmed for Saturday! 🎉"
                   rows={4}
                   disabled={notifyState === 'sending' || notifyState === 'sent'}
-                  className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-white font-sans text-sm focus:outline-none focus:border-yellow focus:ring-1 focus:ring-yellow-glow transition-all duration-200 resize-none disabled:opacity-50"
+                  className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-text font-sans text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-200 resize-none disabled:opacity-50"
                 />
               </div>
 
@@ -1012,11 +1012,11 @@ const Admin: React.FC = () => {
                 <button
                   onClick={handleNotifyAll}
                   disabled={notifyState === 'sending' || !notifyMessage.trim()}
-                  className="inline-flex items-center gap-2 bg-yellow text-bg font-sans font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-yellow hover:bg-yellow-dim transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 bg-primary text-white font-sans font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-primary hover:bg-primary-hover transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {notifyState === 'sending' ? (
                     <>
-                      <span className="w-3 h-3 rounded-full border-2 border-bg border-t-transparent animate-spin" />
+                      <span className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
                       <span>Sending...</span>
                     </>
                   ) : (
