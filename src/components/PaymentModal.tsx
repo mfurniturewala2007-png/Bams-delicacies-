@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 import { supabase } from '../utils/supabase';
 
 // ─── FILL IN YOUR DETAILS BELOW ──────────────────────────────────────────────
-const UPI_ID   = 'bamsdelicacies@upi';  // Mohammed: replace with your real UPI ID
+const UPI_ID   = 'bfurniturewala@okicici';
 const UPI_NAME = "Bam's Delicacies";    // Display name shown in UPI apps
 // ─────────────────────────────────────────────────────────────────────────────
 
