@@ -11,7 +11,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Crispy samosas stuffed with spiced chicken keema. 12 pcs per order.",
     price: 360,
     image_url: null,
-    category: 'Non-Veg Samosa',
+    category: 'Non-Veg',
     unit_label: '12 pcs',
     in_stock: true,
   },
@@ -21,7 +21,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Crispy samosas with a smoky spiced dal filling. 12 pcs per order.",
     price: 300,
     image_url: null,
-    category: 'Veg Samosa',
+    category: 'Veg',
     unit_label: '12 pcs',
     in_stock: true,
   },
@@ -31,7 +31,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Tender chicken marinated in a creamy spiced blend, char-grilled to perfection. 12 pcs per order.",
     price: 420,
     image_url: null,
-    category: 'Chicken Starter',
+    category: 'Non-Veg',
     unit_label: '12 pcs',
     in_stock: true,
   },
@@ -41,7 +41,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: "Hearty pattice with a richly spiced mutton keema filling. 12 pcs per order.",
     price: 480,
     image_url: null,
-    category: 'Mutton Starter',
+    category: 'Non-Veg',
     unit_label: '12 pcs',
     in_stock: true,
   }
@@ -100,7 +100,7 @@ const MenuGrid: React.FC = () => {
   }, []);
 
   // Filter products by category tab
-  const categories = ['all', 'Non-Veg Samosa', 'Veg Samosa', 'Chicken Starter', 'Mutton Starter'];
+  const categories = ['all', 'Veg', 'Non-Veg'];
   const filteredProducts = activeCategory === 'all' 
     ? products 
     : products.filter(p => p.category === activeCategory);

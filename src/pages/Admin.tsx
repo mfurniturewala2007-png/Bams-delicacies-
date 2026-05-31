@@ -13,7 +13,7 @@ const DEFAULT_PRODUCTS: Product[] = [
     description: "Crispy samosas stuffed with spiced chicken keema. 12 pcs per order.",
     price: 360,
     image_url: null,
-    category: 'Non-Veg Samosa',
+    category: 'Non-Veg',
     unit_label: '12 pcs',
     in_stock: true,
   },
@@ -23,7 +23,7 @@ const DEFAULT_PRODUCTS: Product[] = [
     description: "Crispy samosas with a smoky spiced dal filling. 12 pcs per order.",
     price: 300,
     image_url: null,
-    category: 'Veg Samosa',
+    category: 'Veg',
     unit_label: '12 pcs',
     in_stock: true,
   },
@@ -48,7 +48,7 @@ const Admin: React.FC = () => {
   const [newProdName, setNewProdName] = useState('');
   const [newProdDesc, setNewProdDesc] = useState('');
   const [newProdPrice, setNewProdPrice] = useState('');
-  const [newProdCat, setNewProdCat] = useState('Non-Veg Samosa');
+  const [newProdCat, setNewProdCat] = useState('Non-Veg');
   const [newProdUnit, setNewProdUnit] = useState('12 pcs');
   const [newProdStock, setNewProdStock] = useState(true);
   
@@ -313,7 +313,7 @@ const Admin: React.FC = () => {
       setNewProdName('');
       setNewProdDesc('');
       setNewProdPrice('');
-      setNewProdCat('Non-Veg Samosa');
+      setNewProdCat('Non-Veg');
       setNewProdUnit('12 pcs');
       setNewProdStock(true);
       setImagePreview(null);
@@ -740,10 +740,8 @@ const Admin: React.FC = () => {
                           onChange={(e) => setNewProdCat(e.target.value)}
                           className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250"
                         >
-                          <option value="Non-Veg Samosa">Non-Veg Samosa</option>
-                          <option value="Veg Samosa">Veg Samosa</option>
-                          <option value="Chicken Starter">Chicken Starter</option>
-                          <option value="Mutton Starter">Mutton Starter</option>
+                          <option value="Non-Veg">Non-Veg</option>
+                          <option value="Veg">Veg</option>
                         </select>
                       </div>
 
