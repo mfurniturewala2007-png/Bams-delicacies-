@@ -16,10 +16,6 @@ const AuthModal: React.FC = () => {
 
   const [tab, setTab] = useState<'signin' | 'signup'>('signup');
   
-  // Input fields
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
   // Profile fields
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -56,26 +52,34 @@ const AuthModal: React.FC = () => {
     setTab(newTab);
     setErrorMsg('');
     setFieldErrors({});
-    setEmail('');
-    setPassword('');
   };
 
   // Submit Handler: Sign In
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setErrorMsg('Please enter both email and password.');
+    const errors: { [key: string]: string } = {};
+
+    if (!phone.trim()) {
+      errors.phone = 'Phone Number is required';
+    } else if (!/^[0-9]{10}$/.test(phone.trim())) {
+      errors.phone = 'Phone must be exactly 10 digits';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
     try {
       setIsSubmitting(true);
       setErrorMsg('');
-      await signIn(email.trim(), password);
-      // Success will trigger AuthContext update, which closes modal or forces profile setup
+      setFieldErrors({});
+      const dummyEmail = `${phone.trim()}@bams.com`;
+      const dummyPassword = phone.trim();
+      await signIn(dummyEmail, dummyPassword);
     } catch (err: any) {
       console.error('Sign In error:', err);
-      setErrorMsg(err.message || 'Incorrect email or password. Please try again.');
+      setErrorMsg(err.message || 'Phone number not registered. Please sign up first.');
     } finally {
       setIsSubmitting(false);
     }
@@ -86,12 +90,6 @@ const AuthModal: React.FC = () => {
     e.preventDefault();
     const errors: { [key: string]: string } = {};
 
-    if (!email.trim()) {
-      errors.email = 'Email is required';
-    }
-    if (!password || password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
     if (!name.trim()) {
       errors.name = 'Full Name is required';
     }
@@ -118,7 +116,9 @@ const AuthModal: React.FC = () => {
       setIsSubmitting(true);
       setErrorMsg('');
       setFieldErrors({});
-      await signUp(email.trim(), password, {
+      const dummyEmail = `${phone.trim()}@bams.com`;
+      const dummyPassword = phone.trim();
+      await signUp(dummyEmail, dummyPassword, {
         name: name.trim(),
         phone: phone.trim(),
         address: address.trim(),
@@ -126,7 +126,11 @@ const AuthModal: React.FC = () => {
       });
     } catch (err: any) {
       console.error('Sign Up error:', err);
-      setErrorMsg(err.message || 'Failed to create account. Please try again.');
+      if (err.message?.includes('User already exists')) {
+        setErrorMsg('This phone number is already registered. Please sign in instead!');
+      } else {
+        setErrorMsg(err.message || 'Failed to create account. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -225,30 +229,27 @@ const AuthModal: React.FC = () => {
             <form onSubmit={handleSignInSubmit} className="space-y-4 text-left">
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                  Email Address
+                  Phone Number <span className="text-primary">*</span>
                 </label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
+                  type="tel"
+                  value={phone}
+                  maxLength={10}
+                  onChange={(e) => {
+                    setPhone(e.target.value.replace(/[^0-9]/g, ''));
+                    if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
+                  }}
+                  placeholder="Enter your 10-digit phone number"
                   required
-                  className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                    fieldErrors.phone ? 'border-error' : 'border-border'
+                  }`}
                 />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-                />
+                {fieldErrors.phone && (
+                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
+                    {fieldErrors.phone}
+                  </span>
+                )}
               </div>
 
               <button
@@ -286,52 +287,6 @@ const AuthModal: React.FC = () => {
             )}
 
             <form onSubmit={handleSignUpSubmit} className="space-y-3.5 text-left">
-              <div>
-                <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                  Email Address <span className="text-primary">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: '' }));
-                  }}
-                  placeholder="name@example.com"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
-                    fieldErrors.email ? 'border-error' : 'border-border'
-                  }`}
-                />
-                {fieldErrors.email && (
-                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                    {fieldErrors.email}
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
-                  Password (min 6 chars) <span className="text-primary">*</span>
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: '' }));
-                  }}
-                  placeholder="••••••••"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
-                    fieldErrors.password ? 'border-error' : 'border-border'
-                  }`}
-                />
-                {fieldErrors.password && (
-                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                    {fieldErrors.password}
-                  </span>
-                )}
-              </div>
-
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
                   Full Name <span className="text-primary">*</span>
@@ -463,17 +418,6 @@ const AuthModal: React.FC = () => {
             )}
 
             <form onSubmit={handleProfileSubmit} className="space-y-4 text-left">
-              <div>
-                <label className="block text-[11px] font-sans font-bold text-text/50 uppercase tracking-wider mb-1">
-                  Email (read-only)
-                </label>
-                <input
-                  type="text"
-                  value={user?.email || ''}
-                  disabled
-                  className="w-full bg-surface-2/50 border border-border/40 rounded-xl px-4 py-2.5 text-text/50 font-sans cursor-not-allowed select-none focus:outline-none"
-                />
-              </div>
 
               <div>
                 <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">

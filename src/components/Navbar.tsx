@@ -125,7 +125,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                         {profile?.name || 'My Profile'}
                       </p>
                       <p className="font-sans text-[10px] text-muted truncate">
-                        {user.email}
+                        {profile?.phone || user.email}
                       </p>
                     </div>
                     <button
