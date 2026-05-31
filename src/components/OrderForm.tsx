@@ -26,7 +26,7 @@ const OrderForm: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setCustomerName(profile.name || '');
-      setCustomerPhone(profile.phone || '');
+      setCustomerPhone((profile.phone || '').replace(/[^0-9]/g, '').slice(-10));
       setCustomerAddress(profile.address || '');
     } else {
       setCustomerName('');
@@ -343,8 +343,9 @@ const OrderForm: React.FC = () => {
               <input
                 type="tel"
                 value={customerPhone}
+                maxLength={10}
                 onChange={(e) => {
-                  setCustomerPhone(e.target.value);
+                  setCustomerPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10));
                   if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
                 }}
                 placeholder="Enter 10-digit contact number"
