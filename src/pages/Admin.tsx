@@ -755,8 +755,8 @@ Thank you for ordering! We'll see you soon. 🍽️
 
   return (
     <div className="min-h-screen flex bg-bg text-text select-text">
-      {/* 1. Sidebar Panel (Fixed left, 240px) */}
-      <aside className="w-60 bg-surface border-r border-border h-screen sticky top-0 flex flex-col justify-between flex-shrink-0 z-30 select-none">
+      {/* ── Desktop Sidebar (hidden on mobile) ─────────────────── */}
+      <aside className="hidden md:flex w-60 bg-surface border-r border-border h-screen sticky top-0 flex-col justify-between flex-shrink-0 z-30 select-none">
         <div>
           {/* Logo & Brand Header */}
           <div className="p-6 border-b border-border flex items-center gap-3">
@@ -805,9 +805,7 @@ Thank you for ordering! We'll see you soon. 🍽️
         {/* Admin signout trigger */}
         <div className="p-4 border-t border-border">
           <button
-            onClick={() => {
-              setIsAuthenticated(false);
-            }}
+            onClick={() => { setIsAuthenticated(false); }}
             className="w-full py-2.5 px-4 rounded-xl font-sans font-bold text-xs tracking-wider text-error hover:bg-error/10 border border-transparent hover:border-error/25 transition-all duration-200 uppercase"
           >
             Sign Out
@@ -815,23 +813,23 @@ Thank you for ordering! We'll see you soon. 🍽️
         </div>
       </aside>
 
-      {/* 2. Main content area */}
-      <main className="flex-grow p-8 overflow-y-auto h-screen bg-bg/95 relative z-10 flex flex-col">
+      {/* ── Main content area ────────────────────────────────────── */}
+      <main className="flex-grow p-4 md:p-8 overflow-y-auto h-screen pb-24 md:pb-8 bg-bg/95 relative z-10 flex flex-col">
         {/* Products tab screen */}
         {activeTab === 0 && (
           <div className="flex-grow flex flex-col">
             {/* Tab Header bar */}
-            <div className="flex justify-between items-center mb-8 pb-4 border-b border-border/40 select-none">
+            <div className="flex justify-between items-start md:items-center mb-6 md:mb-8 pb-4 border-b border-border/40 select-none gap-4">
               <div className="text-left">
-                <h2 className="font-serif font-black text-3xl text-heading">Menu Catalog</h2>
-                <p className="text-muted text-xs font-sans mt-1">Add, update stock status, or remove delicacies.</p>
+                <h2 className="font-serif font-black text-2xl md:text-3xl text-heading">Menu Catalog</h2>
+                <p className="text-muted text-xs font-sans mt-1">Add, update stock, or remove delicacies.</p>
               </div>
-              <div className="flex flex-col items-end gap-2">
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 <button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="bg-primary text-white font-sans font-bold text-sm px-5 py-3 rounded-xl shadow-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all duration-300"
+                  className="bg-primary text-white font-sans font-bold text-sm px-4 py-2.5 md:px-5 md:py-3 rounded-xl shadow-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all duration-300"
                 >
-                  + Add Product
+                  + Add
                 </button>
                 {!isSeeded && (
                   <button
@@ -845,137 +843,135 @@ Thank you for ordering! We'll see you soon. 🍽️
               </div>
             </div>
 
-            {/* Catalog list grid view */}
+            {/* Catalog display: cards on mobile, table on desktop */}
             {productsLoading ? (
               <div className="flex-grow flex items-center justify-center py-20 select-none">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-transparent"></div>
               </div>
             ) : (
-              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left">
-                    <thead>
-                      <tr className="border-b border-border bg-surface-2 text-muted font-sans text-xs font-bold uppercase tracking-wider select-none">
-                        <th className="py-4 px-6">Product</th>
-                        <th className="py-4 px-6">Category</th>
-                        <th className="py-4 px-6">Price / Dozen</th>
-                        <th className="py-4 px-6">Stock Status</th>
-                        <th className="py-4 px-6 text-center">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/60 text-sm font-sans">
-                      {products.map((prod) => (
-                        <tr key={prod.id} className="hover:bg-surface-2/30 transition-colors duration-150">
-                          {/* Image & Title Details */}
-                          <td className="py-4 px-6 flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-xl bg-bg border border-border flex-shrink-0 flex items-center justify-center overflow-hidden">
-                              {prod.image_url ? (
-                                <img
-                                  src={prod.image_url}
-                                  alt={prod.name}
-                                  className="h-full w-full object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    const fallback = e.currentTarget.nextElementSibling as HTMLSpanElement;
-                                    if (fallback) fallback.style.display = 'inline';
-                                  }}
-                                />
-                              ) : null}
-                              <span
-                                className="text-xl"
-                                style={{ display: prod.image_url ? 'none' : 'inline' }}
-                              >
-                                🍽️
-                              </span>
-                            </div>
-                            <div className="text-left font-bold text-text">
-                              {prod.name}
-                              <span className="block text-xs font-normal text-muted truncate max-w-xs mt-1">
-                                {prod.description || 'No description available'}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Category Cell */}
-                          <td className="py-4 px-6 capitalize text-text/80">
-                            {prod.category}
-                          </td>
-
-                          {/* Price Cell */}
-                          <td className="py-4 px-6 font-serif font-semibold text-yellow">
-                            ₹{prod.price} <span className="text-xs font-sans text-muted">/ {prod.unit_label || '12 pcs'}</span>
-                          </td>
-
-                          {/* stock status switch toggle */}
-                          <td className="py-4 px-6 select-none">
+              <>
+                {/* ── Mobile product cards (hidden on md+) ── */}
+                <div className="md:hidden flex flex-col gap-3">
+                  {products.map((prod) => (
+                    <div key={prod.id} className="bg-surface border border-border rounded-2xl p-4 flex items-start gap-3 shadow-card">
+                      {/* Thumbnail */}
+                      <div className="h-14 w-14 rounded-xl bg-bg border border-border flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        {prod.image_url ? (
+                          <img src={prod.image_url} alt={prod.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-2xl">🍽️</span>
+                        )}
+                      </div>
+                      {/* Info */}
+                      <div className="flex-grow min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-bold text-text text-sm leading-tight truncate">{prod.name}</p>
+                            <p className="text-xs text-muted mt-0.5">{prod.category} · <span className="text-yellow font-bold">₹{prod.price}</span> <span className="text-muted">/ {prod.unit_label || '12 pcs'}</span></p>
+                          </div>
+                          {/* Action buttons */}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {/* Stock toggle */}
                             <button
                               onClick={() => handleToggleStock(prod.id, prod.in_stock)}
                               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
                                 prod.in_stock ? 'bg-primary shadow-primary' : 'bg-surface-2 border border-border'
                               }`}
+                              title={prod.in_stock ? 'In Stock' : 'Out of Stock'}
                             >
-                              <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
-                                  prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
-                                }`}
-                              />
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                                prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                              }`} />
                             </button>
-                          </td>
-
-                          {/* Actions buttons */}
-                          <td className="py-4 px-6 text-center select-none">
-                            <div className="flex items-center justify-center gap-1">
-                              {/* Edit Button */}
-                              <button
-                                onClick={() => handleOpenEditModal(prod)}
-                                className="p-2 text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 rounded-xl transition-all duration-200"
-                                title="Edit Item"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                  stroke="currentColor"
-                                  className="w-4 h-4"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                                  />
-                                </svg>
-                              </button>
-
-                              {/* Delete Button */}
-                              <button
-                                onClick={() => handleDeleteProduct(prod.id, prod.name)}
-                                className="p-2 text-error hover:bg-error/10 border border-transparent hover:border-error/20 rounded-xl transition-all duration-200"
-                                title="Delete Item"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                  stroke="currentColor"
-                                  className="w-4 h-4"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-1.816A2.25 2.25 0 0122.167 2h-4.333a2.25 2.25 0 01-2.244 2.077v1.816m-7.5 0V4a2.25 2.25 0 012.244-2.243h4.333M19 19H5"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            {/* Edit */}
+                            <button
+                              onClick={() => handleOpenEditModal(prod)}
+                              className="p-2 text-primary hover:bg-primary/10 rounded-xl transition-all duration-200"
+                              title="Edit"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                              </svg>
+                            </button>
+                            {/* Delete */}
+                            <button
+                              onClick={() => handleDeleteProduct(prod.id, prod.name)}
+                              className="p-2 text-error hover:bg-error/10 rounded-xl transition-all duration-200"
+                              title="Delete"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916C19.5 2.979 18.521 2 17.313 2H6.687C5.479 2 4.5 2.979 4.5 4.184v.916" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted/70 mt-1 line-clamp-1">{prod.description || 'No description'}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+
+                {/* ── Desktop product table (hidden on mobile) ── */}
+                <div className="hidden md:block bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left">
+                      <thead>
+                        <tr className="border-b border-border bg-surface-2 text-muted font-sans text-xs font-bold uppercase tracking-wider select-none">
+                          <th className="py-4 px-6">Product</th>
+                          <th className="py-4 px-6">Category</th>
+                          <th className="py-4 px-6">Price / Dozen</th>
+                          <th className="py-4 px-6">Stock Status</th>
+                          <th className="py-4 px-6 text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60 text-sm font-sans">
+                        {products.map((prod) => (
+                          <tr key={prod.id} className="hover:bg-surface-2/30 transition-colors duration-150">
+                            <td className="py-4 px-6 flex items-center gap-4">
+                              <div className="h-12 w-12 rounded-xl bg-bg border border-border flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                {prod.image_url ? (
+                                  <img src={prod.image_url} alt={prod.name} className="h-full w-full object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; const fb = e.currentTarget.nextElementSibling as HTMLSpanElement; if (fb) fb.style.display = 'inline'; }}
+                                  />
+                                ) : null}
+                                <span className="text-xl" style={{ display: prod.image_url ? 'none' : 'inline' }}>🍽️</span>
+                              </div>
+                              <div className="text-left font-bold text-text">
+                                {prod.name}
+                                <span className="block text-xs font-normal text-muted truncate max-w-xs mt-1">{prod.description || 'No description available'}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6 capitalize text-text/80">{prod.category}</td>
+                            <td className="py-4 px-6 font-serif font-semibold text-yellow">₹{prod.price} <span className="text-xs font-sans text-muted">/ {prod.unit_label || '12 pcs'}</span></td>
+                            <td className="py-4 px-6 select-none">
+                              <button
+                                onClick={() => handleToggleStock(prod.id, prod.in_stock)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                                  prod.in_stock ? 'bg-primary shadow-primary' : 'bg-surface-2 border border-border'
+                                }`}
+                              >
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                                  prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                                }`} />
+                              </button>
+                            </td>
+                            <td className="py-4 px-6 text-center select-none">
+                              <div className="flex items-center justify-center gap-1">
+                                <button onClick={() => handleOpenEditModal(prod)} className="p-2 text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 rounded-xl transition-all duration-200" title="Edit Item">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                                </button>
+                                <button onClick={() => handleDeleteProduct(prod.id, prod.name)} className="p-2 text-error hover:bg-error/10 border border-transparent hover:border-error/20 rounded-xl transition-all duration-200" title="Delete Item">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916C19.5 2.979 18.521 2 17.313 2H6.687C5.479 2 4.5 2.979 4.5 4.184v.916" /></svg>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* "+ Add Product" Modal overlay popup */}
@@ -1366,32 +1362,28 @@ Thank you for ordering! We'll see you soon. 🍽️
         {activeTab === 1 && (
           <div className="flex-grow flex flex-col">
             {/* Header section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-4 border-b border-border/40 select-none">
-              <div className="text-left">
-                <h2 className="font-serif font-black text-3xl text-heading">Orders Manager</h2>
-                <p className="text-muted text-xs font-sans mt-1">Review weekend deliveries, booking capacities, and statuses.</p>
-              </div>
-              
-              <div className="flex items-center gap-3 flex-wrap">
-                {/* Notify All Customers Button */}
-                <button
-                  onClick={() => {
-                    setIsNotifyModalOpen(true);
-                    setNotifyState('idle');
-                    setNotifyResult(null);
-                  }}
-                  className="inline-flex items-center gap-2 bg-surface border border-border text-primary font-sans font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl hover:bg-surface-2 hover:border-primary/50 transition-all duration-200"
-                >
-                  <span>🔔</span>
-                  <span>Notify All Customers</span>
-                </button>
-
-                {/* Slots Count Display badge */}
-                <div className="self-start inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-surface border border-border">
-                  <span className="text-yellow text-xs font-bold uppercase tracking-wider">Slot Tally:</span>
-                  <span className="bg-yellow text-bg font-sans font-black text-xs px-2.5 py-0.5 rounded-full shadow-yellow">
-                    {slotsCount} / {getActiveLimit()} bookings
-                  </span>
+            <div className="flex flex-col gap-3 mb-6 md:mb-8 pb-4 border-b border-border/40 select-none">
+              <div className="flex items-center justify-between">
+                <div className="text-left">
+                  <h2 className="font-serif font-black text-2xl md:text-3xl text-heading">Orders</h2>
+                  <p className="text-muted text-xs font-sans mt-1">Review deliveries and statuses.</p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Notify All Customers Button */}
+                  <button
+                    onClick={() => { setIsNotifyModalOpen(true); setNotifyState('idle'); setNotifyResult(null); }}
+                    className="inline-flex items-center gap-1.5 bg-surface border border-border text-primary font-sans font-bold text-xs uppercase tracking-wider px-3 py-2 rounded-xl hover:bg-surface-2 hover:border-primary/50 transition-all duration-200"
+                  >
+                    <span>🔔</span>
+                    <span className="hidden sm:inline">Notify All</span>
+                  </button>
+                  {/* Slots Count Display badge */}
+                  <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface border border-border">
+                    <span className="text-yellow text-xs font-bold uppercase tracking-wider">Slots:</span>
+                    <span className="bg-yellow text-bg font-sans font-black text-xs px-2 py-0.5 rounded-full shadow-yellow">
+                      {slotsCount} / {getActiveLimit()}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1437,24 +1429,24 @@ Thank you for ordering! We'll see you soon. 🍽️
               </div>
             </div>
 
-            {/* Top Date Filter buttons bar */}
-            <div className="flex flex-wrap gap-3 mb-8 select-none">
+            {/* Date Filter buttons — horizontal scroll on mobile */}
+            <div className="flex gap-2 md:gap-3 mb-6 md:mb-8 select-none overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none flex-nowrap">
               {filterOptions.map((opt) => {
                 const isActive = opt.dbStr === activeFilterDateStr;
                 return (
                   <button
                     key={opt.dbStr}
                     onClick={() => setActiveFilterDateStr(opt.dbStr)}
-                    className={`px-5 py-2.5 border rounded-xl font-sans text-xs md:text-sm font-semibold tracking-wider transition-all duration-300 ${
+                    className={`flex-shrink-0 px-4 py-2 border rounded-xl font-sans text-xs font-semibold tracking-wider transition-all duration-300 ${
                       isActive
-                        ? 'bg-primary border-primary text-white shadow-primary hover:scale-[1.02]'
-                        : 'bg-surface border-border text-text/80 hover:text-primary hover:border-primary hover:scale-[1.01]'
+                        ? 'bg-primary border-primary text-white shadow-primary'
+                        : 'bg-surface border-border text-text/80 hover:text-primary hover:border-primary'
                     }`}
                   >
                     <div className="flex flex-col text-left">
                       <span>{opt.label}</span>
                       <span className={`text-[10px] font-normal mt-0.5 ${isActive ? 'text-white/75' : 'text-muted'}`}>
-                        {format(opt.date, 'MMM d, yyyy')}
+                        {format(opt.date, 'MMM d')}
                       </span>
                     </div>
                   </button>
@@ -1462,7 +1454,7 @@ Thank you for ordering! We'll see you soon. 🍽️
               })}
             </div>
 
-            {/* Orders Data Table Display grid */}
+            {/* Orders display: cards on mobile, table on desktop */}
             {ordersLoading ? (
               <div className="flex-grow flex items-center justify-center py-20 select-none">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-transparent"></div>
@@ -1470,211 +1462,281 @@ Thank you for ordering! We'll see you soon. 🍽️
             ) : filteredOrders.length === 0 ? (
               <div className="flex-grow flex flex-col items-center justify-center text-center py-24 border border-dashed border-border rounded-2xl bg-surface/30 select-none">
                 <span className="text-5xl animate-float" style={{ animationDuration: '3.5s' }}>🎉</span>
-                <h3 className="font-serif font-bold text-xl text-heading mt-4">
-                  No orders for this day yet
-                </h3>
-                <p className="text-muted text-sm mt-2 max-w-sm">
-                  Slots are fully open! Share the website link to invite customers.
-                </p>
+                <h3 className="font-serif font-bold text-xl text-heading mt-4">No orders yet</h3>
+                <p className="text-muted text-sm mt-2 max-w-sm">Slots are fully open! Share the website link.</p>
               </div>
             ) : (
-              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left">
-                    <thead>
-                      <tr className="border-b border-border bg-surface-2 text-muted font-sans text-xs font-bold uppercase tracking-wider select-none">
-                        <th className="py-4 px-6">#</th>
-                        <th className="py-4 px-6">Customer</th>
-                        <th className="py-4 px-6">Contact info</th>
-                        <th className="py-4 px-6">Address</th>
-                        <th className="py-4 px-6">Items Order</th>
-                        <th className="py-4 px-6">Total Amount</th>
-                        <th className="py-4 px-6">Txn ID</th>
-                        <th className="py-4 px-6">Status</th>
-                        <th className="py-4 px-6">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/60 text-sm font-sans">
-                      {filteredOrders.map((ord, idx) => (
-                        <tr
-                          key={ord.id}
-                          className={`hover:bg-surface-2/30 transition-colors duration-150 ${
-                            ord.status === 'payment_pending' ? 'bg-warning/5 border-l-2 border-warning' : ''
+              <>
+                {/* ── Mobile order cards (hidden on md+) ── */}
+                <div className="md:hidden flex flex-col gap-4">
+                  {filteredOrders.map((ord, idx) => (
+                    <div
+                      key={ord.id}
+                      className={`bg-surface border rounded-2xl p-4 shadow-card flex flex-col gap-3 ${
+                        ord.status === 'payment_pending' ? 'border-warning border-l-4' : 'border-border'
+                      }`}
+                    >
+                      {/* Row header: number + name + status badge */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-bold text-text text-sm">
+                            {ord.status === 'payment_pending' && <span className="mr-1">⚠️</span>}
+                            #{idx + 1} — {ord.customer_name}
+                          </p>
+                          <p className="text-xs text-muted font-mono mt-0.5">{ord.customer_phone}</p>
+                        </div>
+                        {/* Status select */}
+                        <select
+                          value={ord.status}
+                          onChange={(e) => handleUpdateStatus(ord.id, e.target.value as any)}
+                          className={`px-2 py-1 rounded-lg border text-xs font-bold focus:outline-none cursor-pointer flex-shrink-0 ${
+                            ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
+                            : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
+                            : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-yellow'
+                            : ord.status === 'delivered' ? 'bg-success/10 border-success/35 text-success'
+                            : 'bg-error/10 border-error/35 text-error'
                           }`}
                         >
-                          {/* Row Number */}
-                          <td className="py-4 px-6 font-mono text-muted/80">
-                            {ord.status === 'payment_pending' && (
-                              <span className="mr-1" title="Awaiting payment">⚠️</span>
-                            )}
-                            {idx + 1}
-                          </td>
+                          <option value="payment_pending">⏳ Pending Pay</option>
+                          <option value="pending">🟠 Pending</option>
+                          <option value="confirmed">🟡 Confirmed</option>
+                          <option value="delivered">✅ Delivered</option>
+                          <option value="cancelled">❌ Cancelled</option>
+                        </select>
+                      </div>
 
-                          {/* Customer Name */}
-                          <td className="py-4 px-6 font-bold text-text text-left">
-                            {ord.customer_name}
-                          </td>
+                      {/* Items list */}
+                      <div className="bg-surface-2/40 rounded-xl p-3">
+                        <p className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Items</p>
+                        {ord.items && ord.items.map((item, ki) => (
+                          <p key={ki} className="text-xs text-text/85">
+                            • {item.name} <span className="text-primary font-bold">
+                              {item.dozens !== undefined ? `×${item.dozens} doz (${item.dozens * 12} pcs)` : `×${(item as any).quantity}`}
+                            </span>
+                          </p>
+                        ))}
+                      </div>
 
-                          {/* Phone Info */}
-                          <td className="py-4 px-6 font-mono text-text/80 text-left">
-                            {ord.customer_phone}
-                          </td>
+                      {/* Total + Txn row */}
+                      <div className="flex items-center justify-between">
+                        <span className="font-serif font-bold text-yellow text-base">₹{ord.total}</span>
+                        {ord.upi_transaction_id && (
+                          <span className="font-mono text-xs text-text/70 bg-surface-2 border border-border px-2 py-1 rounded-lg">
+                            {ord.upi_transaction_id.slice(0, 12)}
+                          </span>
+                        )}
+                      </div>
 
-                          {/* Address Info */}
-                          <td className="py-4 px-6 max-w-xs truncate text-text/70 text-left" title={ord.customer_address}>
-                            {ord.customer_address}
-                          </td>
+                      {/* Address */}
+                      <p className="text-xs text-muted/80 leading-relaxed">
+                        📍 {ord.customer_address}
+                      </p>
 
-                          {/* Items Cart list */}
-                          <td className="py-4 px-6 text-left">
-                            <ul className="list-none space-y-1">
-                              {ord.items && ord.items.map((item, keyIdx) => (
-                                <li key={keyIdx} className="text-xs text-text/85">
-                                  • {item.name}{' '}
-                                  <span className="text-primary font-bold">
-                                    {item.dozens !== undefined ? `×${item.dozens} doz (${item.dozens * 12} pcs)` : `×${(item as any).quantity}`}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </td>
-
-                          {/* Total Bill */}
-                          <td className="py-4 px-6 font-serif font-semibold text-yellow">
-                            ₹{ord.total}
-                          </td>
-
-                          {/* UPI Transaction ID */}
-                          <td className="py-4 px-6">
-                            {ord.upi_transaction_id ? (
-                              <span
-                                className="font-mono text-xs text-text/80 bg-surface-2 border border-border px-2 py-1 rounded-lg"
-                                title={ord.upi_transaction_id}
-                              >
-                                {ord.upi_transaction_id.slice(0, 12)}
-                              </span>
-                            ) : (
-                              <span className="text-muted/50 text-xs font-sans">—</span>
-                            )}
-                          </td>
-
-                          {/* Live Dropdown Status Select */}
-                          <td className="py-4 px-6 select-none">
-                            <select
-                              value={ord.status}
-                              onChange={(e) =>
-                                handleUpdateStatus(
-                                  ord.id,
-                                  e.target.value as 'payment_pending' | 'pending' | 'confirmed' | 'delivered' | 'cancelled'
-                                )
-                              }
-                              className={`px-3 py-1.5 rounded-lg border text-xs font-bold focus:outline-none transition-colors duration-250 cursor-pointer ${
-                                ord.status === 'payment_pending'
-                                  ? 'bg-muted/10 border-muted/35 text-muted'
-                                  : ord.status === 'pending'
-                                  ? 'bg-warning/10 border-warning/35 text-warning'
-                                  : ord.status === 'confirmed'
-                                  ? 'bg-yellow/10 border-yellow/35 text-yellow'
-                                  : ord.status === 'delivered'
-                                  ? 'bg-success/10 border-success/35 text-success'
-                                  : 'bg-error/10 border-error/35 text-error'
-                              }`}
-                            >
-                              <option value="payment_pending" className="bg-surface text-muted font-bold">⏳ Payment Pending</option>
-                              <option value="pending" className="bg-surface text-warning font-bold">🟠 Pending</option>
-                              <option value="confirmed" className="bg-surface text-yellow font-bold">🟡 Confirmed</option>
-                              <option value="delivered" className="bg-surface text-success font-bold">✅ Delivered</option>
-                              <option value="cancelled" className="bg-surface text-error font-bold">❌ Cancelled</option>
-                            </select>
-                          </td>
-
-                          {/* WhatsApp Actions column */}
-                          <td className="py-4 px-6">
-                            <div className="flex flex-col gap-2 min-w-[160px]">
-
-                              {/* Confirm & Notify via WhatsApp — hidden for delivered/cancelled */}
-                              {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
+                      {/* WhatsApp action buttons */}
+                      {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
+                        <div className="flex flex-col gap-2 pt-1 border-t border-border/50">
+                          <button
+                            onClick={() => handleConfirmAndNotify(ord)}
+                            disabled={confirmingOrderId === ord.id}
+                            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold text-white transition-all duration-200 disabled:opacity-50 active:scale-95"
+                            style={{ backgroundColor: confirmingOrderId === ord.id ? '#9ca3af' : '#25D366' }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                            </svg>
+                            {confirmingOrderId === ord.id ? 'Confirming...' : 'Confirm & Notify on WhatsApp'}
+                          </button>
+                          <button
+                            onClick={() => setCustomMsgOrderId(customMsgOrderId === ord.id ? null : ord.id)}
+                            className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-bold bg-surface-2 border border-border text-text hover:border-primary hover:text-primary transition-all duration-200"
+                          >
+                            <span>📣</span> Send Custom Update
+                          </button>
+                          {customMsgOrderId === ord.id && (
+                            <div className="flex flex-col gap-2 animate-fade-slide-up">
+                              <textarea
+                                rows={3}
+                                placeholder="Type a custom message..."
+                                value={customMsgText[ord.id] || ''}
+                                onChange={(e) => setCustomMsgText((prev) => ({ ...prev, [ord.id]: e.target.value }))}
+                                className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2.5 text-sm text-text font-sans focus:outline-none focus:border-primary resize-none"
+                              />
+                              <div className="flex gap-2">
                                 <button
-                                  onClick={() => handleConfirmAndNotify(ord)}
-                                  disabled={confirmingOrderId === ord.id}
-                                  title="Mark as confirmed and open WhatsApp to notify customer"
-                                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full text-xs font-bold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.03] active:scale-95"
-                                  style={{
-                                    backgroundColor: confirmingOrderId === ord.id ? '#9ca3af' : '#25D366',
-                                  }}
-                                  onMouseEnter={(e) => { if (confirmingOrderId !== ord.id) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#1ebe57'; }}
-                                  onMouseLeave={(e) => { if (confirmingOrderId !== ord.id) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#25D366'; }}
-                                >
-                                  {/* WhatsApp SVG icon */}
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                                  </svg>
-                                  {confirmingOrderId === ord.id ? 'Confirming...' : 'Confirm & Notify'}
-                                </button>
-                              )}
-
-                              {/* Send Custom Update button — hidden for delivered/cancelled */}
-                              {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
+                                  onClick={() => handleSendCustomMessage(ord)}
+                                  disabled={!(customMsgText[ord.id] || '').trim()}
+                                  className="flex-1 py-2.5 rounded-full text-sm font-bold text-white disabled:opacity-40 active:scale-95 transition-all"
+                                  style={{ backgroundColor: '#25D366' }}
+                                >Send</button>
                                 <button
-                                  onClick={() => {
-                                    if (customMsgOrderId === ord.id) {
-                                      setCustomMsgOrderId(null);
-                                    } else {
-                                      setCustomMsgOrderId(ord.id);
-                                    }
-                                  }}
-                                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold bg-surface-2 border border-border text-text hover:border-primary hover:text-primary transition-all duration-200"
-                                >
-                                  <span>📣</span>
-                                  <span>Send Update</span>
-                                </button>
-                              )}
-
-                              {/* Inline custom message textarea — expands below buttons */}
-                              {customMsgOrderId === ord.id && (
-                                <div className="mt-1 flex flex-col gap-2 animate-fade-slide-up">
-                                  <textarea
-                                    rows={3}
-                                    placeholder="Type a custom message..."
-                                    value={customMsgText[ord.id] || ''}
-                                    onChange={(e) =>
-                                      setCustomMsgText((prev) => ({ ...prev, [ord.id]: e.target.value }))
-                                    }
-                                    className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-xs text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 resize-none placeholder:text-muted/60"
-                                  />
-                                  <div className="flex gap-2">
-                                    <button
-                                      onClick={() => handleSendCustomMessage(ord)}
-                                      disabled={!(customMsgText[ord.id] || '').trim()}
-                                      className="flex-1 px-3 py-1.5 rounded-full text-xs font-bold text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-95"
-                                      style={{ backgroundColor: '#25D366' }}
-                                    >
-                                      Send
-                                    </button>
-                                    <button
-                                      onClick={() => setCustomMsgOrderId(null)}
-                                      className="flex-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-2 border border-border text-muted hover:text-text hover:border-border/80 transition-all duration-200"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-
+                                  onClick={() => setCustomMsgOrderId(null)}
+                                  className="flex-1 py-2.5 rounded-full text-sm font-bold bg-surface-2 border border-border text-muted"
+                                >Cancel</button>
+                              </div>
                             </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              </div>
+
+                {/* ── Desktop order table (hidden on mobile) ── */}
+                <div className="hidden md:block bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left">
+                      <thead>
+                        <tr className="border-b border-border bg-surface-2 text-muted font-sans text-xs font-bold uppercase tracking-wider select-none">
+                          <th className="py-4 px-6">#</th>
+                          <th className="py-4 px-6">Customer</th>
+                          <th className="py-4 px-6">Contact info</th>
+                          <th className="py-4 px-6">Address</th>
+                          <th className="py-4 px-6">Items Order</th>
+                          <th className="py-4 px-6">Total Amount</th>
+                          <th className="py-4 px-6">Txn ID</th>
+                          <th className="py-4 px-6">Status</th>
+                          <th className="py-4 px-6">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60 text-sm font-sans">
+                        {filteredOrders.map((ord, idx) => (
+                          <tr
+                            key={ord.id}
+                            className={`hover:bg-surface-2/30 transition-colors duration-150 ${
+                              ord.status === 'payment_pending' ? 'bg-warning/5 border-l-2 border-warning' : ''
+                            }`}
+                          >
+                            <td className="py-4 px-6 font-mono text-muted/80">
+                              {ord.status === 'payment_pending' && <span className="mr-1" title="Awaiting payment">⚠️</span>}
+                              {idx + 1}
+                            </td>
+                            <td className="py-4 px-6 font-bold text-text text-left">{ord.customer_name}</td>
+                            <td className="py-4 px-6 font-mono text-text/80 text-left">{ord.customer_phone}</td>
+                            <td className="py-4 px-6 max-w-xs truncate text-text/70 text-left" title={ord.customer_address}>{ord.customer_address}</td>
+                            <td className="py-4 px-6 text-left">
+                              <ul className="list-none space-y-1">
+                                {ord.items && ord.items.map((item, keyIdx) => (
+                                  <li key={keyIdx} className="text-xs text-text/85">
+                                    • {item.name}{' '}
+                                    <span className="text-primary font-bold">
+                                      {item.dozens !== undefined ? `×${item.dozens} doz (${item.dozens * 12} pcs)` : `×${(item as any).quantity}`}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </td>
+                            <td className="py-4 px-6 font-serif font-semibold text-yellow">₹{ord.total}</td>
+                            <td className="py-4 px-6">
+                              {ord.upi_transaction_id ? (
+                                <span className="font-mono text-xs text-text/80 bg-surface-2 border border-border px-2 py-1 rounded-lg" title={ord.upi_transaction_id}>
+                                  {ord.upi_transaction_id.slice(0, 12)}
+                                </span>
+                              ) : (
+                                <span className="text-muted/50 text-xs font-sans">—</span>
+                              )}
+                            </td>
+                            <td className="py-4 px-6 select-none">
+                              <select
+                                value={ord.status}
+                                onChange={(e) => handleUpdateStatus(ord.id, e.target.value as any)}
+                                className={`px-3 py-1.5 rounded-lg border text-xs font-bold focus:outline-none transition-colors duration-250 cursor-pointer ${
+                                  ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
+                                  : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
+                                  : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-yellow'
+                                  : ord.status === 'delivered' ? 'bg-success/10 border-success/35 text-success'
+                                  : 'bg-error/10 border-error/35 text-error'
+                                }`}
+                              >
+                                <option value="payment_pending" className="bg-surface text-muted font-bold">⏳ Payment Pending</option>
+                                <option value="pending" className="bg-surface text-warning font-bold">🟠 Pending</option>
+                                <option value="confirmed" className="bg-surface text-yellow font-bold">🟡 Confirmed</option>
+                                <option value="delivered" className="bg-surface text-success font-bold">✅ Delivered</option>
+                                <option value="cancelled" className="bg-surface text-error font-bold">❌ Cancelled</option>
+                              </select>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="flex flex-col gap-2 min-w-[160px]">
+                                {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
+                                  <button
+                                    onClick={() => handleConfirmAndNotify(ord)}
+                                    disabled={confirmingOrderId === ord.id}
+                                    title="Mark as confirmed and open WhatsApp to notify customer"
+                                    className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full text-xs font-bold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.03] active:scale-95"
+                                    style={{ backgroundColor: confirmingOrderId === ord.id ? '#9ca3af' : '#25D366' }}
+                                    onMouseEnter={(e) => { if (confirmingOrderId !== ord.id) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#1ebe57'; }}
+                                    onMouseLeave={(e) => { if (confirmingOrderId !== ord.id) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#25D366'; }}
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                    </svg>
+                                    {confirmingOrderId === ord.id ? 'Confirming...' : 'Confirm & Notify'}
+                                  </button>
+                                )}
+                                {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
+                                  <button
+                                    onClick={() => { setCustomMsgOrderId(customMsgOrderId === ord.id ? null : ord.id); }}
+                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold bg-surface-2 border border-border text-text hover:border-primary hover:text-primary transition-all duration-200"
+                                  >
+                                    <span>📣</span><span>Send Update</span>
+                                  </button>
+                                )}
+                                {customMsgOrderId === ord.id && (
+                                  <div className="mt-1 flex flex-col gap-2 animate-fade-slide-up">
+                                    <textarea
+                                      rows={3}
+                                      placeholder="Type a custom message..."
+                                      value={customMsgText[ord.id] || ''}
+                                      onChange={(e) => setCustomMsgText((prev) => ({ ...prev, [ord.id]: e.target.value }))}
+                                      className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-xs text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 resize-none placeholder:text-muted/60"
+                                    />
+                                    <div className="flex gap-2">
+                                      <button onClick={() => handleSendCustomMessage(ord)} disabled={!(customMsgText[ord.id] || '').trim()} className="flex-1 px-3 py-1.5 rounded-full text-xs font-bold text-white disabled:opacity-40 hover:scale-[1.02] active:scale-95 transition-all" style={{ backgroundColor: '#25D366' }}>Send</button>
+                                      <button onClick={() => setCustomMsgOrderId(null)} className="flex-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-2 border border-border text-muted">Cancel</button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
       </main>
 
-      {/* ─── Notify All Customers Modal ──────────────────────────────────── */}
+      {/* ── Mobile Bottom Tab Bar (visible only on mobile) ───────── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border flex items-stretch select-none shadow-2xl">
+        <button
+          onClick={() => setActiveTab(0)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
+            activeTab === 0 ? 'text-primary border-t-2 border-primary -mt-px' : 'text-muted/70'
+          }`}
+        >
+          <span className="text-xl">🍱</span>
+          <span className="font-sans">Products</span>
+        </button>
+        <button
+          onClick={() => setActiveTab(1)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
+            activeTab === 1 ? 'text-primary border-t-2 border-primary -mt-px' : 'text-muted/70'
+          }`}
+        >
+          <span className="text-xl">📋</span>
+          <span className="font-sans">Orders</span>
+        </button>
+        <button
+          onClick={() => setIsAuthenticated(false)}
+          className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold text-error/80 transition-all duration-200 active:bg-error/10"
+        >
+          <span className="text-xl">🚪</span>
+          <span className="font-sans">Sign Out</span>
+        </button>
+      </nav>
       {isNotifyModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
