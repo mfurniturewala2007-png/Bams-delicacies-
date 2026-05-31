@@ -28,9 +28,7 @@ const DEFAULT_PRODUCTS: Product[] = [
 
 const Admin: React.FC = () => {
   // Gating State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('bams_admin_authenticated') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [isShaking, setIsShaking] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -125,6 +123,11 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Logging for mounting confirmation
+  useEffect(() => {
+    console.log("Admin component mounted at:", window.location.href);
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       loadProducts();
@@ -141,7 +144,6 @@ const Admin: React.FC = () => {
     if (passwordInput === adminPassword) {
       setIsAuthenticated(true);
       setAuthError('');
-      sessionStorage.setItem('bams_admin_authenticated', 'true');
     } else {
       setIsShaking(true);
       setAuthError('Incorrect password');
@@ -461,7 +463,6 @@ const Admin: React.FC = () => {
           <button
             onClick={() => {
               setIsAuthenticated(false);
-              sessionStorage.removeItem('bams_admin_authenticated');
             }}
             className="w-full py-2.5 px-4 rounded-xl font-sans font-bold text-xs tracking-wider text-error hover:bg-error/10 border border-transparent hover:border-error/25 transition-all duration-200 uppercase"
           >
