@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
-import HowItWorks from '../components/HowItWorks';
+import HowItWorksModal from '../components/HowItWorksModal';
 import FeaturedCarousel from '../components/FeaturedCarousel';
 import MenuGrid from '../components/MenuGrid';
 import OrderForm from '../components/OrderForm';
@@ -10,6 +10,19 @@ import Footer from '../components/Footer';
 
 const Home: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isExplainerOpen, setIsExplainerOpen] = useState(false);
+
+  useEffect(() => {
+    const shown = sessionStorage.getItem('bams_explainer_shown');
+    if (!shown) {
+      setIsExplainerOpen(true);
+    }
+  }, []);
+
+  const handleExplainerClose = () => {
+    sessionStorage.setItem('bams_explainer_shown', 'true');
+    setIsExplainerOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-bg text-text relative">
@@ -18,9 +31,6 @@ const Home: React.FC = () => {
 
       {/* 2. Dynamic Hero Landing Page */}
       <Hero />
-
-      {/* 3. Stagger-animated How It Works explainer */}
-      <HowItWorks />
 
       {/* 4. Featured Products Horizontal Carousel */}
       <FeaturedCarousel />
@@ -36,6 +46,9 @@ const Home: React.FC = () => {
 
       {/* Reusable Footer Component */}
       <Footer />
+
+      {/* "How It Works" Pop-up Modal */}
+      <HowItWorksModal isOpen={isExplainerOpen} onClose={handleExplainerClose} />
     </div>
   );
 };

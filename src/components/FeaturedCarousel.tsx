@@ -1,25 +1,92 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { supabase } from '../utils/supabase';
 import { useCart } from '../context/CartContext';
 import QuantityModal from './QuantityModal';
 
+const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }> = ({ prod, onAddClick }) => {
+  return (
+    <div
+      className="w-[190px] flex-shrink-0 bg-surface border border-border/40 hover:border-primary/50 hover:shadow-yellow hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-3.5 flex flex-col justify-between"
+      style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+    >
+      <div>
+        {/* Aspect Square Image Cover */}
+        <div className="relative aspect-square w-full bg-surface-2 rounded-xl overflow-hidden mb-3 border border-border/40">
+          {prod.image_url ? (
+            <img
+              src={prod.image_url}
+              alt={prod.name}
+              className="w-full h-full object-cover animate-fade-slide-up"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                const fb = e.currentTarget.nextElementSibling as HTMLDivElement;
+                if (fb) fb.style.display = 'flex';
+              }}
+            />
+          ) : null}
+
+          {/* Fallback plate emoji */}
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center bg-surface-2 text-muted"
+            style={{ display: prod.image_url ? 'none' : 'flex' }}
+          >
+            <span className="text-3xl">🍽️</span>
+          </div>
+
+          {/* Category badge */}
+          {prod.category && (
+            <span className="absolute top-2 right-2 bg-bg/85 backdrop-blur-md border border-border/40 text-primary text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+              {prod.category}
+            </span>
+          )}
+        </div>
+
+        {/* Product Title */}
+        <h3 className="font-sans font-bold text-xs text-heading leading-snug line-clamp-1 mb-1 text-left">
+          {prod.name}
+        </h3>
+      </div>
+
+      {/* Bottom CTA & Pricing: Price on left, Floating Plus circle on right */}
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/20 pt-2.5">
+        <div className="flex flex-col text-left">
+          <span className="font-serif text-base font-black text-yellow leading-tight">
+            ₹{prod.price}
+          </span>
+          <span className="text-muted text-[9px] font-sans mt-0.5">
+            / {prod.unit_label || '12 pcs'}
+          </span>
+        </div>
+
+        {/* Add button */}
+        <button
+          onClick={() => onAddClick(prod)}
+          className="w-8 h-8 rounded-full bg-primary hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none"
+          title="Add to Cart"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const FeaturedCarousel: React.FC = () => {
   const { addItem } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // 1. Fetch featured products on mount
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
         setLoading(true);
-        // Query products where is_featured is true
         const { data, error } = await supabase
           .from('products')
           .select('*')
@@ -41,39 +108,6 @@ const FeaturedCarousel: React.FC = () => {
     fetchFeatured();
   }, []);
 
-  // 2. Smooth Continuous Auto-scroll: glides 1px every 25ms, pauses on hover
-  useEffect(() => {
-    if (products.length === 0 || isHovered) return;
-
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        
-        // If we have scrolled to the end, wrap back to the beginning
-        if (scrollLeft + clientWidth >= scrollWidth - 2) {
-          scrollRef.current.scrollLeft = 0;
-        } else {
-          scrollRef.current.scrollLeft += 1;
-        }
-      }
-    }, 25); // ~40 FPS smooth continuous glide
-
-    return () => clearInterval(interval);
-  }, [products, isHovered]);
-
-  // 3. Arrow buttons scroll by card size (245px) with smooth transition
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = 240; // Card width + gap
-      const target = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-      
-      scrollRef.current.scrollTo({
-        left: target,
-        behavior: 'smooth',
-      });
-    }
-  };
-
   const handleAddClick = (product: Product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
@@ -92,14 +126,17 @@ const FeaturedCarousel: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  // If loading or no featured products exist, render nothing (no placeholder/empty state)
+  // If loading or no featured products exist, render nothing
   if (loading || products.length === 0) {
     return null;
   }
 
+  // Adjust marquee speed dynamically based on the number of products (more products = longer track = needs slightly longer time to look consistent)
+  const marqueeSpeed = `${Math.max(15, products.length * 6)}s`;
+
   return (
     <section className="py-12 px-4 md:px-12 bg-bg border-b border-border/40 relative overflow-hidden select-none animate-page-fade">
-      {/* Hide scrollbars for the carousel */}
+      {/* CSS infinite marquee rules */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;
@@ -108,116 +145,50 @@ const FeaturedCarousel: React.FC = () => {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-marquee-track {
+          display: flex;
+          gap: 1.5rem; /* gap-6 = 24px */
+          width: max-content;
+          animation: marquee ${marqueeSpeed} linear infinite;
+        }
+        .animate-marquee-track:hover {
+          animation-play-state: paused;
+        }
       `}</style>
 
       <div className="max-w-7xl mx-auto">
-        {/* Header Block: Playfair Display "Featured Delicacies" */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-left">
-            <h2 className="font-serif font-black text-3xl md:text-5xl text-heading tracking-tight">
-              Featured Delicacies
-            </h2>
-            <div className="w-16 h-1 bg-primary mt-3 rounded-full shadow-primary" />
-          </div>
-
-          {/* Navigation Control Buttons */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => scroll('left')}
-              className="w-10 h-10 rounded-full border border-border bg-surface text-text flex items-center justify-center hover:border-primary hover:text-primary active:scale-90 transition-all duration-200 shadow-md"
-              title="Previous"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              className="w-10 h-10 rounded-full border border-border bg-surface text-text flex items-center justify-center hover:border-primary hover:text-primary active:scale-90 transition-all duration-200 shadow-md"
-              title="Next"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
-          </div>
+        {/* Header Block */}
+        <div className="text-left mb-8">
+          <h2 className="font-serif font-black text-3xl md:text-5xl text-heading tracking-tight">
+            Featured Delicacies
+          </h2>
+          <div className="w-16 h-1 bg-primary mt-3 rounded-full shadow-primary" />
         </div>
 
         {/* Carousel Outer Wrapper */}
         <div className="relative w-full overflow-hidden">
-          {/* Scrolling horizontal container */}
-          <div
-            ref={scrollRef}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className="flex gap-6 overflow-x-auto no-scrollbar pb-4"
-          >
-            {products.map((prod) => (
-              <div
-                key={prod.id}
-                className="w-[220px] flex-shrink-0 bg-surface border border-border hover:border-primary hover:shadow-yellow hover:-translate-y-1.5 transition-all duration-300"
-                style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
-              >
-                <div>
-                  {/* Aspect Square Image Cover */}
-                  <div className="relative aspect-square w-full bg-surface-2 rounded-xl overflow-hidden mb-3 border border-border">
-                    {prod.image_url ? (
-                      <img
-                        src={prod.image_url}
-                        alt={prod.name}
-                        className="w-full h-full object-cover animate-fade-slide-up"
-                        loading="lazy"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          const fb = e.currentTarget.nextElementSibling as HTMLDivElement;
-                          if (fb) fb.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-
-                    {/* Fallback plate emoji */}
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center bg-surface-2 text-muted"
-                      style={{ display: prod.image_url ? 'none' : 'flex' }}
-                    >
-                      <span className="text-4xl">🍽️</span>
-                    </div>
-
-                    {/* Category badge */}
-                    {prod.category && (
-                      <span className="absolute top-2.5 right-2.5 bg-bg/85 backdrop-blur-md border border-border text-primary text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                        {prod.category}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Product Title */}
-                  <h3 className="font-sans font-bold text-sm text-heading leading-snug line-clamp-1 mb-1 text-left">
-                    {prod.name}
-                  </h3>
-                </div>
-
-                {/* Bottom CTA & Pricing */}
-                <div className="mt-2 text-left">
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span className="font-serif text-lg font-black text-yellow">
-                      ₹{prod.price}
-                    </span>
-                    <span className="text-muted text-[10px] font-sans">
-                      / {prod.unit_label || '12 pcs'}
-                    </span>
-                  </div>
-
-                  {/* Add button */}
-                  <button
-                    onClick={() => handleAddClick(prod)}
-                    className="w-full py-2 bg-primary hover:bg-primary-hover active:scale-95 text-white font-sans font-extrabold text-xs rounded-full shadow-md transition-all duration-200 select-none flex items-center justify-center gap-1.5"
-                  >
-                    <span>+ Add</span>
-                  </button>
-                </div>
-              </div>
-            ))}
+          {/* Scrolling horizontal container (Pure CSS Infinite Loop) */}
+          <div className="animate-marquee-track pb-4">
+            {/* Track 1 */}
+            <div className="flex gap-6 shrink-0">
+              {products.map((prod) => (
+                <FeaturedCard key={`track1-${prod.id}`} prod={prod} onAddClick={handleAddClick} />
+              ))}
+            </div>
+            {/* Track 2 (Duplicate for seamless loop) */}
+            <div className="flex gap-6 shrink-0" aria-hidden="true">
+              {products.map((prod) => (
+                <FeaturedCard key={`track2-${prod.id}`} prod={prod} onAddClick={handleAddClick} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

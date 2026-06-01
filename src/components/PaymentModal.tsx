@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { supabase } from '../utils/supabase';
+import HowItWorksModal from './HowItWorksModal';
 
 // ─── FILL IN YOUR DETAILS BELOW ──────────────────────────────────────────────
 const UPI_ID   = 'bfurniturewala@okicici';
@@ -31,6 +32,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [qrError, setQrError] = useState(false);
+  const [showExplainer, setShowExplainer] = useState(true);
 
   // Generate QR code onto canvas whenever totalAmount changes
   useEffect(() => {
@@ -271,6 +273,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           </p>
         </div>
       </div>
+
+      <HowItWorksModal
+        isOpen={showExplainer}
+        onClose={() => setShowExplainer(false)}
+      />
     </div>
   );
 };
