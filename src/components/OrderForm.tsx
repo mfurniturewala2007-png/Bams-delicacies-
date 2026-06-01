@@ -60,6 +60,7 @@ const OrderForm: React.FC = () => {
 
   const [maxOrdersSatLimit, setMaxOrdersSatLimit] = useState(15);
   const [maxOrdersSunLimit, setMaxOrdersSunLimit] = useState(15);
+  const [festivalDeliveryDate, setFestivalDeliveryDate] = useState('2026-06-12');
 
   // Fetch orders count on mount to populate slot calculations
   const fetchOrdersForWeekend = async () => {
@@ -83,18 +84,20 @@ const OrderForm: React.FC = () => {
       const { data } = await supabase
         .from('settings')
         .select('*')
-        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday']);
+        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday', 'festival_deal_delivery_date']);
 
       if (data) {
         const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
         const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
         const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
+        const festDeliv = data.find(r => r.key === 'festival_deal_delivery_date')?.value || '2026-06-12';
         
         setMaxOrdersSatLimit(Number(sat));
         setMaxOrdersSunLimit(Number(sun));
+        setFestivalDeliveryDate(festDeliv);
       }
     } catch (err) {
-      console.warn('Failed to fetch settings from Supabase. Falling back to 15.');
+      console.warn('Failed to fetch settings from Supabase. Falling back to defaults.');
     }
   };
 
@@ -107,6 +110,25 @@ const OrderForm: React.FC = () => {
       fetchOrdersForWeekend();
     }
   }, [items, dbSatStr, dbSunStr]);
+
+  const hasFestiveItem = items.some(item => item.category === 'Pheli Raat');
+
+  // Lock delivery date automatically if there is a festive item in the cart
+  useEffect(() => {
+    if (hasFestiveItem && festivalDeliveryDate) {
+      const parts = festivalDeliveryDate.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        const dateObj = new Date(year, month, day);
+        setSelectedDate(dateObj);
+        if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
+      }
+    } else if (!hasFestiveItem && selectedDate && format(selectedDate, 'yyyy-MM-dd') === festivalDeliveryDate) {
+      setSelectedDate(null);
+    }
+  }, [hasFestiveItem, festivalDeliveryDate]);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type, visible: true });
@@ -384,18 +406,37 @@ const OrderForm: React.FC = () => {
               )}
             </div>
 
-            {/* Embedded Delivery Slot Picker */}
+            {/* Embedded Delivery Slot Picker / Lock Banner */}
             <div className="pt-2">
-              <DeliveryPicker
-                selectedDate={selectedDate}
-                onSelect={(date) => {
-                  setSelectedDate(date);
-                  if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
-                }}
-                orders={orders}
-                maxOrdersSatLimit={maxOrdersSatLimit}
-                maxOrdersSunLimit={maxOrdersSunLimit}
-              />
+              {hasFestiveItem ? (
+                <div className="w-full">
+                  <label className="block text-left text-sm font-sans font-semibold text-text uppercase tracking-wider mb-3">
+                    Delivery Date <span className="text-primary">*</span>
+                  </label>
+                  <div className="p-5 rounded-2xl bg-gradient-to-r from-primary/15 to-yellow/15 border border-primary/30 text-left shadow-yellow animate-pulse-glow">
+                    <div className="flex items-center gap-2 text-primary font-black uppercase tracking-wider text-xs mb-1.5">
+                      <span>✨ Pheli Raat Special Delivery Slot ✨</span>
+                    </div>
+                    <p className="text-text font-black text-lg">
+                      {selectedDate ? format(selectedDate, 'eeee, MMMM d, yyyy') : 'Friday, June 12, 2026'}
+                    </p>
+                    <p className="text-muted text-xs mt-1 leading-relaxed">
+                      Your order contains premium Pheli Raat festival combos and is locked for special festival-day delivery.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <DeliveryPicker
+                  selectedDate={selectedDate}
+                  onSelect={(date) => {
+                    setSelectedDate(date);
+                    if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
+                  }}
+                  orders={orders}
+                  maxOrdersSatLimit={maxOrdersSatLimit}
+                  maxOrdersSunLimit={maxOrdersSunLimit}
+                />
+              )}
               {fieldErrors.date && (
                 <span className="text-error text-xs font-sans font-semibold text-left mt-2 block">
                   {fieldErrors.date}

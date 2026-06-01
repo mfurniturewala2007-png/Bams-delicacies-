@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
+import PheliRaat from './pages/PheliRaat';
 
 // ─── Page Fade Wrapper ─────────────────────────────────────────────────────
 // Applies the animate-page-fade CSS keyframe on every route mount.
@@ -86,6 +87,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/pheli-raat" element={<PheliRaat />} />
             </Routes>
           </PageWrapper>
         </Router>

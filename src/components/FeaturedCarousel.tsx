@@ -7,12 +7,12 @@ import QuantityModal from './QuantityModal';
 const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }> = ({ prod, onAddClick }) => {
   return (
     <div
-      className="w-[190px] flex-shrink-0 bg-surface border border-border/40 hover:border-primary/50 hover:shadow-yellow hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-3.5 flex flex-col justify-between"
+      className="w-[160px] flex-shrink-0 bg-surface border border-border/40 hover:border-primary/50 hover:shadow-yellow hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-2.5 flex flex-col justify-between"
       style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
     >
       <div>
         {/* Aspect Square Image Cover */}
-        <div className="relative aspect-square w-full bg-surface-2 rounded-xl overflow-hidden mb-3 border border-border/40">
+        <div className="relative aspect-square w-full bg-surface-2 rounded-xl overflow-hidden mb-2.5 border border-border/40">
           {prod.image_url ? (
             <img
               src={prod.image_url}
@@ -32,30 +32,30 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }
             className="absolute inset-0 flex flex-col items-center justify-center bg-surface-2 text-muted"
             style={{ display: prod.image_url ? 'none' : 'flex' }}
           >
-            <span className="text-3xl">🍽️</span>
+            <span className="text-2xl">🍽️</span>
           </div>
 
           {/* Category badge */}
           {prod.category && (
-            <span className="absolute top-2 right-2 bg-bg/85 backdrop-blur-md border border-border/40 text-primary text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+            <span className="absolute top-2 right-2 bg-bg/85 backdrop-blur-md border border-border/40 text-primary text-[7px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
               {prod.category}
             </span>
           )}
         </div>
 
         {/* Product Title */}
-        <h3 className="font-sans font-bold text-xs text-heading leading-snug line-clamp-1 mb-1 text-left">
+        <h3 className="font-sans font-bold text-[11px] sm:text-xs text-heading leading-snug line-clamp-1 mb-1 text-left">
           {prod.name}
         </h3>
       </div>
 
       {/* Bottom CTA & Pricing: Price on left, Floating Plus circle on right */}
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/20 pt-2.5">
+      <div className="mt-2.5 flex items-center justify-between gap-1.5 border-t border-border/20 pt-2">
         <div className="flex flex-col text-left">
-          <span className="font-serif text-base font-black text-yellow leading-tight">
+          <span className="font-serif text-sm sm:text-base font-black text-yellow leading-tight">
             ₹{prod.price}
           </span>
-          <span className="text-muted text-[9px] font-sans mt-0.5">
+          <span className="text-muted text-[8px] sm:text-[9px] font-sans mt-0.5">
             / {prod.unit_label || '12 pcs'}
           </span>
         </div>
@@ -63,10 +63,10 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }
         {/* Add button */}
         <button
           onClick={() => onAddClick(prod)}
-          className="w-8 h-8 rounded-full bg-primary hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none"
+          className="w-7 h-7 rounded-full bg-primary hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none flex-shrink-0"
           title="Add to Cart"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
         </button>
@@ -155,7 +155,7 @@ const FeaturedCarousel: React.FC = () => {
         }
         .animate-marquee-track {
           display: flex;
-          gap: 1.5rem; /* gap-6 = 24px */
+          gap: 1rem; /* gap-4 = 16px */
           width: max-content;
           animation: marquee ${marqueeSpeed} linear infinite;
         }
@@ -178,13 +178,13 @@ const FeaturedCarousel: React.FC = () => {
           {/* Scrolling horizontal container (Pure CSS Infinite Loop) */}
           <div className="animate-marquee-track pb-4">
             {/* Track 1 */}
-            <div className="flex gap-6 shrink-0">
+            <div className="flex gap-4 shrink-0">
               {products.map((prod) => (
                 <FeaturedCard key={`track1-${prod.id}`} prod={prod} onAddClick={handleAddClick} />
               ))}
             </div>
             {/* Track 2 (Duplicate for seamless loop) */}
-            <div className="flex gap-6 shrink-0" aria-hidden="true">
+            <div className="flex gap-4 shrink-0" aria-hidden="true">
               {products.map((prod) => (
                 <FeaturedCard key={`track2-${prod.id}`} prod={prod} onAddClick={handleAddClick} />
               ))}

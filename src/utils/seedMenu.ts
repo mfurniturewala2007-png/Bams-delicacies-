@@ -158,5 +158,32 @@ export const BAMS_MENU = [
     unit_label: "12 pcs",
     in_stock: true,
     image_url: ""
+  },
+  {
+    name: "Pheli Raat Combo 1",
+    description: "Chicken Keema Samosa ×4, Chicken Shami Kabab ×4, Mutton Keema Pattice ×4",
+    category: "Pheli Raat",
+    price: 400,
+    unit_label: "1 combo",
+    in_stock: true,
+    image_url: ""
+  },
+  {
+    name: "Pheli Raat Combo 2",
+    description: "Smoked Dal Samosa ×4, Chicken Cream Tikka ×4, Mutton Shami Kabab ×4",
+    category: "Pheli Raat",
+    price: 460,
+    unit_label: "1 combo",
+    in_stock: true,
+    image_url: ""
+  },
+  {
+    name: "Pheli Raat Combo 3",
+    description: "Mutton Keema Samosa ×4, Chicken Cream Tikka ×4, Mutton Keema Pattice ×4",
+    category: "Pheli Raat",
+    price: 500,
+    unit_label: "1 combo",
+    in_stock: true,
+    image_url: ""
   }
 ];

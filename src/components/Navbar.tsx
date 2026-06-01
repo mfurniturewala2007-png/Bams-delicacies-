@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabase';
 
 interface NavbarProps {
   onCartOpen: () => void;
@@ -13,6 +14,28 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const badgeRef = useRef<HTMLSpanElement>(null);
+  const [isFestivalActive, setIsFestivalActive] = useState(false);
+
+  // Check if festival promo is active
+  useEffect(() => {
+    const checkFestival = async () => {
+      try {
+        const { data } = await supabase
+          .from('settings')
+          .select('*')
+          .eq('key', 'festival_deal_enabled')
+          .maybeSingle();
+        if (data && data.value === 'false') {
+          setIsFestivalActive(false);
+        } else {
+          setIsFestivalActive(true); // Default to true if not set or enabled
+        }
+      } catch (err) {
+        setIsFestivalActive(true);
+      }
+    };
+    checkFestival();
+  }, []);
 
   // Trigger badge bounce animation whenever an item is added
   useEffect(() => {
@@ -40,9 +63,9 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
   }, []);
 
   const navLinks = [
-    { label: 'Menu', href: '#menu' },
-    { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Order Now', href: '#order' },
+    { label: 'Menu', href: '/#menu' },
+    ...(isFestivalActive ? [{ label: '🌙 Pheli Raat Combos', href: '/pheli-raat', isFestive: true }] : []),
+    { label: 'Order Now', href: '/#order' },
   ];
 
   const handleLinkClick = () => {
@@ -72,7 +95,11 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
             <a
               key={link.label}
               href={link.href}
-              className="font-sans font-medium text-text/90 hover:text-primary transition-colors duration-200 text-sm tracking-wide uppercase"
+              className={`font-sans font-medium hover:text-primary transition-colors duration-200 text-sm tracking-wide uppercase ${
+                link.isFestive
+                  ? 'text-primary font-black animate-pulse drop-shadow-[0_0_8px_rgba(200,81,27,0.4)] border border-primary/20 bg-primary/5 px-3 py-1 rounded-full'
+                  : 'text-text/90'
+              }`}
             >
               {link.label}
             </a>
@@ -235,7 +262,11 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               key={link.label}
               href={link.href}
               onClick={handleLinkClick}
-              className="font-sans font-medium text-text/90 hover:text-primary hover:bg-surface-2 px-4 py-3 rounded-xl transition-all duration-200 text-base border border-transparent hover:border-border"
+              className={`font-sans font-medium hover:text-primary hover:bg-surface-2 px-4 py-3 rounded-xl transition-all duration-200 text-base border ${
+                link.isFestive
+                  ? 'text-primary border-primary/30 bg-primary/5 font-black animate-pulse'
+                  : 'border-transparent hover:border-border text-text/90'
+              }`}
             >
               {link.label}
             </a>

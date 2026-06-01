@@ -48,16 +48,16 @@ const MOCK_PRODUCTS: Product[] = [
 ];
 
 const SkeletonCard: React.FC = () => (
-  <div className="bg-surface border border-border rounded-2xl p-6 h-[450px] flex flex-col justify-between animate-pulse">
+  <div className="bg-surface border border-border rounded-2xl p-3 sm:p-4 h-[330px] sm:h-[390px] flex flex-col justify-between animate-pulse">
     <div>
-      <div className="w-full aspect-square bg-surface-2 rounded-xl mb-4" />
-      <div className="h-6 bg-surface-2 rounded w-2/3 mb-3" />
-      <div className="h-4 bg-surface-2 rounded w-full mb-2" />
-      <div className="h-4 bg-surface-2 rounded w-4/5" />
+      <div className="w-full aspect-[4/3] bg-surface-2 rounded-xl mb-3" />
+      <div className="h-4 bg-surface-2 rounded w-2/3 mb-2" />
+      <div className="h-3 bg-surface-2 rounded w-full mb-1" />
+      <div className="h-3 bg-surface-2 rounded w-4/5" />
     </div>
     <div>
-      <div className="h-6 bg-surface-2 rounded w-1/3 mb-4" />
-      <div className="h-12 bg-surface-2 rounded-full w-full" />
+      <div className="h-5 bg-surface-2 rounded w-1/3 mb-2" />
+      <div className="h-8 bg-surface-2 rounded-full w-full" />
     </div>
   </div>
 );
@@ -138,14 +138,14 @@ const MenuGrid: React.FC = () => {
 
         {/* Grid display logic */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
             ))}

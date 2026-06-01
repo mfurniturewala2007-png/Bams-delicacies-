@@ -73,6 +73,12 @@ const Admin: React.FC = () => {
   const [maxOrdersSunInput, setMaxOrdersSunInput] = useState('15');
   const [isSavingMaxOrders, setIsSavingMaxOrders] = useState(false);
 
+  // Festival settings states
+  const [festivalEnabled, setFestivalEnabled] = useState(true);
+  const [festivalEndDate, setFestivalEndDate] = useState('2026-06-10T23:59');
+  const [festivalDeliveryDate, setFestivalDeliveryDate] = useState('2026-06-12');
+  const [isSavingFestivalSettings, setIsSavingFestivalSettings] = useState(false);
+
   // Image Upload States
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -181,7 +187,14 @@ const Admin: React.FC = () => {
       const { data, error } = await supabase
         .from('settings')
         .select('*')
-        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday']);
+        .in('key', [
+          'max_orders_per_day',
+          'max_orders_saturday',
+          'max_orders_sunday',
+          'festival_deal_enabled',
+          'festival_deal_end_date',
+          'festival_deal_delivery_date'
+        ]);
 
       if (error) throw error;
       if (data) {
@@ -191,6 +204,14 @@ const Admin: React.FC = () => {
         
         setMaxOrdersSatInput(sat);
         setMaxOrdersSunInput(sun);
+
+        const festEnabled = data.find(r => r.key === 'festival_deal_enabled')?.value !== 'false';
+        const festEnd = data.find(r => r.key === 'festival_deal_end_date')?.value || '2026-06-10T23:59';
+        const festDelivery = data.find(r => r.key === 'festival_deal_delivery_date')?.value || '2026-06-12';
+        
+        setFestivalEnabled(festEnabled);
+        setFestivalEndDate(festEnd);
+        setFestivalDeliveryDate(festDelivery);
       }
     } catch (e) {
       console.warn('Failed to load settings.');
@@ -571,6 +592,35 @@ const Admin: React.FC = () => {
       alert(`Failed to save capacity settings. Error: ${err.message}`);
     } finally {
       setIsSavingMaxOrders(false);
+    }
+  };
+
+  // Save Festival Settings (Pheli Raat)
+  const handleSaveFestivalSettings = async () => {
+    try {
+      setIsSavingFestivalSettings(true);
+
+      const { error: errEnabled } = await supabase
+        .from('settings')
+        .upsert({ key: 'festival_deal_enabled', value: String(festivalEnabled) });
+      if (errEnabled) throw errEnabled;
+
+      const { error: errEnd } = await supabase
+        .from('settings')
+        .upsert({ key: 'festival_deal_end_date', value: festivalEndDate });
+      if (errEnd) throw errEnd;
+
+      const { error: errDelivery } = await supabase
+        .from('settings')
+        .upsert({ key: 'festival_deal_delivery_date', value: festivalDeliveryDate });
+      if (errDelivery) throw errDelivery;
+
+      showToast("Pheli Raat festival settings updated successfully! ✓", "success");
+    } catch (err: any) {
+      console.error(err);
+      alert(`Failed to save festival settings. Error: ${err.message}`);
+    } finally {
+      setIsSavingFestivalSettings(false);
     }
   };
 
@@ -1087,6 +1137,7 @@ Thank you for ordering! We'll see you soon. 🍽️
                         >
                           <option value="Non-Veg">Non-Veg</option>
                           <option value="Veg">Veg</option>
+                          <option value="Pheli Raat">Pheli Raat</option>
                         </select>
                       </div>
 
@@ -1298,6 +1349,7 @@ Thank you for ordering! We'll see you soon. 🍽️
                         >
                           <option value="Non-Veg">Non-Veg</option>
                           <option value="Veg">Veg</option>
+                          <option value="Pheli Raat">Pheli Raat</option>
                         </select>
                       </div>
 
@@ -1524,6 +1576,59 @@ Thank you for ordering! We'll see you soon. 🍽️
                   className="w-full sm:w-auto bg-primary text-bg font-sans font-black text-sm uppercase tracking-wider px-6 py-3.5 rounded-full shadow-primary hover:scale-[1.03] active:scale-95 transition-all duration-300 disabled:opacity-50"
                 >
                   {isSavingMaxOrders ? 'Saving capacities...' : 'Update Capacity Limits ✓'}
+                </button>
+              </div>
+            </div>
+
+            {/* Pheli Raat Festive Combo Settings Card */}
+            <div className="bg-surface border border-border p-6 rounded-2xl mb-8 flex flex-col gap-6 shadow-card text-left select-none animate-fade-slide-up animate-delay-100">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-heading">Pheli Raat Festive Settings</h3>
+                <p className="text-muted text-xs font-sans mt-1">Configure your limited-time festival combo promotion details. When disabled or expired, it is hidden from customers.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Active / Enabled Toggle */}
+                <div className="flex flex-col justify-between p-4 bg-surface-2 border border-border rounded-xl">
+                  <label className="text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">Enable Pheli Raat Deal</label>
+                  <button
+                    onClick={() => setFestivalEnabled(!festivalEnabled)}
+                    className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                      festivalEnabled ? 'bg-primary shadow-primary' : 'bg-bg border border-border'
+                    }`}
+                  >
+                    <span className={`inline-block h-6 w-6 transform rounded-full bg-bg transition-transform duration-300 ${
+                      festivalEnabled ? 'translate-x-8 bg-surface-2' : 'translate-x-1 bg-muted'
+                    }`} />
+                  </button>
+                </div>
+                {/* End Date (Countdown End) */}
+                <div className="flex flex-col gap-1.5 p-4 bg-surface-2 border border-border rounded-xl">
+                  <label className="text-xs font-sans font-bold text-[#3D2000]/80 uppercase tracking-wider">Countdown Expiry Date</label>
+                  <input
+                    type="datetime-local"
+                    value={festivalEndDate}
+                    onChange={(e) => setFestivalEndDate(e.target.value)}
+                    className="bg-bg border border-border rounded-xl px-3 py-2 text-text font-sans font-semibold focus:outline-none focus:border-primary mt-1"
+                  />
+                </div>
+                {/* Delivery Date */}
+                <div className="flex flex-col gap-1.5 p-4 bg-surface-2 border border-border rounded-xl">
+                  <label className="text-xs font-sans font-bold text-[#3D2000]/80 uppercase tracking-wider">Festival Delivery Date</label>
+                  <input
+                    type="date"
+                    value={festivalDeliveryDate}
+                    onChange={(e) => setFestivalDeliveryDate(e.target.value)}
+                    className="bg-bg border border-border rounded-xl px-3 py-2 text-text font-sans font-semibold focus:outline-none focus:border-primary mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSaveFestivalSettings}
+                  disabled={isSavingFestivalSettings}
+                  className="w-full sm:w-auto bg-primary text-bg font-sans font-black text-sm uppercase tracking-wider px-6 py-3.5 rounded-full shadow-primary hover:scale-[1.03] active:scale-95 transition-all duration-300 disabled:opacity-50"
+                >
+                  {isSavingFestivalSettings ? 'Saving...' : 'Update Festive Settings ✓'}
                 </button>
               </div>
             </div>

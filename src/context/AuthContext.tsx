@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(true); // Open by default for guests
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !localStorage.getItem('bams_user_phone')); // Synchronously check local session to prevent layout flashes on load
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
 
   // Restore user session from localStorage on mount
