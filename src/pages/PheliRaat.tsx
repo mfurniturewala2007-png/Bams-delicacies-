@@ -233,15 +233,14 @@ const PheliRaat: React.FC = () => {
       {/* 3. Main Products Menu Grid */}
       <section className="max-w-6xl mx-auto px-4 py-12 relative z-10">
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            <div className="bg-[#150F0A]/50 border border-[#DFBA73]/10 rounded-2xl p-4 h-[330px] animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-sm md:max-w-4xl mx-auto justify-center">
             <div className="bg-[#150F0A]/50 border border-[#DFBA73]/10 rounded-2xl p-4 h-[330px] animate-pulse" />
             <div className="bg-[#150F0A]/50 border border-[#DFBA73]/10 rounded-2xl p-4 h-[330px] animate-pulse" />
             <div className="bg-[#150F0A]/50 border border-[#DFBA73]/10 rounded-2xl p-4 h-[330px] animate-pulse" />
           </div>
         ) : products.length > 0 ? (
           <div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-sm md:max-w-4xl mx-auto justify-center">
               {products.map((product, idx) => (
                 <div key={product.id} className="relative group">
                   {/* Subtle golden saffron glowing card halo wrapper */}
@@ -297,7 +296,7 @@ const PheliRaat: React.FC = () => {
               <p className="text-[#FFFAF4]/60 text-xs mt-1">The deadline for ordering Pheli Raat combos has passed. Thank you!</p>
             </div>
           ) : (
-            <OrderForm />
+            <OrderForm isDark={true} />
           )}
         </div>
       </section>
