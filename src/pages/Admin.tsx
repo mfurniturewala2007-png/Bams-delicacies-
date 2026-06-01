@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { Product, Order } from '../types';
 import { supabase } from '../utils/supabase';
@@ -828,6 +829,13 @@ Thank you for ordering! We'll see you soon. 🍽️
               <span>📋</span>
               <span>Orders</span>
             </button>
+            <Link
+              to="/"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide text-text/70 hover:text-text hover:bg-surface-2/40 border-l-2 border-transparent transition-all duration-200"
+            >
+              <span>🏠</span>
+              <span>Back to Website</span>
+            </Link>
           </nav>
         </div>
 
@@ -1820,6 +1828,13 @@ Thank you for ordering! We'll see you soon. 🍽️
           <span className="text-xl">📋</span>
           <span className="font-sans">Orders</span>
         </button>
+        <Link
+          to="/"
+          className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold text-muted/70 hover:text-text transition-all duration-200"
+        >
+          <span className="text-xl">🏠</span>
+          <span className="font-sans">Website</span>
+        </Link>
         <button
           onClick={() => setIsAuthenticated(false)}
           className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold text-error/80 transition-all duration-200 active:bg-error/10"
