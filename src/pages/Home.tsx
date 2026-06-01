@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
+import FeaturedCarousel from '../components/FeaturedCarousel';
 import MenuGrid from '../components/MenuGrid';
 import OrderForm from '../components/OrderForm';
 import CartSidebar from '../components/CartSidebar';
@@ -21,7 +22,10 @@ const Home: React.FC = () => {
       {/* 3. Stagger-animated How It Works explainer */}
       <HowItWorks />
 
-      {/* 4. Supabase connected Menu Grid listing */}
+      {/* 4. Featured Products Horizontal Carousel */}
+      <FeaturedCarousel />
+
+      {/* 5. Supabase connected Menu Grid listing */}
       <MenuGrid />
 
       {/* 5. Complete Order input form section */}

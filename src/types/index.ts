@@ -7,6 +7,7 @@ export interface Product {
   category: string | null;
   in_stock: boolean;
   unit_label?: string | null;
+  is_featured?: boolean;
   created_at?: string;
 }
 

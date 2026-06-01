@@ -51,6 +51,7 @@ const Admin: React.FC = () => {
   const [newProdCat, setNewProdCat] = useState('Non-Veg');
   const [newProdUnit, setNewProdUnit] = useState('12 pcs');
   const [newProdStock, setNewProdStock] = useState(true);
+  const [newProdFeatured, setNewProdFeatured] = useState(false);
   
   // Edit Product Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -61,6 +62,7 @@ const Admin: React.FC = () => {
   const [editProdCat, setEditProdCat] = useState('Non-Veg');
   const [editProdUnit, setEditProdUnit] = useState('12 pcs');
   const [editProdStock, setEditProdStock] = useState(true);
+  const [editProdFeatured, setEditProdFeatured] = useState(false);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
   const [editUploadedImageUrl, setEditUploadedImageUrl] = useState<string | null>(null);
   const [isUploadingEditImage, setIsUploadingEditImage] = useState(false);
@@ -249,6 +251,29 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Products CRUD: Toggle Featured
+  const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
+    try {
+      // Update local state first for instant responsive feel
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, is_featured: !currentFeatured } : p))
+      );
+
+      const { error } = await supabase
+        .from('products')
+        .update({ is_featured: !currentFeatured })
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Failed to update featured state in Supabase:', err);
+      // Revert if error
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, is_featured: currentFeatured } : p))
+      );
+    }
+  };
+
   // Products CRUD: Delete Item
   const handleDeleteProduct = async (id: string, name: string) => {
     if (window.confirm(`Delete ${name}? This cannot be undone.`)) {
@@ -331,6 +356,7 @@ const Admin: React.FC = () => {
         price: Number(newProdPrice),
         category: newProdCat,
         in_stock: newProdStock,
+        is_featured: newProdFeatured,
         unit_label: newProdUnit.trim() || '12 pcs',
         image_url: finalImgUrl,
       };
@@ -362,6 +388,7 @@ const Admin: React.FC = () => {
       setNewProdCat('Non-Veg');
       setNewProdUnit('12 pcs');
       setNewProdStock(true);
+      setNewProdFeatured(false);
       setImagePreview(null);
       setUploadedImageUrl(null);
 
@@ -421,6 +448,7 @@ const Admin: React.FC = () => {
     setEditProdCat(prod.category || 'Non-Veg');
     setEditProdUnit(prod.unit_label || '12 pcs');
     setEditProdStock(prod.in_stock);
+    setEditProdFeatured(prod.is_featured ?? false);
     setEditImagePreview(prod.image_url);
     setEditUploadedImageUrl(prod.image_url);
     setIsEditModalOpen(true);
@@ -486,6 +514,7 @@ const Admin: React.FC = () => {
         price: Number(editProdPrice),
         category: editProdCat,
         in_stock: editProdStock,
+        is_featured: editProdFeatured,
         unit_label: editProdUnit.trim() || '12 pcs',
         image_url: finalImgUrl,
       };
@@ -883,6 +912,16 @@ Thank you for ordering! We'll see you soon. 🍽️
                                 prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
                               }`} />
                             </button>
+                            {/* Star Toggle */}
+                            <button
+                              onClick={() => handleToggleFeatured(prod.id, prod.is_featured ?? false)}
+                              className="p-2 hover:bg-surface-2 rounded-xl transition-all duration-200"
+                              title={prod.is_featured ? 'Featured' : 'Not Featured'}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "#F5C200" : "none"} stroke={prod.is_featured ? "#F5C200" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.172-.468.868-.468 1.04 0l2.125 5.757a1 1 0 00.95.69h6.04c.5 0 .708.641.304.933l-4.887 3.555a1 1 0 00-.364 1.118l1.867 5.06a1 1 0 00-1.54 1.118l-4.888-3.555a1 1 0 00-1.176 0l-4.888 3.555a1 1 0 00-1.54-1.118l1.867-5.06a1 1 0 00-.364-1.118L2.093 10.88c-.404-.292-.196-.933.304-.933h6.04a1 1 0 00.95-.69l2.125-5.757z" />
+                              </svg>
+                            </button>
                             {/* Edit */}
                             <button
                               onClick={() => handleOpenEditModal(prod)}
@@ -921,6 +960,7 @@ Thank you for ordering! We'll see you soon. 🍽️
                           <th className="py-4 px-6">Category</th>
                           <th className="py-4 px-6">Price / Dozen</th>
                           <th className="py-4 px-6">Stock Status</th>
+                          <th className="py-4 px-6 text-center">Featured</th>
                           <th className="py-4 px-6 text-center">Actions</th>
                         </tr>
                       </thead>
@@ -953,6 +993,17 @@ Thank you for ordering! We'll see you soon. 🍽️
                                 <span className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
                                   prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
                                 }`} />
+                              </button>
+                            </td>
+                            <td className="py-4 px-6 select-none text-center">
+                              <button
+                                onClick={() => handleToggleFeatured(prod.id, prod.is_featured ?? false)}
+                                className="p-2 hover:bg-surface-2 rounded-xl transition-all duration-200 inline-block align-middle"
+                                title={prod.is_featured ? 'Featured' : 'Not Featured'}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "#F5C200" : "none"} stroke={prod.is_featured ? "#F5C200" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5 mx-auto">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.172-.468.868-.468 1.04 0l2.125 5.757a1 1 0 00.95.69h6.04c.5 0 .708.641.304.933l-4.887 3.555a1 1 0 00-.364 1.118l1.867 5.06a1 1 0 00-1.54 1.118l-4.888-3.555a1 1 0 00-1.176 0l-4.888 3.555a1 1 0 00-1.54-1.118l1.867-5.06a1 1 0 00-.364-1.118L2.093 10.88c-.404-.292-.196-.933.304-.933h6.04a1 1 0 00.95-.69l2.125-5.757z" />
+                                </svg>
                               </button>
                             </td>
                             <td className="py-4 px-6 text-center select-none">
@@ -1139,6 +1190,26 @@ Thank you for ordering! We'll see you soon. 🍽️
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
                             newProdStock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Featured switch toggle */}
+                    <div className="flex items-center gap-4 bg-surface-2/30 border border-border/40 p-4 rounded-xl select-none">
+                      <div className="text-left flex-grow">
+                        <span className="block text-sm font-bold text-text">Featured Delicacy</span>
+                        <span className="text-muted text-xs block mt-0.5">Highlight this product in the top Featured Products carousel.</span>
+                      </div>
+                      <button
+                        onClick={() => setNewProdFeatured(!newProdFeatured)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                          newProdFeatured ? 'bg-yellow shadow-yellow' : 'bg-surface-2 border border-border'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                            newProdFeatured ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
                           }`}
                         />
                       </button>
@@ -1330,6 +1401,26 @@ Thank you for ordering! We'll see you soon. 🍽️
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
                             editProdStock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Featured switch toggle */}
+                    <div className="flex items-center gap-4 bg-surface-2/30 border border-border/40 p-4 rounded-xl select-none">
+                      <div className="text-left flex-grow">
+                        <span className="block text-sm font-bold text-text">Featured Delicacy</span>
+                        <span className="text-muted text-xs block mt-0.5">Highlight this product in the top Featured Products carousel.</span>
+                      </div>
+                      <button
+                        onClick={() => setEditProdFeatured(!editProdFeatured)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                          editProdFeatured ? 'bg-yellow shadow-yellow' : 'bg-surface-2 border border-border'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                            editProdFeatured ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
                           }`}
                         />
                       </button>
