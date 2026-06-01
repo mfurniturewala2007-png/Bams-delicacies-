@@ -11,11 +11,11 @@ interface HowItWorksCardProps {
 const HowItWorksCard: React.FC<HowItWorksCardProps> = ({ number, icon, title, description, delayMs }) => {
   return (
     <div
-      className="relative bg-surface border border-border hover:border-primary rounded-2xl p-6 pt-10 md:p-8 md:pt-10 shadow-card hover:scale-[1.02] transition-all duration-300 group opacity-0 animate-fade-slide-up"
-      style={{ animationDelay: `${delayMs}ms` }}
+      className="relative bg-surface border border-border hover:border-primary hover:shadow-yellow rounded-2xl p-6 pt-10 md:p-8 md:pt-10 shadow-card hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300 group opacity-0 animate-fade-slide-up"
+      style={{ animationDelay: `${delayMs}ms`, transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
     >
       {/* Dynamic Number Badge overlapping the top boundary */}
-      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-primary text-white font-sans font-black text-lg flex items-center justify-center border-4 border-bg shadow-primary group-hover:scale-110 transition-transform duration-300">
+      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-yellow text-white font-sans font-black text-lg flex items-center justify-center border-4 border-bg shadow-primary group-hover:scale-110 group-hover:shadow-yellow-strong transition-all duration-300">
         {number}
       </div>
 

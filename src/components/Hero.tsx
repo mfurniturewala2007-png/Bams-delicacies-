@@ -171,8 +171,13 @@ const Hero: React.FC = () => {
       {/* Content Container */}
       <div className="flex flex-col items-center max-w-4xl text-center z-10 animate-fade-slide-up select-text">
         {/* Top Center Floating Brand Logo */}
-        <div className="mb-5 animate-float" style={{ animationDuration: '4s' }}>
-          <img src="/logo.jpeg" alt="Bam's Delicacies" className="w-20 md:w-28 rounded-full" />
+        <div className="mb-5 relative group animate-float" style={{ animationDuration: '4s' }}>
+          <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/35 transition-all duration-500 animate-pulse" />
+          <img
+            src="/logo.jpeg"
+            alt="Bam's Delicacies"
+            className="w-20 md:w-28 rounded-full border-4 border-primary/20 relative z-10 transition-all duration-500 group-hover:scale-105 group-hover:border-primary shadow-lg"
+          />
         </div>
 
         {/* Dynamic Delivery Date & Slots Badge */}
@@ -198,7 +203,7 @@ const Hero: React.FC = () => {
         </div>
 
         {/* Primary Hero Heading */}
-        <h1 className="font-serif font-black text-4xl sm:text-5xl md:text-8xl text-heading leading-tight tracking-tight drop-shadow-md">
+        <h1 className="font-serif font-black text-4xl sm:text-5xl md:text-8xl bg-gradient-to-r from-[#8B3A00] via-[#C8511B] to-[#F5C200] bg-clip-text text-transparent leading-tight tracking-tight drop-shadow-md pb-2 select-none">
           Bam's Delicacies
         </h1>
 
@@ -216,7 +221,7 @@ const Hero: React.FC = () => {
         <div className="mt-8 flex flex-col items-center gap-4">
           <a
             href="#menu"
-            className="group inline-flex items-center gap-3 bg-primary text-white font-sans font-bold text-sm md:text-base px-8 md:px-10 py-4 rounded-full shadow-primary hover:bg-primary-hover hover:scale-105 hover:shadow-primary-strong transition-all duration-300 ease-out cursor-pointer"
+            className="group inline-flex items-center gap-3 bg-primary text-white font-sans font-bold text-sm md:text-base px-8 md:px-10 py-4 rounded-full shadow-primary hover:bg-primary-hover hover:scale-[1.04] hover:shadow-primary-strong active:scale-95 transition-all duration-300 ease-out cursor-pointer"
           >
             <span>Order Now</span>
             <svg

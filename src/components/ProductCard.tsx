@@ -38,8 +38,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
   return (
     <>
       <div
-        className="bg-surface rounded-2xl border border-border hover:border-primary shadow-card hover:shadow-primary hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group overflow-hidden opacity-0 animate-fade-slide-up"
-        style={{ animationDelay: `${index * 100}ms` }}
+        className="bg-surface rounded-2xl border border-border hover:border-primary hover:shadow-yellow hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group overflow-hidden opacity-0 animate-fade-slide-up"
+        style={{ animationDelay: `${index * 100}ms`, transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
       >
         {/* Product Image Cover (Aspect Square) */}
         <div className="relative aspect-square w-full bg-surface-2 overflow-hidden border-b border-border">

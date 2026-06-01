@@ -53,8 +53,8 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 h-20 border-b ${
         isScrolled
-          ? 'bg-bg/95 backdrop-blur-md border-border/80 shadow-lg'
-          : 'bg-bg border-transparent'
+          ? 'bg-bg/80 backdrop-blur-xl border-border/60 shadow-md'
+          : 'bg-transparent border-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between">

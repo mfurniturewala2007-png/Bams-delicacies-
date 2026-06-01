@@ -155,7 +155,8 @@ const FeaturedCarousel: React.FC = () => {
             {products.map((prod) => (
               <div
                 key={prod.id}
-                className="w-[220px] flex-shrink-0 bg-surface border border-border rounded-2xl p-4 flex flex-col justify-between hover:border-primary hover:shadow-card hover:-translate-y-1 transition-all duration-300"
+                className="w-[220px] flex-shrink-0 bg-surface border border-border hover:border-primary hover:shadow-yellow hover:-translate-y-1.5 transition-all duration-300"
+                style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
               >
                 <div>
                   {/* Aspect Square Image Cover */}
