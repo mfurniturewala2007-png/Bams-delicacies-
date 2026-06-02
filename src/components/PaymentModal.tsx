@@ -186,7 +186,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <button
               onClick={handleCopyUpiId}
               title="Copy UPI ID"
-              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-sans font-bold uppercase tracking-wider transition-all duration-200 hover:border-yellow hover:text-yellow"
+              className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-border text-xs font-sans font-bold uppercase tracking-wider transition-all duration-200 md:hover:border-yellow md:hover:text-yellow active:scale-95 min-h-[44px]"
             >
               {copied ? (
                 <span className="text-success">✓ Copied!</span>
@@ -242,7 +242,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <button
               onClick={handleCancelOrder}
               disabled={isCancelling || isSubmitting}
-              className="flex-shrink-0 py-3 px-4 font-sans font-bold text-sm text-error hover:underline transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-shrink-0 min-h-[44px] py-2.5 px-4 font-sans font-bold text-sm text-error hover:underline transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
             >
               {isCancelling ? 'Cancelling...' : 'Cancel'}
             </button>
@@ -251,7 +251,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <button
               onClick={handleConfirmPayment}
               disabled={isSubmitting || isCancelling}
-              className="flex-1 py-3 rounded-full font-sans font-black text-sm uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+              className="flex-1 py-4 rounded-full font-sans font-black text-sm uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center"
               style={{
                 backgroundColor: '#F5C200',
                 color: '#1E1E1E',

@@ -125,10 +125,10 @@ const MenuGrid: React.FC = () => {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2 rounded-full font-sans text-xs md:text-sm font-semibold tracking-wider uppercase transition-all duration-300 border ${
+              className={`px-5 py-2.5 rounded-full font-sans text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 border min-h-[44px] flex items-center active:scale-95 ${
                 activeCategory === cat
                   ? 'bg-primary border-primary text-white shadow-primary'
-                  : 'bg-surface-2 border-border text-text/80 hover:text-primary hover:border-primary'
+                  : 'bg-surface-2 border-border text-text/80 md:hover:text-primary md:hover:border-primary'
               }`}
             >
               {cat}

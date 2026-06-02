@@ -28,19 +28,19 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
         className="absolute inset-0 bg-[#0D0D0D]/70 backdrop-blur-sm transition-opacity duration-300"
       />
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10 pointer-events-none">
-        {/* Slide in panel from right */}
-        <div className="w-screen max-w-md pointer-events-auto">
+      <div className="absolute inset-y-0 right-0 max-w-full flex pointer-events-none">
+        {/* Slide in panel from right — full screen on mobile, max-md on desktop */}
+        <div className="w-screen sm:max-w-md pointer-events-auto">
           <div className="h-full flex flex-col bg-surface border-l border-border shadow-2xl animate-slide-in-right">
             {/* Header */}
-            <div className="px-4 py-4 sm:px-6 sm:py-6 border-b border-border flex items-center justify-between">
+            <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-border flex items-center justify-between flex-shrink-0">
               <h2 className="font-serif font-black text-2xl text-heading flex items-center gap-2">
                 <span>Your Order</span>
                 <span className="text-xl">🛒</span>
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary focus:outline-none transition-all duration-200"
+                className="w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary focus:outline-none transition-all duration-200"
                 aria-label="Close Shopping Cart"
               >
                 {/* SVG Close Cross */}
@@ -112,19 +112,19 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                     {/* Quantity Controls & Total */}
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                       <div className="flex flex-col items-end gap-1.5">
-                        <div className="flex items-center gap-1.5 bg-bg border border-border rounded-lg p-1">
+                        <div className="flex items-center gap-1 bg-bg border border-border rounded-xl p-1">
                           <button
                             onClick={() => updateQty(item.product_id, item.dozens - 1)}
-                            className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
+                            className="w-9 h-9 rounded-lg hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-lg select-none active:scale-95"
                           >
                             −
                           </button>
-                          <span className="font-sans font-bold text-xs px-2 w-5 text-center text-text select-none">
+                          <span className="font-sans font-bold text-sm px-2 min-w-[28px] text-center text-text select-none">
                             {item.dozens}
                           </span>
                           <button
                             onClick={() => updateQty(item.product_id, item.dozens + 1)}
-                            className="w-6 h-6 rounded-md hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-sm select-none"
+                            className="w-9 h-9 rounded-lg hover:bg-surface border border-transparent hover:border-border text-text hover:text-primary transition-all duration-200 flex items-center justify-center font-bold text-lg select-none active:scale-95"
                           >
                             +
                           </button>
@@ -139,10 +139,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                         </div>
                       </div>
 
-                      {/* Explicit trash bin remove button */}
+                      {/* Explicit trash bin remove button — 44px touch target */}
                       <button
                         onClick={() => removeItem(item.product_id)}
-                        className="p-1.5 sm:p-2 text-muted hover:text-error hover:bg-error/10 border border-transparent hover:border-error/20 rounded-xl transition-all duration-200 focus:outline-none flex-shrink-0"
+                        className="w-11 h-11 flex items-center justify-center text-muted hover:text-error hover:bg-error/10 border border-transparent hover:border-error/20 rounded-xl transition-all duration-200 focus:outline-none flex-shrink-0 active:scale-95"
                         title="Remove item"
                       >
                         <svg
@@ -166,9 +166,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
               )}
             </div>
 
-            {/* Bottom Sticky panel */}
+            {/* Bottom Sticky panel — safe-area aware */}
             {items.length > 0 && (
-              <div className="border-t border-border bg-surface-2 p-4 sm:p-6 space-y-6">
+              <div className="border-t border-border bg-surface-2 p-4 sm:p-6 space-y-4 flex-shrink-0" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
                 <div className="flex items-baseline justify-between">
                   <span className="font-sans font-semibold text-muted text-sm uppercase tracking-wider">
                     Subtotal

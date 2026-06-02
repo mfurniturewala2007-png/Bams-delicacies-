@@ -113,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 p-1 rounded-full bg-surface-2 border border-border hover:border-primary transition-all duration-200 select-none focus:outline-none"
+                className="flex items-center gap-2 p-1.5 rounded-full bg-surface-2 border border-border hover:border-primary transition-all duration-200 select-none focus:outline-none min-h-[44px]"
               >
                 {/* User's Initials Avatar */}
                 <div className="h-8 w-8 rounded-full bg-yellow text-bg font-sans font-black flex items-center justify-center text-xs shadow-md select-none">
@@ -180,7 +180,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           ) : (
             <button
               onClick={openAuthModal}
-              className="px-4 py-2 rounded-full border-2 border-yellow text-heading hover:bg-yellow hover:text-bg font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 select-none focus:outline-none"
+              className="px-5 py-2.5 rounded-full border-2 border-yellow text-heading md:hover:bg-yellow md:hover:text-bg font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 select-none focus:outline-none min-h-[44px] flex items-center active:scale-95"
             >
               Sign In
             </button>
@@ -189,10 +189,9 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           {/* Cart Icon Toggle Button */}
           <button
             onClick={onCartOpen}
-            className="relative p-2.5 rounded-full bg-surface-2 border border-border text-text hover:text-primary hover:border-primary hover:scale-105 transition-all duration-200 focus:outline-none"
+            className="relative w-11 h-11 flex items-center justify-center rounded-full bg-surface-2 border border-border text-text hover:text-primary hover:border-primary md:hover:scale-105 transition-all duration-200 focus:outline-none active:scale-95"
             aria-label="Open Shopping Cart"
           >
-            {/* SVG Shopping Cart Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -222,7 +221,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           {/* Mobile Menu Hamburger Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary focus:outline-none transition-all duration-200"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary focus:outline-none transition-all duration-200 active:scale-95"
             aria-label="Toggle Navigation Menu"
           >
             {isMobileMenuOpen ? (
@@ -262,10 +261,10 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               key={link.label}
               href={link.href}
               onClick={handleLinkClick}
-              className={`font-sans font-medium hover:text-primary hover:bg-surface-2 px-4 py-3 rounded-xl transition-all duration-200 text-base border ${
+              className={`font-sans font-semibold md:hover:text-primary md:hover:bg-surface-2 px-4 py-3.5 rounded-xl transition-all duration-200 text-base border ${
                 link.isFestive
                   ? 'text-primary border-primary/30 bg-primary/5 font-black animate-pulse'
-                  : 'border-transparent hover:border-border text-text/90'
+                  : 'border-transparent md:hover:border-border text-text/90'
               }`}
             >
               {link.label}

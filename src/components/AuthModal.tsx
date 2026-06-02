@@ -167,7 +167,7 @@ const AuthModal: React.FC = () => {
         {profile && (
           <button
             onClick={closeAuthModal}
-            className="absolute top-4 right-4 p-1 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
+            className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200"
             aria-label="Close modal"
           >
             ✕
@@ -206,7 +206,7 @@ const AuthModal: React.FC = () => {
                     if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
                   }}
                   placeholder="Enter your 10-digit phone number"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.phone ? 'border-error' : 'border-border'
                   }`}
                 />
@@ -220,7 +220,7 @@ const AuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-3.5 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
+                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
               >
                 {isSubmitting ? 'Signing In...' : 'Sign In'}
               </button>
@@ -266,7 +266,7 @@ const AuthModal: React.FC = () => {
                     if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
                   }}
                   placeholder="e.g. Mohammed Furniturewala"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.name ? 'border-error' : 'border-border'
                   }`}
                 />
@@ -290,7 +290,7 @@ const AuthModal: React.FC = () => {
                       if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
                     }}
                     placeholder="10-digit number"
-                    className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                    className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                       fieldErrors.phone ? 'border-error' : 'border-border'
                     }`}
                   />
@@ -312,7 +312,7 @@ const AuthModal: React.FC = () => {
                       if (fieldErrors.pincode) setFieldErrors((prev) => ({ ...prev, pincode: '' }));
                     }}
                     placeholder="6-digit code"
-                    className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                    className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                       fieldErrors.pincode ? 'border-error' : 'border-border'
                     }`}
                   />
@@ -347,7 +347,7 @@ const AuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-3.5 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
+                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating Account...' : 'Create Account'}
               </button>
@@ -392,7 +392,7 @@ const AuthModal: React.FC = () => {
                     if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
                   }}
                   placeholder="Your full name"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.name ? 'border-error' : 'border-border'
                   }`}
                 />
@@ -428,7 +428,7 @@ const AuthModal: React.FC = () => {
                     if (fieldErrors.pincode) setFieldErrors((prev) => ({ ...prev, pincode: '' }));
                   }}
                   placeholder="6-digit pincode"
-                  className={`w-full bg-surface-2 border rounded-xl px-4 py-2.5 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                  className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                     fieldErrors.pincode ? 'border-error' : 'border-border'
                   }`}
                 />
@@ -461,7 +461,7 @@ const AuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-3.5 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
+                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>

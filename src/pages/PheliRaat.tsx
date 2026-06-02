@@ -277,7 +277,7 @@ const PheliRaat: React.FC = () => {
       <section id="checkout-festive" className="max-w-6xl mx-auto px-4 py-16 relative z-10 border-t border-[#DFBA73]/10">
         <div className="text-center mb-8">
           <h2 className="font-serif font-black text-3xl text-[#DFBA73] tracking-tight">Complete Celebration Booking</h2>
-          <p className="text-[#FFFAF4]/60 text-xs mt-2">Enter your delivery details below to reserve your slot for June 12th.</p>
+          <p className="text-[#FFFAF4]/60 text-xs mt-2">Enter your delivery details below to reserve your slot for {deliveryDateStr}.</p>
           <div className="w-16 h-1 bg-primary mx-auto mt-3 rounded-full" />
         </div>
 

@@ -7,7 +7,7 @@ import QuantityModal from './QuantityModal';
 const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }> = ({ prod, onAddClick }) => {
   return (
     <div
-      className="w-[160px] flex-shrink-0 bg-surface border border-border/40 hover:border-primary/50 hover:shadow-yellow hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-2.5 flex flex-col justify-between"
+      className="w-[160px] flex-shrink-0 bg-surface border border-border/40 md:hover:border-primary/50 md:hover:shadow-yellow md:hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-2.5 flex flex-col justify-between"
       style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
     >
       <div>
@@ -44,7 +44,7 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }
         </div>
 
         {/* Product Title */}
-        <h3 className="font-sans font-bold text-[11px] sm:text-xs text-heading leading-snug line-clamp-1 mb-1 text-left">
+        <h3 className="font-sans font-bold text-xs sm:text-sm text-heading leading-snug line-clamp-1 mb-1 text-left">
           {prod.name}
         </h3>
       </div>
@@ -55,18 +55,18 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }
           <span className="font-serif text-sm sm:text-base font-black text-yellow leading-tight">
             ₹{prod.price}
           </span>
-          <span className="text-muted text-[8px] sm:text-[9px] font-sans mt-0.5">
+          <span className="text-muted text-[10px] sm:text-xs font-sans mt-0.5">
             / {prod.unit_label || '12 pcs'}
           </span>
         </div>
 
-        {/* Add button */}
+        {/* Add button — 44px touch target */}
         <button
           onClick={() => onAddClick(prod)}
-          className="w-7 h-7 rounded-full bg-primary hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none flex-shrink-0"
+          className="w-11 h-11 rounded-full bg-primary md:hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none flex-shrink-0"
           title="Add to Cart"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
         </button>

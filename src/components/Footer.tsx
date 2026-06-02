@@ -20,15 +20,15 @@ const Footer: React.FC = () => {
           </p>
           <a
             href="/admin"
-            className="text-[12px] text-[#555] no-underline hover:text-[#F5C200] transition-colors duration-200"
+            className="text-[12px] text-[#555] no-underline md:hover:text-[#F5C200] transition-colors duration-200 py-1.5 px-3 rounded-lg border border-transparent hover:border-border min-h-[44px] flex items-center justify-center"
           >
             Admin
           </a>
         </div>
-        <div className="flex gap-6 text-text/70">
-          <a href="#how-it-works" className="hover:text-primary transition-colors duration-200">About</a>
-          <a href="#menu" className="hover:text-primary transition-colors duration-200">Our Menu</a>
-          <a href="#order" className="hover:text-primary transition-colors duration-200">Order Online</a>
+        <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-text/70 font-semibold select-none">
+          <a href="#how-it-works" className="py-2 px-3 md:hover:text-primary transition-colors duration-200 min-h-[44px] flex items-center">About</a>
+          <a href="#menu" className="py-2 px-3 md:hover:text-primary transition-colors duration-200 min-h-[44px] flex items-center">Our Menu</a>
+          <a href="#order" className="py-2 px-3 md:hover:text-primary transition-colors duration-200 min-h-[44px] flex items-center">Order Online</a>
         </div>
       </div>
     </footer>

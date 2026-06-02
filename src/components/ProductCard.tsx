@@ -41,8 +41,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index, isDark = fals
       <div
         className={`rounded-2xl border transition-all duration-300 flex flex-col justify-between group overflow-hidden opacity-0 animate-fade-slide-up ${
           isDark
-            ? 'bg-[#150F0A]/90 border-[#DFBA73]/15 hover:border-[#DFBA73]/60 hover:shadow-[0_0_24px_rgba(223,186,115,0.15)]'
-            : 'bg-surface border-border/40 hover:border-primary/50 hover:shadow-yellow hover:-translate-y-1.5'
+            ? 'bg-[#150F0A]/90 border-[#DFBA73]/15 md:hover:border-[#DFBA73]/60 md:hover:shadow-[0_0_24px_rgba(223,186,115,0.15)]'
+            : 'bg-surface border-border/40 md:hover:border-primary/50 md:hover:shadow-yellow md:hover:-translate-y-1.5'
         }`}
         style={{ animationDelay: `${index * 100}ms`, transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
       >
@@ -91,14 +91,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index, isDark = fals
         <div className="p-3 sm:p-4 flex flex-col flex-grow justify-between">
           <div className="text-left">
             {/* Product Name */}
-            <h3 className={`font-sans font-bold text-xs sm:text-sm md:text-base leading-snug transition-colors duration-200 tracking-tight line-clamp-1 ${
+            <h3 className={`font-sans font-bold text-sm leading-snug transition-colors duration-200 tracking-tight line-clamp-2 ${
               isDark ? 'text-[#FFFAF4] group-hover:text-[#E3A857]' : 'text-heading group-hover:text-primary'
             }`}>
               {product.name}
             </h3>
 
             {/* Description line-clamped */}
-            <p className={`font-sans font-medium text-[10px] sm:text-xs mt-1.5 line-clamp-2 min-h-[2rem] leading-relaxed ${
+            <p className={`font-sans font-medium text-xs mt-1.5 line-clamp-2 min-h-[2rem] leading-relaxed ${
               isDark ? 'text-[#FFFAF4]/65' : 'text-muted'
             }`}>
               {product.description || 'Prepared fresh with finest ingredients. Delivered clean and hot.'}
@@ -110,10 +110,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index, isDark = fals
             isDark ? 'border-[#DFBA73]/10' : 'border-border/20'
           }`}>
             <div className="flex flex-col">
-              <span className="font-serif text-base sm:text-lg md:text-xl font-black text-[#E3A857] leading-tight">
+              <span className="font-serif text-lg font-black text-[#E3A857] leading-tight">
                 ₹{product.price}
               </span>
-              <span className={`text-[9px] sm:text-[10px] font-sans mt-0.5 ${
+              <span className={`text-[10px] font-sans mt-0.5 ${
                 isDark ? 'text-[#FFF8EE]/50' : 'text-muted'
               }`}>
                 per {product.unit_label || '12 pcs'}
@@ -123,7 +123,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index, isDark = fals
             <button
               onClick={handleOpenModal}
               disabled={!product.in_stock}
-              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-[1.08] active:scale-90 select-none flex-shrink-0 focus:outline-none ${
+              className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all duration-300 md:hover:scale-[1.08] active:scale-90 select-none flex-shrink-0 focus:outline-none ${
                 !product.in_stock
                   ? isDark
                     ? 'bg-white/[0.03] border border-white/[0.08] text-[#FFF8EE]/20 cursor-not-allowed shadow-none'
@@ -131,17 +131,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index, isDark = fals
                   : isAdded
                   ? 'bg-success text-white'
                   : isDark
-                  ? 'bg-[#E3A857] text-[#150F0A] hover:bg-[#DFBA73] hover:shadow-[0_0_15px_rgba(227,168,87,0.3)] shadow-md'
-                  : 'bg-primary text-white hover:bg-primary-hover shadow-primary/20'
+                  ? 'bg-[#E3A857] text-[#150F0A] md:hover:bg-[#DFBA73] md:hover:shadow-[0_0_15px_rgba(227,168,87,0.3)] shadow-md'
+                  : 'bg-primary text-white md:hover:bg-primary-hover shadow-primary/20'
               }`}
               title={product.in_stock ? 'Add to Cart' : 'Out of Stock'}
             >
               {isAdded ? (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3.5" stroke="currentColor" className="w-3.5 h-3.5 sm:w-4 sm:h-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3.5" stroke="currentColor" className="w-4 h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               ) : product.in_stock ? (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
               ) : (

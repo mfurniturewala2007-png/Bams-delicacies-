@@ -98,10 +98,10 @@ const FestivePromoModal: React.FC = () => {
           }
         `}</style>
 
-        {/* Close Cross */}
+        {/* Close Cross — 44px touch target */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-1.5 rounded-xl bg-[#2D1F15] border border-[#DFBA73]/15 text-[#FFF8EE]/80 hover:text-[#E3A857] transition-all duration-200"
+          className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-xl bg-[#2D1F15] border border-[#DFBA73]/15 text-[#FFF8EE]/80 hover:text-[#E3A857] hover:border-[#DFBA73]/40 active:scale-95 transition-all duration-200"
           aria-label="Close Promo"
         >
           ✕
@@ -141,7 +141,7 @@ const FestivePromoModal: React.FC = () => {
                   ₹{combo.price}
                 </span>
               </div>
-              <div className="text-[10px] text-[#FFF8EE]/70 font-sans leading-relaxed">
+              <div className="text-xs text-[#FFF8EE]/70 font-sans leading-relaxed">
                 {combo.items.join('  ·  ')}
               </div>
             </div>

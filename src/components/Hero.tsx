@@ -127,7 +127,7 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <section className="min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden bg-bg">
+    <section className="min-h-[100dvh] flex flex-col justify-center items-center px-4 relative overflow-hidden bg-bg">
       {/* Premium Ambient Orange Glow Background (Radial Gradient) */}
       <div 
         className="absolute inset-0 pointer-events-none"
@@ -182,7 +182,7 @@ const Hero: React.FC = () => {
 
         {/* Dynamic Delivery Date & Slots Badge */}
         <div
-          className={`mb-5 inline-flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-2.5 rounded-full bg-surface-2 border border-border text-[11px] md:text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
+          className={`mb-5 inline-flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-2.5 rounded-full bg-surface-2 border border-border text-xs md:text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
             isLowSlots
               ? 'border-error/50 text-error animate-pulse-glow shadow-primary-strong bg-surface'
               : 'text-yellow shadow-yellow'
@@ -213,7 +213,7 @@ const Hero: React.FC = () => {
         </p>
 
         {/* Subtext explaining booking cutoff */}
-        <p className="text-muted text-xs md:text-sm mt-2 max-w-sm px-2">
+        <p className="text-muted text-sm mt-2 max-w-sm px-2 leading-relaxed">
           Pre-orders open weekly. Cut-off every Thursday night for weekend delivery.
         </p>
 
@@ -241,7 +241,7 @@ const Hero: React.FC = () => {
             <button
               onClick={handlePushSubscribe}
               disabled={pushState === 'requesting'}
-              className="inline-flex items-center gap-2 text-xs font-sans font-medium text-muted hover:text-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 text-xs font-sans font-semibold text-muted md:hover:text-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] py-1.5 px-4 rounded-full bg-surface-2/60 border border-border/40 active:scale-95 transition-all"
             >
               {pushState === 'requesting' ? (
                 <>

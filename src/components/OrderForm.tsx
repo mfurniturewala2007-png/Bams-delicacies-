@@ -67,6 +67,15 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
   const [maxOrdersSunLimit, setMaxOrdersSunLimit] = useState(15);
   const [festivalDeliveryDate, setFestivalDeliveryDate] = useState('2026-06-12');
 
+  const formatDbDate = (dateStr: string) => {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      return format(dateObj, 'eeee, MMMM d, yyyy');
+    }
+    return dateStr;
+  };
+
   // Fetch orders count on mount to populate slot calculations
   const fetchOrdersForWeekend = async () => {
     try {
@@ -503,7 +512,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
                   <span>✨ Pheli Raat Special Delivery Slot ✨</span>
                 </div>
                 <p className="text-[#FFFAF4] font-black text-lg">
-                  {selectedDate ? format(selectedDate, 'eeee, MMMM d, yyyy') : 'Friday, June 12, 2026'}
+                  {selectedDate ? format(selectedDate, 'eeee, MMMM d, yyyy') : formatDbDate(festivalDeliveryDate)}
                 </p>
                 <p className="text-[#FFFAF4]/70 text-xs mt-1 leading-relaxed font-sans">
                   Your order contains premium Pheli Raat festival combos and is locked for special festival-day delivery.
@@ -631,7 +640,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
       {/* Toast Alert Box */}
       {toast.visible && (
         <div
-          className={`fixed bottom-6 right-6 z-50 p-5 rounded-2xl shadow-xl flex items-center gap-3 border transition-all duration-300 animate-slide-in-right ${
+          className={`fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-auto z-50 p-5 rounded-2xl shadow-xl flex items-center gap-3 border transition-all duration-300 animate-slide-in-right ${
             toast.type === 'success'
               ? 'bg-surface border-primary text-text shadow-primary'
               : 'bg-surface border-error/50 text-error shadow-lg'
@@ -797,7 +806,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
                       <span>✨ Pheli Raat Special Delivery Slot ✨</span>
                     </div>
                     <p className="text-text font-black text-lg">
-                      {selectedDate ? format(selectedDate, 'eeee, MMMM d, yyyy') : 'Friday, June 12, 2026'}
+                      {selectedDate ? format(selectedDate, 'eeee, MMMM d, yyyy') : formatDbDate(festivalDeliveryDate)}
                     </p>
                     <p className="text-muted text-xs mt-1 leading-relaxed">
                       Your order contains premium Pheli Raat festival combos and is locked for special festival-day delivery.

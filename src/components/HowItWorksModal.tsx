@@ -42,6 +42,14 @@ const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClose }) =>
         className="relative z-10 w-full bg-surface border border-border rounded-2xl p-6 md:p-8 shadow-2xl animate-fade-slide-up text-center flex flex-col items-center gap-6"
         style={{ maxWidth: '420px', maxHeight: '90vh' }}
       >
+        {/* Absolute Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200"
+          aria-label="Close modal"
+        >
+          ✕
+        </button>
         <div>
           <h2 className="font-serif font-black text-2xl md:text-3xl text-heading leading-tight">
             How It Works
@@ -74,7 +82,7 @@ const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClose }) =>
         {/* Action Button */}
         <button
           onClick={onClose}
-          className="w-full py-3.5 bg-gradient-to-r from-primary to-yellow hover:scale-[1.03] active:scale-95 transition-all text-white font-sans font-black text-sm uppercase tracking-wider rounded-full shadow-yellow select-none focus:outline-none"
+          className="w-full py-4 bg-gradient-to-r from-primary to-yellow md:hover:scale-[1.03] active:scale-95 transition-all text-white font-sans font-black text-sm uppercase tracking-wider rounded-full shadow-yellow select-none focus:outline-none"
         >
           Go! 🎉
         </button>

@@ -126,17 +126,72 @@ const Admin: React.FC = () => {
   const [notifyState, setNotifyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [notifyResult, setNotifyResult] = useState<string | null>(null);
 
+  // Helper: detect if an order is a combo/festival order
+  const isComboOrder = (order: Order): boolean => {
+    return order.items.some((i) =>
+      (i.category && i.category.toLowerCase().includes('pheli')) ||
+      (i.name && (i.name.toLowerCase().includes('combo') || i.name.toLowerCase().includes('pheli')))
+    );
+  };
+
   // Date Filters
   const { saturday: thisSat, sunday: thisSun } = getAvailableDeliveryDates();
   const nextSat = addDays(thisSat, 7);
   const nextSun = addDays(thisSun, 7);
 
-  const filterOptions = [
+  // 1. Define standard weekend options
+  const baseOptions = [
     { date: thisSat, label: 'This Saturday', dbStr: format(thisSat, 'yyyy-MM-dd') },
     { date: thisSun, label: 'This Sunday', dbStr: format(thisSun, 'yyyy-MM-dd') },
     { date: nextSat, label: 'Next Saturday', dbStr: format(nextSat, 'yyyy-MM-dd') },
     { date: nextSun, label: 'Next Sunday', dbStr: format(nextSun, 'yyyy-MM-dd') },
   ];
+
+  // 2. Build festival option if enabled and valid
+  const festivalOpt = festivalEnabled && festivalDeliveryDate ? (() => {
+    const parts = festivalDeliveryDate.split('-');
+    if (parts.length === 3) {
+      const dObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      return { date: dObj, label: '✨ Pheli Raat ✨', dbStr: festivalDeliveryDate };
+    }
+    return null;
+  })() : null;
+
+  // 3. Deduplicate standard options with festival options
+  const initialOptions: typeof baseOptions = [];
+  if (festivalOpt) {
+    initialOptions.push(festivalOpt);
+  }
+  baseOptions.forEach((opt) => {
+    if (!festivalOpt || opt.dbStr !== festivalOpt.dbStr) {
+      initialOptions.push(opt);
+    } else {
+      // Merge: append label to show it's both
+      festivalOpt.label = `✨ Pheli Raat (${opt.label}) ✨`;
+    }
+  });
+
+  // 4. Scan loaded orders to dynamically extract and add other dates (e.g. June 12)
+  const existingDbStrs = new Set(initialOptions.map((o) => o.dbStr));
+  const additionalOptions: typeof baseOptions = [];
+  const uniqueOrderDates = Array.from(new Set(orders.map((o) => o.delivery_date))).sort();
+
+  uniqueOrderDates.forEach((dateStr) => {
+    if (!existingDbStrs.has(dateStr)) {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const dObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        const hasFestive = orders.some((o) => o.delivery_date === dateStr && isComboOrder(o));
+        additionalOptions.push({
+          date: dObj,
+          label: hasFestive ? '✨ Festive Combo ✨' : 'Other Date',
+          dbStr: dateStr,
+        });
+      }
+    }
+  });
+
+  const filterOptions = [...initialOptions, ...additionalOptions];
 
   const [activeFilterDateStr, setActiveFilterDateStr] = useState<string>(
     format(thisSat, 'yyyy-MM-dd')
@@ -215,6 +270,10 @@ const Admin: React.FC = () => {
         setFestivalEnabled(festEnabled);
         setFestivalEndDate(festEnd);
         setFestivalDeliveryDate(festDelivery);
+
+        if (festEnabled) {
+          setActiveFilterDateStr(festDelivery);
+        }
       }
     } catch (e) {
       console.warn('Failed to load settings.');
@@ -628,6 +687,11 @@ const Admin: React.FC = () => {
       if (errDelivery) throw errDelivery;
 
       showToast("Pheli Raat festival settings updated successfully! ✓", "success");
+      if (festivalEnabled) {
+        setActiveFilterDateStr(festivalDeliveryDate);
+      } else {
+        setActiveFilterDateStr(format(thisSat, 'yyyy-MM-dd'));
+      }
     } catch (err: any) {
       console.error(err);
       alert(`Failed to save festival settings. Error: ${err.message}`);
@@ -655,13 +719,7 @@ const Admin: React.FC = () => {
     }
   };
 
-  // Helper: detect if an order is a combo/festival order
-  const isComboOrder = (order: Order): boolean => {
-    return order.items.some((i) =>
-      (i.category && i.category.toLowerCase().includes('pheli')) ||
-      (i.name && (i.name.toLowerCase().includes('combo') || i.name.toLowerCase().includes('pheli')))
-    );
-  };
+
 
   // WhatsApp Stage 1: Order Confirmed
   const buildWhatsAppConfirmedLink = (order: Order): string => {
@@ -2137,7 +2195,7 @@ Please come pick up your order at your convenience.
       </main>
 
       {/* ── Mobile Bottom Tab Bar (visible only on mobile) ───────── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border flex items-stretch select-none shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border flex items-stretch select-none shadow-2xl pb-[env(safe-area-inset-bottom,0px)]">
         <button
           onClick={() => setActiveTab(1)}
           className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
@@ -2190,7 +2248,8 @@ Please come pick up your order at your convenience.
                 </div>
                 <button
                   onClick={() => setDeliveryTypeModalOrderId(null)}
-                  className="p-1.5 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
+                  className="w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200"
+                  aria-label="Close modal"
                 >
                   ✕
                 </button>
@@ -2233,12 +2292,12 @@ Please come pick up your order at your convenience.
             className="absolute inset-0 bg-black/75 backdrop-blur-sm"
           />
           <div className="relative z-10 w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden animate-fade-slide-up">
-            {/* Modal Header */}
             <div className="px-6 py-5 border-b border-border flex justify-between items-center">
-              <h3 className="font-serif font-bold text-xl text-heading">🔔 Notify All Customers</h3>
+              <h3 className="font-serif font-bold text-xl text-heading">🔔 Notify All</h3>
               <button
                 onClick={() => setIsNotifyModalOpen(false)}
-                className="p-1 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
+                className="w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200"
+                aria-label="Close modal"
               >
                 ✕
               </button>
