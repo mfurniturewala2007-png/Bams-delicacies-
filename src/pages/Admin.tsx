@@ -191,11 +191,13 @@ const Admin: React.FC = () => {
     }
   });
 
-  const filterOptions = [...initialOptions, ...additionalOptions];
+  const filterOptions = [
+    { date: new Date(), label: 'All Orders', dbStr: 'all' },
+    ...initialOptions,
+    ...additionalOptions,
+  ];
 
-  const [activeFilterDateStr, setActiveFilterDateStr] = useState<string>(
-    format(thisSat, 'yyyy-MM-dd')
-  );
+  const [activeFilterDateStr, setActiveFilterDateStr] = useState<string>('all');
 
   // Load Products & Orders
   const loadProducts = async () => {
@@ -926,7 +928,7 @@ Please come pick up your order at your convenience.
 
   // Filter orders matching selected date — payment_pending shown first
   const filteredOrders = orders
-    .filter((o) => o.delivery_date === activeFilterDateStr)
+    .filter((o) => activeFilterDateStr === 'all' || o.delivery_date === activeFilterDateStr)
     .sort((a, b) => {
       if (a.status === 'payment_pending' && b.status !== 'payment_pending') return -1;
       if (b.status === 'payment_pending' && a.status !== 'payment_pending') return 1;
@@ -934,15 +936,10 @@ Please come pick up your order at your convenience.
     });
   const slotsCount = filteredOrders.length;
 
-  // Stat card computations
-  const comboOrders = filteredOrders.filter(isComboOrder);
-  const normalOrders = filteredOrders.filter((o) => !isComboOrder(o));
-  const comboRevenue = comboOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-  const normalRevenue = normalOrders.reduce((sum, o) => sum + (o.total || 0), 0);
 
   const getActiveLimit = () => {
     const activeOpt = filterOptions.find(o => o.dbStr === activeFilterDateStr);
-    if (activeOpt) {
+    if (activeOpt && activeOpt.dbStr !== 'all') {
       const day = activeOpt.date.getDay(); // 6 = Sat, 0 = Sun
       if (day === 6) return maxOrdersSatInput;
       if (day === 0) return maxOrdersSunInput;
@@ -1753,51 +1750,17 @@ Please come pick up your order at your convenience.
                   </button>
                   {/* Slots Count Display badge */}
                   <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface border border-border">
-                    <span className="text-yellow text-xs font-bold uppercase tracking-wider">Slots:</span>
+                    <span className="text-yellow text-xs font-bold uppercase tracking-wider">
+                      {activeFilterDateStr === 'all' ? 'Total Orders:' : 'Slots:'}
+                    </span>
                     <span className="bg-yellow text-bg font-sans font-black text-xs px-2 py-0.5 rounded-full shadow-yellow">
-                      {slotsCount} / {getActiveLimit()}
+                      {activeFilterDateStr === 'all' ? filteredOrders.length : `${slotsCount} / ${getActiveLimit()}`}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ── Stat Cards: Combo vs Normal Orders ── */}
-            <div className="grid grid-cols-2 gap-4 mb-6 md:mb-8 select-none">
-              {/* Combo Orders Card */}
-              <div className="relative overflow-hidden bg-surface border border-border rounded-2xl p-5 shadow-card flex flex-col gap-2 group hover:border-primary/40 transition-all duration-300">
-                <div className="absolute inset-0 opacity-5" style={{ background: 'radial-gradient(circle at top right, #C8511B 0%, transparent 70%)' }} />
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-sans font-bold uppercase tracking-widest text-muted">Combo Orders</span>
-                  <span className="text-2xl">🎁</span>
-                </div>
-                <div className="flex items-end gap-2 mt-1">
-                  <span className="font-serif font-black text-4xl text-heading leading-none">{comboOrders.length}</span>
-                  <span className="text-xs text-muted font-sans mb-1">orders</span>
-                </div>
-                {comboRevenue > 0 && (
-                  <span className="text-xs font-bold text-primary font-sans">₹{comboRevenue.toLocaleString()} revenue</span>
-                )}
-                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-yellow rounded-b-2xl" style={{ width: `${filteredOrders.length > 0 ? (comboOrders.length / filteredOrders.length) * 100 : 0}%`, transition: 'width 0.6s ease' }} />
-              </div>
-
-              {/* Normal Orders Card */}
-              <div className="relative overflow-hidden bg-surface border border-border rounded-2xl p-5 shadow-card flex flex-col gap-2 group hover:border-success/40 transition-all duration-300">
-                <div className="absolute inset-0 opacity-5" style={{ background: 'radial-gradient(circle at top right, #22C55E 0%, transparent 70%)' }} />
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-sans font-bold uppercase tracking-widest text-muted">Normal Orders</span>
-                  <span className="text-2xl">🛍️</span>
-                </div>
-                <div className="flex items-end gap-2 mt-1">
-                  <span className="font-serif font-black text-4xl text-heading leading-none">{normalOrders.length}</span>
-                  <span className="text-xs text-muted font-sans mb-1">orders</span>
-                </div>
-                {normalRevenue > 0 && (
-                  <span className="text-xs font-bold text-success font-sans">₹{normalRevenue.toLocaleString()} revenue</span>
-                )}
-                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-success to-emerald-400 rounded-b-2xl" style={{ width: `${filteredOrders.length > 0 ? (normalOrders.length / filteredOrders.length) * 100 : 0}%`, transition: 'width 0.6s ease' }} />
-              </div>
-            </div>
 
             {/* Dynamic Orders Limit Configuration Card */}
             <div className="bg-surface border border-border p-6 rounded-2xl mb-8 flex flex-col gap-6 shadow-card text-left select-none animate-fade-slide-up">
@@ -1910,7 +1873,7 @@ Please come pick up your order at your convenience.
                     <div className="flex flex-col text-left">
                       <span>{opt.label}</span>
                       <span className={`text-[10px] font-normal mt-0.5 ${isActive ? 'text-white/75' : 'text-muted'}`}>
-                        {format(opt.date, 'MMM d')}
+                        {opt.dbStr === 'all' ? 'All Dates' : format(opt.date, 'MMM d')}
                       </span>
                     </div>
                   </button>
@@ -1933,20 +1896,33 @@ Please come pick up your order at your convenience.
               <>
                 {/* ── Mobile order cards (hidden on md+) ── */}
                 <div className="md:hidden flex flex-col gap-4">
-                  {filteredOrders.map((ord, idx) => (
+                  {filteredOrders.map((ord, idx) => {
+                    const hasCombo = isComboOrder(ord) && ord.delivery_date === festivalDeliveryDate;
+                    return (
                     <div
                       key={ord.id}
                       className={`bg-surface border rounded-2xl p-4 shadow-card flex flex-col gap-3 ${
-                        ord.status === 'payment_pending' ? 'border-warning border-l-4' : 'border-border'
+                        ord.status === 'payment_pending'
+                          ? 'border-warning border-l-4'
+                          : hasCombo
+                          ? 'border-yellow/60 border-l-4'
+                          : 'border-border'
                       }`}
                     >
                       {/* Row header: number + name + status badge */}
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="font-bold text-text text-sm">
-                            {ord.status === 'payment_pending' && <span className="mr-1">⚠️</span>}
-                            #{idx + 1} — {ord.customer_name}
-                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-bold text-text text-sm">
+                              {ord.status === 'payment_pending' && <span className="mr-1">⚠️</span>}
+                              #{idx + 1} — {ord.customer_name}
+                            </p>
+                            {hasCombo && (
+                              <span className="inline-flex items-center gap-1 bg-yellow/15 border border-yellow/40 text-yellow text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse-glow">
+                                🎁 Festive Combo
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-muted font-mono mt-0.5">{ord.customer_phone}</p>
                         </div>
                         {/* Status select */}
@@ -2052,7 +2028,8 @@ Please come pick up your order at your convenience.
                         </div>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* ── Desktop order table (hidden on mobile) ── */}
@@ -2073,18 +2050,33 @@ Please come pick up your order at your convenience.
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/60 text-sm font-sans">
-                        {filteredOrders.map((ord, idx) => (
+                        {filteredOrders.map((ord, idx) => {
+                          const hasCombo = isComboOrder(ord) && ord.delivery_date === festivalDeliveryDate;
+                          return (
                           <tr
                             key={ord.id}
                             className={`hover:bg-surface-2/30 transition-colors duration-150 ${
-                              ord.status === 'payment_pending' ? 'bg-warning/5 border-l-2 border-warning' : ''
+                              ord.status === 'payment_pending'
+                                ? 'bg-warning/5 border-l-2 border-warning'
+                                : hasCombo
+                                ? 'bg-yellow/[0.03] border-l-2 border-yellow/50'
+                                : ''
                             }`}
                           >
                             <td className="py-4 px-6 font-mono text-muted/80">
                               {ord.status === 'payment_pending' && <span className="mr-1" title="Awaiting payment">⚠️</span>}
                               {idx + 1}
                             </td>
-                            <td className="py-4 px-6 font-bold text-text text-left">{ord.customer_name}</td>
+                            <td className="py-4 px-6 text-left">
+                              <div className="flex flex-col gap-1">
+                                <span className="font-bold text-text">{ord.customer_name}</span>
+                                {hasCombo && (
+                                  <span className="inline-flex items-center gap-1 bg-yellow/15 border border-yellow/40 text-yellow text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider w-fit">
+                                    🎁 Festive Combo
+                                  </span>
+                                )}
+                              </div>
+                            </td>
                             <td className="py-4 px-6 font-mono text-text/80 text-left">{ord.customer_phone}</td>
                             <td className="py-4 px-6 max-w-xs truncate text-text/70 text-left" title={ord.customer_address}>{ord.customer_address}</td>
                             <td className="py-4 px-6 text-left">
@@ -2183,7 +2175,8 @@ Please come pick up your order at your convenience.
                               )}
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

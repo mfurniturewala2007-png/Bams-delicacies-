@@ -79,10 +79,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
   // Fetch orders count on mount to populate slot calculations
   const fetchOrdersForWeekend = async () => {
     try {
+      const datesToFetch = [dbSatStr, dbSunStr];
+      if (festivalDeliveryDate && !datesToFetch.includes(festivalDeliveryDate)) {
+        datesToFetch.push(festivalDeliveryDate);
+      }
       const { data, error } = await supabase
         .from('orders')
         .select('delivery_date')
-        .in('delivery_date', [dbSatStr, dbSunStr]);
+        .in('delivery_date', datesToFetch);
 
       if (error) throw error;
       if (data) {
@@ -123,7 +127,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
     if (items.length > 0) {
       fetchOrdersForWeekend();
     }
-  }, [items, dbSatStr, dbSunStr]);
+  }, [items, dbSatStr, dbSunStr, festivalDeliveryDate]);
 
   const hasFestiveItem = items.some(item => item.category === 'Pheli Raat');
 
@@ -823,6 +827,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
                   orders={orders}
                   maxOrdersSatLimit={maxOrdersSatLimit}
                   maxOrdersSunLimit={maxOrdersSunLimit}
+                  festivalDeliveryDate={festivalDeliveryDate}
                 />
               )}
               {fieldErrors.date && (
