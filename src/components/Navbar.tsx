@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
+import { Link } from 'react-router-dom';
 
 interface NavbarProps {
   onCartOpen: () => void;
@@ -82,19 +83,19 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
     >
       <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between">
         {/* Left: Brand Logo & Title */}
-        <a href="#" className="flex items-center gap-3 group">
+        <Link to="/" className="flex items-center gap-3 group">
           <img src="/logo.jpeg" alt="Bam's Delicacies" style={{ height: '40px' }} />
           <span className="font-serif font-black text-lg sm:text-xl md:text-2xl text-heading tracking-tight group-hover:text-primary transition-colors duration-200">
             Bam's Delicacies
           </span>
-        </a>
+        </Link>
 
         {/* Center: Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
-              href={link.href}
+              to={link.href}
               className={`font-sans font-medium hover:text-primary transition-colors duration-200 text-sm tracking-wide uppercase ${
                 link.isFestive
                   ? 'text-primary font-black animate-pulse drop-shadow-[0_0_8px_rgba(200,81,27,0.4)] border border-primary/20 bg-primary/5 px-3 py-1 rounded-full'
@@ -102,7 +103,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               }`}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -257,9 +258,9 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
       {isMobileMenuOpen && (
         <div className="absolute top-20 left-0 w-full bg-surface border-b border-border shadow-2xl py-6 px-4 flex flex-col gap-4 animate-fade-slide-up md:hidden z-40">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
-              href={link.href}
+              to={link.href}
               onClick={handleLinkClick}
               className={`font-sans font-semibold md:hover:text-primary md:hover:bg-surface-2 px-4 py-3.5 rounded-xl transition-all duration-200 text-base border ${
                 link.isFestive
@@ -268,7 +269,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               }`}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
       )}

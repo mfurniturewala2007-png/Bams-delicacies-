@@ -12,7 +12,22 @@ import PheliRaat from './pages/PheliRaat';
 // This gives each page a subtle 200ms opacity fade-in — premium feel,
 // no heavy animation libraries needed.
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
+
+  React.useEffect(() => {
+    if (hash) {
+      setTimeout(() => {
+        const id = hash.replace('#', '');
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [pathname, hash]);
+
   return (
     <div key={pathname} className="animate-page-fade">
       {children}

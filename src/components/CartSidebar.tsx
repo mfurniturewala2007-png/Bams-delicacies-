@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -8,15 +9,25 @@ interface CartSidebarProps {
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { items, updateQty, totalAmount, removeItem } = useCart();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
   const handleProceedToOrder = () => {
     onClose();
-    // Smooth scroll to the order section
-    const orderSection = document.getElementById('order');
-    if (orderSection) {
-      orderSection.scrollIntoView({ behavior: 'smooth' });
+    if (location.pathname === '/pheli-raat') {
+      const orderSection = document.getElementById('checkout-festive');
+      if (orderSection) {
+        orderSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      const orderSection = document.getElementById('order');
+      if (orderSection) {
+        orderSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        navigate('/#order');
+      }
     }
   };
 
