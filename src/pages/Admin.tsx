@@ -38,7 +38,7 @@ const Admin: React.FC = () => {
   const [authError, setAuthError] = useState('');
 
   // Tab State: 0 = Products, 1 = Orders
-  const [activeTab, setActiveTab] = useState<0 | 1>(0);
+  const [activeTab, setActiveTab] = useState<0 | 1>(1);
 
   // Products Tab States
   const [products, setProducts] = useState<Product[]>([]);
@@ -113,9 +113,12 @@ const Admin: React.FC = () => {
 
   // WhatsApp Confirmation: track which orderId is currently being confirmed
   const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
-  // Custom message textarea: track which orderId has its textarea open + the text
-  const [customMsgOrderId, setCustomMsgOrderId] = useState<string | null>(null);
-  const [customMsgText, setCustomMsgText] = useState<Record<string, string>>({});
+
+  // WhatsApp 3-stage notification tracking: which stages have been sent per order
+  const [whatsappSent, setWhatsappSent] = useState<Record<string, Set<'confirmed' | 'ready' | 'delivery' | 'pickup'>>>({});
+
+  // Delivery type modal for 3rd stage
+  const [deliveryTypeModalOrderId, setDeliveryTypeModalOrderId] = useState<string | null>(null);
 
   // Notify All Customers State
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
@@ -652,8 +655,16 @@ const Admin: React.FC = () => {
     }
   };
 
-  // WhatsApp: Build pre-filled deep link for an order
-  const buildWhatsAppLink = (order: Order): string => {
+  // Helper: detect if an order is a combo/festival order
+  const isComboOrder = (order: Order): boolean => {
+    return order.items.some((i) =>
+      (i.category && i.category.toLowerCase().includes('pheli')) ||
+      (i.name && (i.name.toLowerCase().includes('combo') || i.name.toLowerCase().includes('pheli')))
+    );
+  };
+
+  // WhatsApp Stage 1: Order Confirmed
+  const buildWhatsAppConfirmedLink = (order: Order): string => {
     const itemLines = order.items.map((i) => {
       const doz = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
       const pcs = doz * 12;
@@ -662,30 +673,88 @@ const Admin: React.FC = () => {
         : (i as any).price * doz;
       return `• ${i.name} — ${doz} dozen (${pcs} pcs) — ₹${lineTotal}`;
     }).join('\n');
-
     const deliveryFormatted = format(new Date(order.delivery_date), 'EEEE, MMM d');
-
     const message =
 `Hi ${order.customer_name} 👋
 
+✅ *Order Confirmed!*
 Your order from *Bam's Delicacies* has been confirmed! 🎉
 
 📦 *Order Summary:*
 ${itemLines}
 
 💰 *Total: ₹${order.total}*
-📅 *Delivery: ${deliveryFormatted}*
+📅 *Delivery Date: ${deliveryFormatted}*
 📍 *Address: ${order.customer_address}*
 
-Thank you for ordering! We'll see you soon. 🍽️
+We're preparing your delicacies with love! Sit tight 🍽️
 — Bam's Delicacies`;
-
     const encoded = encodeURIComponent(message);
     const phone = `91${order.customer_phone}`;
     return `https://wa.me/${phone}?text=${encoded}`;
   };
 
-  // WhatsApp: Confirm & notify — update status to 'confirmed' then open WhatsApp
+  // WhatsApp Stage 2: Order Ready
+  const buildWhatsAppReadyLink = (order: Order): string => {
+    const itemLines = order.items.map((i) => {
+      const doz = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
+      return `• ${i.name} — ${doz} dozen`;
+    }).join('\n');
+    const message =
+`Hi ${order.customer_name} 👋
+
+🍽️ *Your Order is Ready!*
+
+Your delicacies from *Bam's Delicacies* are freshly prepared and ready for you!
+
+📦 *Your Order:*
+${itemLines}
+
+Please *pick up your order* or let us know if you'd like to schedule delivery. 📞
+
+— Bam's Delicacies`;
+    const encoded = encodeURIComponent(message);
+    const phone = `91${order.customer_phone}`;
+    return `https://wa.me/${phone}?text=${encoded}`;
+  };
+
+  // WhatsApp Stage 3a: Out for Delivery
+  const buildWhatsAppDeliveryLink = (order: Order): string => {
+    const message =
+`Hi ${order.customer_name} 🚗
+
+Your order from *Bam's Delicacies* is *Out for Delivery!*
+
+🛵 We're on our way to:
+📍 ${order.customer_address}
+
+Please be available to receive your fresh delicacies!
+
+— Bam's Delicacies 🍽️`;
+    const encoded = encodeURIComponent(message);
+    const phone = `91${order.customer_phone}`;
+    return `https://wa.me/${phone}?text=${encoded}`;
+  };
+
+  // WhatsApp Stage 3b: Ready for Pickup
+  const buildWhatsAppPickupLink = (order: Order): string => {
+    const message =
+`Hi ${order.customer_name} 👋
+
+🎉 *Your order is ready for pickup!*
+
+Your delicacies from *Bam's Delicacies* are freshly made and ready to collect.
+
+Please come pick up your order at your convenience.
+📞 Call us if you need directions or have any questions!
+
+— Bam's Delicacies 🍽️`;
+    const encoded = encodeURIComponent(message);
+    const phone = `91${order.customer_phone}`;
+    return `https://wa.me/${phone}?text=${encoded}`;
+  };
+
+  // WhatsApp Stage 1: Confirm & notify — update status to 'confirmed' then open WhatsApp
   const handleConfirmAndNotify = async (order: Order) => {
     try {
       setConfirmingOrderId(order.id);
@@ -703,10 +772,17 @@ Thank you for ordering! We'll see you soon. 🍽️
         prev.map((o) => (o.id === order.id ? { ...o, status: 'confirmed' } : o))
       );
 
-      // 3. Open WhatsApp
-      window.open(buildWhatsAppLink(order), '_blank');
+      // 3. Mark stage as sent
+      setWhatsappSent((prev) => {
+        const updated = { ...prev };
+        updated[order.id] = new Set([...(updated[order.id] || []), 'confirmed']);
+        return updated;
+      });
 
-      // 4. Show success toast
+      // 4. Open WhatsApp
+      window.open(buildWhatsAppConfirmedLink(order), '_blank');
+
+      // 5. Show success toast
       showToast('Order confirmed! WhatsApp opened ✓', 'success');
     } catch (err) {
       console.error('Failed to confirm order:', err);
@@ -716,19 +792,39 @@ Thank you for ordering! We'll see you soon. 🍽️
     }
   };
 
-  // WhatsApp: Send custom update message
-  const handleSendCustomMessage = (order: Order) => {
-    const text = customMsgText[order.id] || '';
-    if (!text.trim()) return;
+  // WhatsApp Stage 2: Order Ready
+  const handleOrderReady = (order: Order) => {
+    setWhatsappSent((prev) => {
+      const updated = { ...prev };
+      updated[order.id] = new Set([...(updated[order.id] || []), 'ready']);
+      return updated;
+    });
+    window.open(buildWhatsAppReadyLink(order), '_blank');
+    showToast('"Order Ready" WhatsApp sent ✓', 'success');
+  };
 
-    const encoded = encodeURIComponent(text.trim());
-    const phone = `91${order.customer_phone}`;
-    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+  // WhatsApp Stage 3: Out for Delivery
+  const handleOutForDelivery = (order: Order) => {
+    setDeliveryTypeModalOrderId(null);
+    setWhatsappSent((prev) => {
+      const updated = { ...prev };
+      updated[order.id] = new Set([...(updated[order.id] || []), 'delivery']);
+      return updated;
+    });
+    window.open(buildWhatsAppDeliveryLink(order), '_blank');
+    showToast('"Out for Delivery" WhatsApp sent ✓', 'success');
+  };
 
-    // Collapse textarea and clear text after sending
-    setCustomMsgOrderId(null);
-    setCustomMsgText((prev) => ({ ...prev, [order.id]: '' }));
-    showToast('WhatsApp opened with custom message ✓', 'success');
+  // WhatsApp Stage 3: Ready for Pickup
+  const handleReadyForPickup = (order: Order) => {
+    setDeliveryTypeModalOrderId(null);
+    setWhatsappSent((prev) => {
+      const updated = { ...prev };
+      updated[order.id] = new Set([...(updated[order.id] || []), 'pickup']);
+      return updated;
+    });
+    window.open(buildWhatsAppPickupLink(order), '_blank');
+    showToast('"Ready for Pickup" WhatsApp sent ✓', 'success');
   };
 
   // Send push notification to all subscribed customers
@@ -779,6 +875,13 @@ Thank you for ordering! We'll see you soon. 🍽️
       return 0;
     });
   const slotsCount = filteredOrders.length;
+
+  // Stat card computations
+  const comboOrders = filteredOrders.filter(isComboOrder);
+  const normalOrders = filteredOrders.filter((o) => !isComboOrder(o));
+  const comboRevenue = comboOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const normalRevenue = normalOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+
   const getActiveLimit = () => {
     const activeOpt = filterOptions.find(o => o.dbStr === activeFilterDateStr);
     if (activeOpt) {
@@ -867,17 +970,6 @@ Thank you for ordering! We'll see you soon. 🍽️
           {/* Navigation links */}
           <nav className="p-4 space-y-2 mt-6">
             <button
-              onClick={() => setActiveTab(0)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
-                activeTab === 0
-                  ? 'bg-surface-2 border-primary text-primary'
-                  : 'border-transparent text-text/70 hover:text-text hover:bg-surface-2/40'
-              }`}
-            >
-              <span>🍱</span>
-              <span>Products</span>
-            </button>
-            <button
               onClick={() => setActiveTab(1)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
                 activeTab === 1
@@ -887,6 +979,20 @@ Thank you for ordering! We'll see you soon. 🍽️
             >
               <span>📋</span>
               <span>Orders</span>
+              {filteredOrders.length > 0 && (
+                <span className="ml-auto bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full">{filteredOrders.length}</span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab(0)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
+                activeTab === 0
+                  ? 'bg-surface-2 border-primary text-primary'
+                  : 'border-transparent text-text/70 hover:text-text hover:bg-surface-2/40'
+              }`}
+            >
+              <span>🍱</span>
+              <span>Products</span>
             </button>
             <Link
               to="/"
@@ -1598,6 +1704,43 @@ Thank you for ordering! We'll see you soon. 🍽️
               </div>
             </div>
 
+            {/* ── Stat Cards: Combo vs Normal Orders ── */}
+            <div className="grid grid-cols-2 gap-4 mb-6 md:mb-8 select-none">
+              {/* Combo Orders Card */}
+              <div className="relative overflow-hidden bg-surface border border-border rounded-2xl p-5 shadow-card flex flex-col gap-2 group hover:border-primary/40 transition-all duration-300">
+                <div className="absolute inset-0 opacity-5" style={{ background: 'radial-gradient(circle at top right, #C8511B 0%, transparent 70%)' }} />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-sans font-bold uppercase tracking-widest text-muted">Combo Orders</span>
+                  <span className="text-2xl">🎁</span>
+                </div>
+                <div className="flex items-end gap-2 mt-1">
+                  <span className="font-serif font-black text-4xl text-heading leading-none">{comboOrders.length}</span>
+                  <span className="text-xs text-muted font-sans mb-1">orders</span>
+                </div>
+                {comboRevenue > 0 && (
+                  <span className="text-xs font-bold text-primary font-sans">₹{comboRevenue.toLocaleString()} revenue</span>
+                )}
+                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-yellow rounded-b-2xl" style={{ width: `${filteredOrders.length > 0 ? (comboOrders.length / filteredOrders.length) * 100 : 0}%`, transition: 'width 0.6s ease' }} />
+              </div>
+
+              {/* Normal Orders Card */}
+              <div className="relative overflow-hidden bg-surface border border-border rounded-2xl p-5 shadow-card flex flex-col gap-2 group hover:border-success/40 transition-all duration-300">
+                <div className="absolute inset-0 opacity-5" style={{ background: 'radial-gradient(circle at top right, #22C55E 0%, transparent 70%)' }} />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-sans font-bold uppercase tracking-widest text-muted">Normal Orders</span>
+                  <span className="text-2xl">🛍️</span>
+                </div>
+                <div className="flex items-end gap-2 mt-1">
+                  <span className="font-serif font-black text-4xl text-heading leading-none">{normalOrders.length}</span>
+                  <span className="text-xs text-muted font-sans mb-1">orders</span>
+                </div>
+                {normalRevenue > 0 && (
+                  <span className="text-xs font-bold text-success font-sans">₹{normalRevenue.toLocaleString()} revenue</span>
+                )}
+                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-success to-emerald-400 rounded-b-2xl" style={{ width: `${filteredOrders.length > 0 ? (normalOrders.length / filteredOrders.length) * 100 : 0}%`, transition: 'width 0.6s ease' }} />
+              </div>
+            </div>
+
             {/* Dynamic Orders Limit Configuration Card */}
             <div className="bg-surface border border-border p-6 rounded-2xl mb-8 flex flex-col gap-6 shadow-card text-left select-none animate-fade-slide-up">
               <div>
@@ -1795,49 +1938,59 @@ Thank you for ordering! We'll see you soon. 🍽️
                         📍 {ord.customer_address}
                       </p>
 
-                      {/* WhatsApp action buttons */}
-                      {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
-                        <div className="flex flex-col gap-2 pt-1 border-t border-border/50">
+                      {/* ── WhatsApp 3-Stage Notification Panel (mobile) ── */}
+                      {ord.status !== 'cancelled' && (
+                        <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted/60 select-none">WhatsApp Notifications</p>
+
+                          {/* Stage 1: Confirmed */}
                           <button
                             onClick={() => handleConfirmAndNotify(ord)}
                             disabled={confirmingOrderId === ord.id}
-                            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold text-white transition-all duration-200 disabled:opacity-50 active:scale-95"
-                            style={{ backgroundColor: confirmingOrderId === ord.id ? '#9ca3af' : '#25D366' }}
+                            className={`w-full inline-flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-50 active:scale-[0.98] border ${
+                              whatsappSent[ord.id]?.has('confirmed')
+                                ? 'bg-[#25D366]/10 border-[#25D366]/40 text-[#1a9e4a]'
+                                : 'bg-surface-2 border-border text-text hover:border-[#25D366]/50 hover:text-[#1a9e4a]'
+                            }`}
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                            </svg>
-                            {confirmingOrderId === ord.id ? 'Confirming...' : 'Confirm & Notify on WhatsApp'}
-                          </button>
-                          <button
-                            onClick={() => setCustomMsgOrderId(customMsgOrderId === ord.id ? null : ord.id)}
-                            className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-bold bg-surface-2 border border-border text-text hover:border-primary hover:text-primary transition-all duration-200"
-                          >
-                            <span>📣</span> Send Custom Update
-                          </button>
-                          {customMsgOrderId === ord.id && (
-                            <div className="flex flex-col gap-2 animate-fade-slide-up">
-                              <textarea
-                                rows={3}
-                                placeholder="Type a custom message..."
-                                value={customMsgText[ord.id] || ''}
-                                onChange={(e) => setCustomMsgText((prev) => ({ ...prev, [ord.id]: e.target.value }))}
-                                className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2.5 text-sm text-text font-sans focus:outline-none focus:border-primary resize-none"
-                              />
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleSendCustomMessage(ord)}
-                                  disabled={!(customMsgText[ord.id] || '').trim()}
-                                  className="flex-1 py-2.5 rounded-full text-sm font-bold text-white disabled:opacity-40 active:scale-95 transition-all"
-                                  style={{ backgroundColor: '#25D366' }}
-                                >Send</button>
-                                <button
-                                  onClick={() => setCustomMsgOrderId(null)}
-                                  className="flex-1 py-2.5 rounded-full text-sm font-bold bg-surface-2 border border-border text-muted"
-                                >Cancel</button>
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">✅</span>
+                              <span>{confirmingOrderId === ord.id ? 'Sending...' : 'Order Confirmed'}</span>
                             </div>
-                          )}
+                            {whatsappSent[ord.id]?.has('confirmed') ? <span className="text-[10px] text-[#25D366] font-bold">SENT</span> : <span className="text-[10px] text-muted">Tap to send</span>}
+                          </button>
+
+                          {/* Stage 2: Ready */}
+                          <button
+                            onClick={() => handleOrderReady(ord)}
+                            className={`w-full inline-flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 active:scale-[0.98] border ${
+                              whatsappSent[ord.id]?.has('ready')
+                                ? 'bg-yellow/10 border-yellow/40 text-yellow'
+                                : 'bg-surface-2 border-border text-text hover:border-yellow/50 hover:text-yellow'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">🍽️</span>
+                              <span>Order Ready</span>
+                            </div>
+                            {whatsappSent[ord.id]?.has('ready') ? <span className="text-[10px] text-yellow font-bold">SENT</span> : <span className="text-[10px] text-muted">Tap to send</span>}
+                          </button>
+
+                          {/* Stage 3: Delivery / Pickup */}
+                          <button
+                            onClick={() => setDeliveryTypeModalOrderId(ord.id)}
+                            className={`w-full inline-flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 active:scale-[0.98] border ${
+                              whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')
+                                ? 'bg-primary/10 border-primary/40 text-primary'
+                                : 'bg-surface-2 border-border text-text hover:border-primary/50 hover:text-primary'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">{whatsappSent[ord.id]?.has('pickup') ? '🏠' : '🚗'}</span>
+                              <span>{whatsappSent[ord.id]?.has('pickup') ? 'Ready for Pickup' : 'Out for Delivery'}</span>
+                            </div>
+                            {(whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')) ? <span className="text-[10px] text-primary font-bold">SENT</span> : <span className="text-[10px] text-muted">Choose type</span>}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -1918,47 +2071,58 @@ Thank you for ordering! We'll see you soon. 🍽️
                               </select>
                             </td>
                             <td className="py-4 px-6">
-                              <div className="flex flex-col gap-2 min-w-[160px]">
-                                {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
+                              {/* ── WhatsApp 3-Stage Notification (Desktop) ── */}
+                              {ord.status !== 'cancelled' ? (
+                                <div className="flex flex-col gap-1.5 min-w-[190px]">
+                                  {/* Stage 1: Confirmed */}
                                   <button
                                     onClick={() => handleConfirmAndNotify(ord)}
                                     disabled={confirmingOrderId === ord.id}
-                                    title="Mark as confirmed and open WhatsApp to notify customer"
-                                    className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full text-xs font-bold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.03] active:scale-95"
-                                    style={{ backgroundColor: confirmingOrderId === ord.id ? '#9ca3af' : '#25D366' }}
-                                    onMouseEnter={(e) => { if (confirmingOrderId !== ord.id) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#1ebe57'; }}
-                                    onMouseLeave={(e) => { if (confirmingOrderId !== ord.id) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#25D366'; }}
+                                    title="Send order confirmation via WhatsApp"
+                                    className={`w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 border ${
+                                      whatsappSent[ord.id]?.has('confirmed')
+                                        ? 'bg-[#25D366]/10 border-[#25D366]/40 text-[#1a9e4a]'
+                                        : 'bg-surface-2 border-border text-text hover:border-[#25D366]/50 hover:bg-[#25D366]/5'
+                                    }`}
                                   >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                                    </svg>
-                                    {confirmingOrderId === ord.id ? 'Confirming...' : 'Confirm & Notify'}
+                                    <span className="flex items-center gap-1.5"><span>✅</span>{confirmingOrderId === ord.id ? 'Sending...' : 'Confirmed'}</span>
+                                    {whatsappSent[ord.id]?.has('confirmed') && <span className="text-[9px] font-black text-[#25D366] bg-[#25D366]/10 px-1.5 py-0.5 rounded-full">SENT</span>}
                                   </button>
-                                )}
-                                {ord.status !== 'delivered' && ord.status !== 'cancelled' && (
+
+                                  {/* Stage 2: Ready */}
                                   <button
-                                    onClick={() => { setCustomMsgOrderId(customMsgOrderId === ord.id ? null : ord.id); }}
-                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold bg-surface-2 border border-border text-text hover:border-primary hover:text-primary transition-all duration-200"
+                                    onClick={() => handleOrderReady(ord)}
+                                    title="Notify customer that order is ready"
+                                    className={`w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 border ${
+                                      whatsappSent[ord.id]?.has('ready')
+                                        ? 'bg-yellow/10 border-yellow/40 text-yellow'
+                                        : 'bg-surface-2 border-border text-text hover:border-yellow/50 hover:bg-yellow/5'
+                                    }`}
                                   >
-                                    <span>📣</span><span>Send Update</span>
+                                    <span className="flex items-center gap-1.5"><span>🍽️</span>Ready</span>
+                                    {whatsappSent[ord.id]?.has('ready') && <span className="text-[9px] font-black text-yellow bg-yellow/10 px-1.5 py-0.5 rounded-full">SENT</span>}
                                   </button>
-                                )}
-                                {customMsgOrderId === ord.id && (
-                                  <div className="mt-1 flex flex-col gap-2 animate-fade-slide-up">
-                                    <textarea
-                                      rows={3}
-                                      placeholder="Type a custom message..."
-                                      value={customMsgText[ord.id] || ''}
-                                      onChange={(e) => setCustomMsgText((prev) => ({ ...prev, [ord.id]: e.target.value }))}
-                                      className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-xs text-text font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 resize-none placeholder:text-muted/60"
-                                    />
-                                    <div className="flex gap-2">
-                                      <button onClick={() => handleSendCustomMessage(ord)} disabled={!(customMsgText[ord.id] || '').trim()} className="flex-1 px-3 py-1.5 rounded-full text-xs font-bold text-white disabled:opacity-40 hover:scale-[1.02] active:scale-95 transition-all" style={{ backgroundColor: '#25D366' }}>Send</button>
-                                      <button onClick={() => setCustomMsgOrderId(null)} className="flex-1 px-3 py-1.5 rounded-full text-xs font-bold bg-surface-2 border border-border text-muted">Cancel</button>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
+
+                                  {/* Stage 3: Delivery / Pickup */}
+                                  <button
+                                    onClick={() => setDeliveryTypeModalOrderId(ord.id)}
+                                    title="Choose delivery or pickup notification"
+                                    className={`w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 border ${
+                                      whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')
+                                        ? 'bg-primary/10 border-primary/40 text-primary'
+                                        : 'bg-surface-2 border-border text-text hover:border-primary/50 hover:bg-primary/5'
+                                    }`}
+                                  >
+                                    <span className="flex items-center gap-1.5">
+                                      <span>{whatsappSent[ord.id]?.has('pickup') ? '🏠' : '🚗'}</span>
+                                      <span>{whatsappSent[ord.id]?.has('pickup') ? 'Pickup' : 'Delivery'}</span>
+                                    </span>
+                                    {(whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')) && <span className="text-[9px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">SENT</span>}
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-muted/50 text-xs font-sans">—</span>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -1975,15 +2139,6 @@ Thank you for ordering! We'll see you soon. 🍽️
       {/* ── Mobile Bottom Tab Bar (visible only on mobile) ───────── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border flex items-stretch select-none shadow-2xl">
         <button
-          onClick={() => setActiveTab(0)}
-          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
-            activeTab === 0 ? 'text-primary border-t-2 border-primary -mt-px' : 'text-muted/70'
-          }`}
-        >
-          <span className="text-xl">🍱</span>
-          <span className="font-sans">Products</span>
-        </button>
-        <button
           onClick={() => setActiveTab(1)}
           className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
             activeTab === 1 ? 'text-primary border-t-2 border-primary -mt-px' : 'text-muted/70'
@@ -1991,6 +2146,15 @@ Thank you for ordering! We'll see you soon. 🍽️
         >
           <span className="text-xl">📋</span>
           <span className="font-sans">Orders</span>
+        </button>
+        <button
+          onClick={() => setActiveTab(0)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
+            activeTab === 0 ? 'text-primary border-t-2 border-primary -mt-px' : 'text-muted/70'
+          }`}
+        >
+          <span className="text-xl">🍱</span>
+          <span className="font-sans">Products</span>
         </button>
         <Link
           to="/"
@@ -2007,6 +2171,61 @@ Thank you for ordering! We'll see you soon. 🍽️
           <span className="font-sans">Sign Out</span>
         </button>
       </nav>
+
+      {/* ── Delivery Type Choice Modal ─────────────────────────────── */}
+      {deliveryTypeModalOrderId && (() => {
+        const ord = filteredOrders.find(o => o.id === deliveryTypeModalOrderId);
+        if (!ord) return null;
+        return (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              onClick={() => setDeliveryTypeModalOrderId(null)}
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            />
+            <div className="relative z-10 w-full max-w-sm bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden animate-fade-slide-up">
+              <div className="px-6 py-5 border-b border-border flex justify-between items-center">
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-heading">Stage 3: Notify Customer</h3>
+                  <p className="text-muted text-xs font-sans mt-0.5">{ord.customer_name}</p>
+                </div>
+                <button
+                  onClick={() => setDeliveryTypeModalOrderId(null)}
+                  className="p-1.5 rounded-lg bg-surface-2 border border-border text-text hover:text-primary transition-all duration-200"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6 flex flex-col gap-4">
+                <p className="text-sm text-text/80 font-sans">Choose the appropriate notification for this order:</p>
+
+                {/* Out for Delivery */}
+                <button
+                  onClick={() => handleOutForDelivery(ord)}
+                  className="group w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-primary/60 bg-surface-2 hover:bg-primary/5 transition-all duration-200 text-left"
+                >
+                  <span className="text-3xl group-hover:scale-110 transition-transform duration-200">🚗</span>
+                  <div>
+                    <p className="font-bold text-text text-sm">Out for Delivery</p>
+                    <p className="text-muted text-xs mt-0.5">Customer's order is on its way to their address</p>
+                  </div>
+                </button>
+
+                {/* Ready for Pickup */}
+                <button
+                  onClick={() => handleReadyForPickup(ord)}
+                  className="group w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-yellow/60 bg-surface-2 hover:bg-yellow/5 transition-all duration-200 text-left"
+                >
+                  <span className="text-3xl group-hover:scale-110 transition-transform duration-200">🏠</span>
+                  <div>
+                    <p className="font-bold text-text text-sm">Ready for Pickup</p>
+                    <p className="text-muted text-xs mt-0.5">Ask customer to come collect their order</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       {isNotifyModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
