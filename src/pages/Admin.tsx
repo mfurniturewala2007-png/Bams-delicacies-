@@ -329,11 +329,13 @@ const Admin: React.FC = () => {
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `menu-images/${fileName}`;
 
-      // ACTION NEEDED: create bucket "product-images" in Supabase dashboard and set to PUBLIC
-      // Upload to bucket
+      // Upload to bucket with explicit content type
       const { error } = await supabase.storage
         .from('product-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          contentType: file.type,
+          duplex: 'half'
+        });
 
       if (error) throw error;
 
@@ -343,10 +345,10 @@ const Admin: React.FC = () => {
         .getPublicUrl(filePath);
 
       setUploadedImageUrl(urlData.publicUrl);
-    } catch (err) {
-      // ACTION NEEDED: create bucket "product-images" in Supabase dashboard if upload fails
-      console.warn('Storage uploads offline. Visual previews generated locally.', err);
-      // Generate standard plate fallback url for demo
+      showToast('Image uploaded successfully! ✓', 'success');
+    } catch (err: any) {
+      console.error('Storage upload failed:', err);
+      showToast(`Upload failed: ${err.message || 'Check bucket configuration'}`, 'error');
       setUploadedImageUrl(null);
     } finally {
       setIsUploadingImage(false);
@@ -369,8 +371,8 @@ const Admin: React.FC = () => {
     setFormErrors({});
 
     try {
-      // Use uploaded image URL, preview, or default placeholder if empty
-      const finalImgUrl = uploadedImageUrl || imagePreview || null;
+      // Prevent saving large base64 data URLs to Supabase database
+      const finalImgUrl = uploadedImageUrl && !uploadedImageUrl.startsWith('data:') ? uploadedImageUrl : null;
 
       const newProduct = {
         name: newProdName.trim(),
@@ -495,7 +497,10 @@ const Admin: React.FC = () => {
 
       const { error } = await supabase.storage
         .from('product-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          contentType: file.type,
+          duplex: 'half'
+        });
 
       if (error) throw error;
 
@@ -504,8 +509,11 @@ const Admin: React.FC = () => {
         .getPublicUrl(filePath);
 
       setEditUploadedImageUrl(urlData.publicUrl);
-    } catch (err) {
-      console.warn('Storage upload failed, using local preview.', err);
+      showToast('Image uploaded successfully! ✓', 'success');
+    } catch (err: any) {
+      console.error('Storage upload failed:', err);
+      showToast(`Upload failed: ${err.message || 'Check bucket configuration'}`, 'error');
+      setEditUploadedImageUrl(null);
     } finally {
       setIsUploadingEditImage(false);
     }
@@ -528,7 +536,8 @@ const Admin: React.FC = () => {
     setFormErrors({});
 
     try {
-      const finalImgUrl = editUploadedImageUrl || editImagePreview || null;
+      // Prevent saving large base64 data URLs to Supabase database
+      const finalImgUrl = editUploadedImageUrl && !editUploadedImageUrl.startsWith('data:') ? editUploadedImageUrl : null;
 
       const updatedProduct = {
         name: editProdName.trim(),
@@ -1196,23 +1205,48 @@ Thank you for ordering! We'll see you soon. 🍽️
                       <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
                         Product Image
                       </label>
-                      <div className="flex gap-4 items-center">
-                        <label className="bg-surface-2 border border-border border-dashed hover:border-primary rounded-xl px-4 py-3 cursor-pointer text-xs font-bold text-text hover:text-primary transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
+                      <div className="space-y-3">
+                        <div className="flex gap-4 items-center">
+                          <label className="bg-surface-2 border border-border border-dashed hover:border-primary rounded-xl px-4 py-3 cursor-pointer text-xs font-bold text-text hover:text-primary transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageFileChange}
+                              className="hidden"
+                            />
+                            <span>📂 Choose Image File</span>
+                          </label>
+                          
+                          {/* Status indicator */}
+                          {isUploadingImage && (
+                            <span className="text-xs text-primary animate-pulse">Uploading file...</span>
+                          )}
+                          {uploadedImageUrl && uploadedImageUrl.startsWith('http') && uploadedImageUrl.includes('supabase') && (
+                            <span className="text-xs text-success">✓ Upload success!</span>
+                          )}
+                        </div>
+
+                        {/* Direct URL Input Option */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted flex-shrink-0">— OR —</span>
                           <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageFileChange}
-                            className="hidden"
+                            type="url"
+                            placeholder="Paste Direct Image URL (e.g. https://example.com/pic.jpg)"
+                            value={uploadedImageUrl && !uploadedImageUrl.startsWith('data:') ? uploadedImageUrl : ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setUploadedImageUrl(val || null);
+                              setImagePreview(val || null);
+                            }}
+                            className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text text-xs font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250"
                           />
-                          <span>📂 Choose Image File</span>
-                        </label>
-                        
-                        {/* Status indicator */}
-                        {isUploadingImage && (
-                          <span className="text-xs text-primary animate-pulse">Uploading file...</span>
-                        )}
-                        {uploadedImageUrl && (
-                          <span className="text-xs text-success">✓ Upload success!</span>
+                        </div>
+
+                        {/* Direct URL Explanatory Tip */}
+                        {(!uploadedImageUrl || !uploadedImageUrl.includes('supabase')) && (
+                          <div className="text-[10px] text-muted leading-relaxed bg-surface-2/30 p-3 rounded-lg border border-border/30">
+                            💡 <strong>Tip:</strong> You can upload a file, or just paste a direct image URL (from Postimages, Imgur, Discord, etc.) in the field above!
+                          </div>
                         )}
                       </div>
 
@@ -1408,23 +1442,48 @@ Thank you for ordering! We'll see you soon. 🍽️
                       <label className="block text-xs font-sans font-bold text-text/80 uppercase tracking-wider mb-2">
                         Product Image
                       </label>
-                      <div className="flex gap-4 items-center">
-                        <label className="bg-surface-2 border border-border border-dashed hover:border-primary rounded-xl px-4 py-3 cursor-pointer text-xs font-bold text-text hover:text-primary transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
+                      <div className="space-y-3">
+                        <div className="flex gap-4 items-center">
+                          <label className="bg-surface-2 border border-border border-dashed hover:border-primary rounded-xl px-4 py-3 cursor-pointer text-xs font-bold text-text hover:text-primary transition-all duration-200 flex-shrink-0 flex items-center gap-2 select-none">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleEditImageFileChange}
+                              className="hidden"
+                            />
+                            <span>📂 Choose Image File</span>
+                          </label>
+                          
+                          {/* Status indicator */}
+                          {isUploadingEditImage && (
+                            <span className="text-xs text-primary animate-pulse">Uploading file...</span>
+                          )}
+                          {editUploadedImageUrl && editUploadedImageUrl.startsWith('http') && editUploadedImageUrl.includes('supabase') && (
+                            <span className="text-xs text-success">✓ Upload success!</span>
+                          )}
+                        </div>
+
+                        {/* Direct URL Input Option */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted flex-shrink-0">— OR —</span>
                           <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleEditImageFileChange}
-                            className="hidden"
+                            type="url"
+                            placeholder="Paste Direct Image URL (e.g. https://example.com/pic.jpg)"
+                            value={editUploadedImageUrl && !editUploadedImageUrl.startsWith('data:') ? editUploadedImageUrl : ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setEditUploadedImageUrl(val || null);
+                              setEditImagePreview(val || null);
+                            }}
+                            className="w-full bg-surface-2 border border-border rounded-xl px-4 py-2.5 text-text text-xs font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-250"
                           />
-                          <span>📂 Choose Image File</span>
-                        </label>
-                        
-                        {/* Status indicator */}
-                        {isUploadingEditImage && (
-                          <span className="text-xs text-primary animate-pulse">Uploading file...</span>
-                        )}
-                        {editUploadedImageUrl && (
-                          <span className="text-xs text-success">✓ Upload success!</span>
+                        </div>
+
+                        {/* Direct URL Explanatory Tip */}
+                        {(!editUploadedImageUrl || !editUploadedImageUrl.includes('supabase')) && (
+                          <div className="text-[10px] text-muted leading-relaxed bg-surface-2/30 p-3 rounded-lg border border-border/30">
+                            💡 <strong>Tip:</strong> You can upload a file, or just paste a direct image URL (from Postimages, Imgur, Discord, etc.) in the field above!
+                          </div>
                         )}
                       </div>
 
