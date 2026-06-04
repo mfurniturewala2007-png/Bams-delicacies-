@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface CartSidebarProps {
@@ -9,6 +10,7 @@ interface CartSidebarProps {
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { items, updateQty, totalAmount, removeItem } = useCart();
+  const { profile, openAuthModal } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,6 +18,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
 
   const handleProceedToOrder = () => {
     onClose();
+    if (!profile) {
+      openAuthModal();
+      return;
+    }
     if (location.pathname === '/pheli-raat') {
       const orderSection = document.getElementById('checkout-festive');
       if (orderSection) {

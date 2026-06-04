@@ -163,16 +163,14 @@ const AuthModal: React.FC = () => {
       {/* Modal Card */}
       <div className="w-full max-w-[440px] bg-surface border border-border p-5 md:p-8 rounded-2xl shadow-2xl relative z-10 text-center animate-fade-slide-up flex flex-col max-h-[90vh] overflow-y-auto">
 
-        {/* Close Button — only when logged in and editing */}
-        {profile && (
-          <button
-            onClick={closeAuthModal}
-            className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200"
-            aria-label="Close modal"
-          >
-            ✕
-          </button>
-        )}
+        {/* Close Button — always shown so users can close the modal */}
+        <button
+          onClick={closeAuthModal}
+          className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200"
+          aria-label="Close modal"
+        >
+          ✕
+        </button>
 
         <img
           src="/logo.jpeg"

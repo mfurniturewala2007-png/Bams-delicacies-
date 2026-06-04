@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !localStorage.getItem('bams_user_phone')); // Synchronously check local session to prevent layout flashes on load
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false); // Start with modal closed
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
 
   // Restore user session from localStorage on mount
@@ -38,20 +38,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           if (data) {
             setProfile(data as UserProfile);
-            setIsAuthModalOpen(false);
           } else {
             // Clean up stale phone number if not found in db
             localStorage.removeItem('bams_user_phone');
-            setIsAuthModalOpen(true);
           }
         } catch (err) {
           console.warn('Failed to restore user session:', err);
-          setIsAuthModalOpen(true);
         }
       };
       restoreSession();
-    } else {
-      setIsAuthModalOpen(true);
     }
   }, []);
 
@@ -63,11 +58,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const closeAuthModal = () => {
-    // Only allow closing if the user is logged in
-    if (profile) {
-      setIsAuthModalOpen(false);
-      setIsEditingProfile(false);
-    }
+    setIsAuthModalOpen(false);
+    setIsEditingProfile(false);
   };
 
   // SIGN UP — insert new profile row, phone is the unique key
@@ -117,12 +109,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthModalOpen(false);
   };
 
-  // SIGN OUT — clear profile, clear local session, reopen modal
+  // SIGN OUT — clear profile, clear local session
   const signOut = () => {
     localStorage.removeItem('bams_user_phone');
     setProfile(null);
     setIsEditingProfile(false);
-    setIsAuthModalOpen(true);
+    setIsAuthModalOpen(false);
   };
 
   // UPDATE PROFILE — edit existing row by phone
