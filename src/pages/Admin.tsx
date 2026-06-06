@@ -110,6 +110,7 @@ const Admin: React.FC = () => {
   // Orders Tab States
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [orderSubTab, setOrderSubTab] = useState<'active' | 'pending' | 'confirmed' | 'cancelled'>('active');
 
   // WhatsApp Confirmation: track which orderId is currently being confirmed
   const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
@@ -721,6 +722,26 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Orders CRUD: Delete Cancelled Order
+  const handleDeleteOrder = async (id: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this cancelled order?')) {
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+
+        setOrders((prev) => prev.filter((o) => o.id !== id));
+        showToast('Cancelled order deleted successfully ✓', 'success');
+      } catch (err: any) {
+        console.error('Failed to delete order:', err);
+        alert(`Error deleting order: ${err?.message || 'Please try again.'}`);
+      }
+    }
+  };
+
 
 
   // WhatsApp Stage 1: Order Confirmed
@@ -934,7 +955,27 @@ Please come pick up your order at your convenience.
       if (b.status === 'payment_pending' && a.status !== 'payment_pending') return 1;
       return 0;
     });
-  const slotsCount = filteredOrders.length;
+  
+  // Calculate slotsCount as non-cancelled orders matching the selected date
+  const slotsCount = filteredOrders.filter(o => o.status !== 'cancelled').length;
+
+  // Filter orders for the current sub-tab
+  const getSubTabOrders = (ordersList: Order[]) => {
+    switch (orderSubTab) {
+      case 'active':
+        return ordersList.filter(o => o.status !== 'cancelled');
+      case 'pending':
+        return ordersList.filter(o => o.status === 'pending' || o.status === 'payment_pending');
+      case 'confirmed':
+        return ordersList.filter(o => o.status === 'confirmed' || o.status === 'delivered');
+      case 'cancelled':
+        return ordersList.filter(o => o.status === 'cancelled');
+      default:
+        return ordersList;
+    }
+  };
+
+  const displayedOrders = getSubTabOrders(filteredOrders);
 
 
   const getActiveLimit = () => {
@@ -1034,8 +1075,8 @@ Please come pick up your order at your convenience.
             >
               <span>📋</span>
               <span>Orders</span>
-              {filteredOrders.length > 0 && (
-                <span className="ml-auto bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full">{filteredOrders.length}</span>
+              {filteredOrders.filter(o => o.status !== 'cancelled').length > 0 && (
+                <span className="ml-auto bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full">{filteredOrders.filter(o => o.status !== 'cancelled').length}</span>
               )}
             </button>
             <button
@@ -1880,13 +1921,42 @@ Please come pick up your order at your convenience.
                 );
               })}
             </div>
+            
+            {/* Order Status Sub-Tabs */}
+            <div className="flex border-b border-border/60 mb-6 select-none overflow-x-auto scrollbar-none flex-nowrap gap-1">
+              {[
+                { id: 'active', label: 'All Active', count: filteredOrders.filter(o => o.status !== 'cancelled').length, icon: '📋' },
+                { id: 'pending', label: 'Pending', count: filteredOrders.filter(o => o.status === 'pending' || o.status === 'payment_pending').length, icon: '⏳' },
+                { id: 'confirmed', label: 'Confirmed', count: filteredOrders.filter(o => o.status === 'confirmed' || o.status === 'delivered').length, icon: '✅' },
+                { id: 'cancelled', label: 'Cancelled', count: filteredOrders.filter(o => o.status === 'cancelled').length, icon: '❌' },
+              ].map((tab) => {
+                const isActive = orderSubTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setOrderSubTab(tab.id as any)}
+                    className={`flex items-center gap-2 px-4 py-3 border-b-2 font-sans text-xs font-bold uppercase tracking-wider transition-all duration-200 -mb-px flex-shrink-0 ${
+                      isActive
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted/70 hover:text-text hover:border-border'
+                    }`}
+                  >
+                    <span>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-primary text-white' : 'bg-surface-2 text-muted'}`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Orders display: cards on mobile, table on desktop */}
             {ordersLoading ? (
               <div className="flex-grow flex items-center justify-center py-20 select-none">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-transparent"></div>
               </div>
-            ) : filteredOrders.length === 0 ? (
+            ) : displayedOrders.length === 0 ? (
               <div className="flex-grow flex flex-col items-center justify-center text-center py-24 border border-dashed border-border rounded-2xl bg-surface/30 select-none">
                 <span className="text-5xl animate-float" style={{ animationDuration: '3.5s' }}>🎉</span>
                 <h3 className="font-serif font-bold text-xl text-heading mt-4">No orders yet</h3>
@@ -1896,7 +1966,7 @@ Please come pick up your order at your convenience.
               <>
                 {/* ── Mobile order cards (hidden on md+) ── */}
                 <div className="md:hidden flex flex-col gap-4">
-                  {filteredOrders.map((ord, idx) => {
+                  {displayedOrders.map((ord, idx) => {
                     const hasCombo = isComboOrder(ord) && ord.delivery_date === festivalDeliveryDate;
                     return (
                     <div
@@ -2027,6 +2097,19 @@ Please come pick up your order at your convenience.
                           </button>
                         </div>
                       )}
+
+                      {/* Delete action for cancelled orders (mobile) */}
+                      {ord.status === 'cancelled' && (
+                        <div className="pt-2 border-t border-border/50">
+                          <button
+                            onClick={() => handleDeleteOrder(ord.id)}
+                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-error/10 hover:bg-error/20 border border-error/30 text-error transition-all duration-200 active:scale-[0.98]"
+                          >
+                            <span>🗑️</span>
+                            <span>Delete Order</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                     );
                   })}
@@ -2050,7 +2133,7 @@ Please come pick up your order at your convenience.
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/60 text-sm font-sans">
-                        {filteredOrders.map((ord, idx) => {
+                        {displayedOrders.map((ord, idx) => {
                           const hasCombo = isComboOrder(ord) && ord.delivery_date === festivalDeliveryDate;
                           return (
                           <tr
@@ -2171,7 +2254,14 @@ Please come pick up your order at your convenience.
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-muted/50 text-xs font-sans">—</span>
+                                <button
+                                  onClick={() => handleDeleteOrder(ord.id)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-error/10 hover:bg-error/20 border border-error/30 text-error transition-all duration-200"
+                                  title="Delete Cancelled Order"
+                                >
+                                  <span>🗑️</span>
+                                  <span>Delete</span>
+                                </button>
                               )}
                             </td>
                           </tr>
@@ -2225,7 +2315,7 @@ Please come pick up your order at your convenience.
 
       {/* ── Delivery Type Choice Modal ─────────────────────────────── */}
       {deliveryTypeModalOrderId && (() => {
-        const ord = filteredOrders.find(o => o.id === deliveryTypeModalOrderId);
+        const ord = orders.find(o => o.id === deliveryTypeModalOrderId);
         if (!ord) return null;
         return (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
