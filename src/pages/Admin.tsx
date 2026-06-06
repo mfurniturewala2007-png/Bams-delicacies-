@@ -1921,9 +1921,9 @@ Please come pick up your order at your convenience.
                 );
               })}
             </div>
-            
+
             {/* Order Status Sub-Tabs */}
-            <div className="flex border-b border-border/60 mb-6 select-none overflow-x-auto scrollbar-none flex-nowrap gap-1">
+            <div className="flex bg-surface-2/40 p-1.5 rounded-2xl mb-8 select-none overflow-x-auto scrollbar-none flex-nowrap gap-1 border border-border/40 max-w-fit mx-auto md:mx-0">
               {[
                 { id: 'active', label: 'All Active', count: filteredOrders.filter(o => o.status !== 'cancelled').length, icon: '📋' },
                 { id: 'pending', label: 'Pending', count: filteredOrders.filter(o => o.status === 'pending' || o.status === 'payment_pending').length, icon: '⏳' },
@@ -1935,15 +1935,15 @@ Please come pick up your order at your convenience.
                   <button
                     key={tab.id}
                     onClick={() => setOrderSubTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 font-sans text-xs font-bold uppercase tracking-wider transition-all duration-200 -mb-px flex-shrink-0 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-sans text-xs font-bold uppercase tracking-wider transition-all duration-300 flex-shrink-0 ${
                       isActive
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted/70 hover:text-text hover:border-border'
+                        ? 'bg-primary text-white shadow-primary shadow-sm scale-[1.02]'
+                        : 'text-muted hover:text-text hover:bg-surface-2/60'
                     }`}
                   >
                     <span>{tab.icon}</span>
                     <span>{tab.label}</span>
-                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-primary text-white' : 'bg-surface-2 text-muted'}`}>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all duration-300 ${isActive ? 'bg-white text-primary' : 'bg-surface-2 text-muted'}`}>
                       {tab.count}
                     </span>
                   </button>
@@ -1957,10 +1957,19 @@ Please come pick up your order at your convenience.
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-transparent"></div>
               </div>
             ) : displayedOrders.length === 0 ? (
-              <div className="flex-grow flex flex-col items-center justify-center text-center py-24 border border-dashed border-border rounded-2xl bg-surface/30 select-none">
-                <span className="text-5xl animate-float" style={{ animationDuration: '3.5s' }}>🎉</span>
-                <h3 className="font-serif font-bold text-xl text-heading mt-4">No orders yet</h3>
-                <p className="text-muted text-sm mt-2 max-w-sm">Slots are fully open! Share the website link.</p>
+              <div className="flex-grow flex flex-col items-center justify-center text-center py-20 border border-dashed border-border rounded-3xl bg-surface/30 select-none">
+                <span className="text-5xl mb-4 animate-float" style={{ animationDuration: '3.5s' }}>
+                  {orderSubTab === 'active' ? '🎉' : orderSubTab === 'pending' ? '✨' : orderSubTab === 'confirmed' ? '🍳' : '🗑️'}
+                </span>
+                <h3 className="font-serif font-bold text-xl text-heading">
+                  {orderSubTab === 'active' ? 'No active orders' : orderSubTab === 'pending' ? 'No pending orders' : orderSubTab === 'confirmed' ? 'No confirmed orders' : 'No cancelled orders'}
+                </h3>
+                <p className="text-muted text-xs mt-2 max-w-xs px-4">
+                  {orderSubTab === 'active' ? 'All slots are open! Customers can place new orders on the website.' 
+                   : orderSubTab === 'pending' ? 'All orders have been processed. Great job!' 
+                   : orderSubTab === 'confirmed' ? 'Orders will show here once confirmed or delivered.' 
+                   : 'Cancelled orders that have not been deleted will appear here.'}
+                </p>
               </div>
             ) : (
               <>
@@ -2002,7 +2011,7 @@ Please come pick up your order at your convenience.
                           className={`px-2 py-1 rounded-lg border text-xs font-bold focus:outline-none cursor-pointer flex-shrink-0 ${
                             ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
                             : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
-                            : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-yellow'
+                            : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-[#9E7C00]'
                             : ord.status === 'delivered' ? 'bg-success/10 border-success/35 text-success'
                             : 'bg-error/10 border-error/35 text-error'
                           }`}
@@ -2045,56 +2054,48 @@ Please come pick up your order at your convenience.
                       {/* ── WhatsApp 3-Stage Notification Panel (mobile) ── */}
                       {ord.status !== 'cancelled' && (
                         <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted/60 select-none">WhatsApp Notifications</p>
+                          <p className="text-[10px] font-sans font-bold uppercase tracking-widest text-muted/60 select-none">WhatsApp Notifications</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {/* Stage 1: Confirmed */}
+                            <button
+                              onClick={() => handleConfirmAndNotify(ord)}
+                              disabled={confirmingOrderId === ord.id}
+                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-xl text-[10px] font-bold border transition-all duration-200 disabled:opacity-50 active:scale-[0.98] ${
+                                whatsappSent[ord.id]?.has('confirmed')
+                                  ? 'bg-[#25D366]/10 border-[#25D366]/40 text-[#1a9e4a]'
+                                  : 'bg-surface-2 border-border text-text hover:border-[#25D366]/50'
+                              }`}
+                            >
+                              <span className="text-lg">✅</span>
+                              <span>{confirmingOrderId === ord.id ? 'Sending...' : 'Confirm'}</span>
+                            </button>
 
-                          {/* Stage 1: Confirmed */}
-                          <button
-                            onClick={() => handleConfirmAndNotify(ord)}
-                            disabled={confirmingOrderId === ord.id}
-                            className={`w-full inline-flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-50 active:scale-[0.98] border ${
-                              whatsappSent[ord.id]?.has('confirmed')
-                                ? 'bg-[#25D366]/10 border-[#25D366]/40 text-[#1a9e4a]'
-                                : 'bg-surface-2 border-border text-text hover:border-[#25D366]/50 hover:text-[#1a9e4a]'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="text-base">✅</span>
-                              <span>{confirmingOrderId === ord.id ? 'Sending...' : 'Order Confirmed'}</span>
-                            </div>
-                            {whatsappSent[ord.id]?.has('confirmed') ? <span className="text-[10px] text-[#25D366] font-bold">SENT</span> : <span className="text-[10px] text-muted">Tap to send</span>}
-                          </button>
+                            {/* Stage 2: Ready */}
+                            <button
+                              onClick={() => handleOrderReady(ord)}
+                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-xl text-[10px] font-bold border transition-all duration-200 active:scale-[0.98] ${
+                                whatsappSent[ord.id]?.has('ready')
+                                  ? 'bg-yellow/10 border-yellow/40 text-[#9E7C00]'
+                                  : 'bg-surface-2 border-border text-text hover:border-yellow/50'
+                              }`}
+                            >
+                              <span className="text-lg">🍽️</span>
+                              <span>Ready</span>
+                            </button>
 
-                          {/* Stage 2: Ready */}
-                          <button
-                            onClick={() => handleOrderReady(ord)}
-                            className={`w-full inline-flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 active:scale-[0.98] border ${
-                              whatsappSent[ord.id]?.has('ready')
-                                ? 'bg-yellow/10 border-yellow/40 text-yellow'
-                                : 'bg-surface-2 border-border text-text hover:border-yellow/50 hover:text-yellow'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="text-base">🍽️</span>
-                              <span>Order Ready</span>
-                            </div>
-                            {whatsappSent[ord.id]?.has('ready') ? <span className="text-[10px] text-yellow font-bold">SENT</span> : <span className="text-[10px] text-muted">Tap to send</span>}
-                          </button>
-
-                          {/* Stage 3: Delivery / Pickup */}
-                          <button
-                            onClick={() => setDeliveryTypeModalOrderId(ord.id)}
-                            className={`w-full inline-flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 active:scale-[0.98] border ${
-                              whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')
-                                ? 'bg-primary/10 border-primary/40 text-primary'
-                                : 'bg-surface-2 border-border text-text hover:border-primary/50 hover:text-primary'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="text-base">{whatsappSent[ord.id]?.has('pickup') ? '🏠' : '🚗'}</span>
-                              <span>{whatsappSent[ord.id]?.has('pickup') ? 'Ready for Pickup' : 'Out for Delivery'}</span>
-                            </div>
-                            {(whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')) ? <span className="text-[10px] text-primary font-bold">SENT</span> : <span className="text-[10px] text-muted">Choose type</span>}
-                          </button>
+                            {/* Stage 3: Delivery / Pickup */}
+                            <button
+                              onClick={() => setDeliveryTypeModalOrderId(ord.id)}
+                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-xl text-[10px] font-bold border transition-all duration-200 active:scale-[0.98] ${
+                                whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')
+                                  ? 'bg-primary/10 border-primary/40 text-primary'
+                                  : 'bg-surface-2 border-border text-text hover:border-primary/50'
+                              }`}
+                            >
+                              <span className="text-lg">{whatsappSent[ord.id]?.has('pickup') ? '🏠' : '🚗'}</span>
+                              <span>{whatsappSent[ord.id]?.has('pickup') ? 'Pickup' : 'Delivery'}</span>
+                            </button>
+                          </div>
                         </div>
                       )}
 
@@ -2191,7 +2192,7 @@ Please come pick up your order at your convenience.
                                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold focus:outline-none transition-colors duration-250 cursor-pointer ${
                                   ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
                                   : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
-                                  : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-yellow'
+                                  : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-[#9E7C00]'
                                   : ord.status === 'delivered' ? 'bg-success/10 border-success/35 text-success'
                                   : 'bg-error/10 border-error/35 text-error'
                                 }`}
@@ -2206,51 +2207,45 @@ Please come pick up your order at your convenience.
                             <td className="py-4 px-6">
                               {/* ── WhatsApp 3-Stage Notification (Desktop) ── */}
                               {ord.status !== 'cancelled' ? (
-                                <div className="flex flex-col gap-1.5 min-w-[190px]">
+                                <div className="flex items-center gap-1.5 justify-center">
                                   {/* Stage 1: Confirmed */}
                                   <button
                                     onClick={() => handleConfirmAndNotify(ord)}
                                     disabled={confirmingOrderId === ord.id}
-                                    title="Send order confirmation via WhatsApp"
-                                    className={`w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 border ${
+                                    title="Send WhatsApp: Order Confirmed"
+                                    className={`inline-flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 disabled:opacity-50 border ${
                                       whatsappSent[ord.id]?.has('confirmed')
-                                        ? 'bg-[#25D366]/10 border-[#25D366]/40 text-[#1a9e4a]'
-                                        : 'bg-surface-2 border-border text-text hover:border-[#25D366]/50 hover:bg-[#25D366]/5'
+                                        ? 'bg-[#25D366] border-[#25D366] text-white shadow-sm'
+                                        : 'bg-surface-2 border-border text-text hover:border-[#25D366] hover:bg-[#25D366]/10 hover:text-[#1a9e4a]'
                                     }`}
                                   >
-                                    <span className="flex items-center gap-1.5"><span>✅</span>{confirmingOrderId === ord.id ? 'Sending...' : 'Confirmed'}</span>
-                                    {whatsappSent[ord.id]?.has('confirmed') && <span className="text-[9px] font-black text-[#25D366] bg-[#25D366]/10 px-1.5 py-0.5 rounded-full">SENT</span>}
+                                    <span className="text-sm">✅</span>
                                   </button>
 
                                   {/* Stage 2: Ready */}
                                   <button
                                     onClick={() => handleOrderReady(ord)}
-                                    title="Notify customer that order is ready"
-                                    className={`w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 border ${
+                                    title="Send WhatsApp: Order Ready"
+                                    className={`inline-flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 border ${
                                       whatsappSent[ord.id]?.has('ready')
-                                        ? 'bg-yellow/10 border-yellow/40 text-yellow'
-                                        : 'bg-surface-2 border-border text-text hover:border-yellow/50 hover:bg-yellow/5'
+                                        ? 'bg-yellow border-yellow text-bg shadow-sm'
+                                        : 'bg-surface-2 border-border text-text hover:border-yellow hover:bg-yellow/10 hover:text-[#9E7C00]'
                                     }`}
                                   >
-                                    <span className="flex items-center gap-1.5"><span>🍽️</span>Ready</span>
-                                    {whatsappSent[ord.id]?.has('ready') && <span className="text-[9px] font-black text-yellow bg-yellow/10 px-1.5 py-0.5 rounded-full">SENT</span>}
+                                    <span className="text-sm">🍽️</span>
                                   </button>
 
                                   {/* Stage 3: Delivery / Pickup */}
                                   <button
                                     onClick={() => setDeliveryTypeModalOrderId(ord.id)}
-                                    title="Choose delivery or pickup notification"
-                                    className={`w-full inline-flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 border ${
+                                    title="Send WhatsApp: Dispatch / Pickup"
+                                    className={`inline-flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 border ${
                                       whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')
-                                        ? 'bg-primary/10 border-primary/40 text-primary'
-                                        : 'bg-surface-2 border-border text-text hover:border-primary/50 hover:bg-primary/5'
+                                        ? 'bg-primary border-primary text-white shadow-sm'
+                                        : 'bg-surface-2 border-border text-text hover:border-primary hover:bg-primary/10 hover:text-primary-hover'
                                     }`}
                                   >
-                                    <span className="flex items-center gap-1.5">
-                                      <span>{whatsappSent[ord.id]?.has('pickup') ? '🏠' : '🚗'}</span>
-                                      <span>{whatsappSent[ord.id]?.has('pickup') ? 'Pickup' : 'Delivery'}</span>
-                                    </span>
-                                    {(whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')) && <span className="text-[9px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">SENT</span>}
+                                    <span className="text-sm">{whatsappSent[ord.id]?.has('pickup') ? '🏠' : '🚗'}</span>
                                   </button>
                                 </div>
                               ) : (
