@@ -35,21 +35,35 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: 'Telegram env vars not configured' });
   }
 
+  // Helper to escape HTML special characters
+  const escapeHtml = (text: string) => {
+    if (!text) return '';
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  };
+
+  const safeName = escapeHtml(customer_name);
+  const safePhone = escapeHtml(customer_phone);
+  const safeDate = escapeHtml(delivery_date);
+  const safeOrderId = escapeHtml(order_id);
+
   const itemLines = (items ?? [])
-    .map((item) => `  • ${item.name} × ${item.dozens} doz`)
+    .map((item) => `  • ${escapeHtml(item.name)} × ${item.dozens} doz`)
     .join('\n');
 
   const message = [
-    `🛒 *New Order!*`,
-    `👤 ${customer_name}`,
-    `📞 ${customer_phone}`,
-    `📅 ${delivery_date}`,
+    `🛒 <b>New Order!</b>`,
+    `👤 ${safeName}`,
+    `📞 ${safePhone}`,
+    `📅 ${safeDate}`,
     ``,
-    `*Items:*`,
+    `<b>Items:</b>`,
     itemLines,
     ``,
     `💰 ₹${total}`,
-    `🆔 \`${order_id}\``,
+    `🆔 <code>${safeOrderId}</code>`,
   ].join('\n');
 
   try {
@@ -61,7 +75,7 @@ export default async function handler(req: any, res: any) {
         body: JSON.stringify({
           chat_id: CHAT_ID,
           text: message,
-          parse_mode: 'Markdown',
+          parse_mode: 'HTML',
         }),
       }
     );
