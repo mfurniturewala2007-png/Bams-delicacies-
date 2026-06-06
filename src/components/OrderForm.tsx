@@ -202,13 +202,27 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
           upi_transaction_id: 'COD', // Mark it as Cash on Delivery
         };
 
-        const { error } = await supabase
+        const { data: codData, error } = await supabase
           .from('orders')
           .insert([newOrder])
           .select('id')
           .single();
 
         if (error) throw error;
+
+        // Fire-and-forget Telegram notification
+        fetch('/api/notify-telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: codData?.id ?? '',
+            customer_name: customerName.trim(),
+            customer_phone: customerPhone.trim(),
+            total: totalAmount,
+            delivery_date: deliveryDateStr,
+            items,
+          }),
+        }).catch(() => {});
 
         // Show Success Toast directly!
         showToast(
@@ -247,6 +261,20 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
           .single();
 
         if (error) throw error;
+
+        // Fire-and-forget Telegram notification
+        fetch('/api/notify-telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: data?.id ?? '',
+            customer_name: customerName.trim(),
+            customer_phone: customerPhone.trim(),
+            total: totalAmount,
+            delivery_date: deliveryDateStr,
+            items,
+          }),
+        }).catch(() => {});
 
         // Store selected date for post-payment success toast, open PaymentModal
         setPaymentSelectedDate(selectedDate);
