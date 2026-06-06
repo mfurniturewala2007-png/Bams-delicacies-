@@ -1,8 +1,6 @@
 // api/notify-telegram.ts — Vercel Serverless Function
 // ES module syntax only. No require().
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
 interface OrderItem {
   name: string;
   dozens: number;
@@ -17,7 +15,7 @@ interface NotifyBody {
   items: OrderItem[];
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const {
