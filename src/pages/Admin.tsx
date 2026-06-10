@@ -30,6 +30,65 @@ const DEFAULT_PRODUCTS: Product[] = [
   },
 ];
 
+const DEFAULT_TEMPLATE_CONFIRMED =
+`Hi {customer_name} 👋
+
+✅ *Order Confirmed!*
+Your order from *Bam's Delicacies* has been confirmed! 🎉
+
+📦 *Order Summary:*
+{item_lines}
+
+💰 *Total: ₹{total}*
+📅 *Pick up: {delivery_date}*
+🏪 *Bam Delicacies pickup address:*
+A1/18 Brahma Aangan Society, 5th floor, Salunke Vihar Road, Kondhwa, Pune 411048
+
+📍 *Customer's address:*
+{customer_address}
+*(Note: Delivery charges for the above customer's address will be paid by the customer)*
+
+We're preparing your delicacies with love! Sit tight 🍽️
+— Bam's Delicacies`;
+
+const DEFAULT_TEMPLATE_READY =
+`Hi {customer_name} 👋
+
+🍽️ *Your Order is Ready!*
+
+Your delicacies from *Bam's Delicacies* are freshly prepared and ready for you!
+
+📦 *Your Order:*
+{item_lines}
+
+Please *pick up your order* or let us know if you'd like to schedule delivery. 📞
+
+— Bam's Delicacies`;
+
+const DEFAULT_TEMPLATE_DELIVERY =
+`Hi {customer_name} 🚗
+
+Your order from *Bam's Delicacies* is *Out for Delivery!*
+
+🛵 We're on our way to:
+📍 {customer_address}
+
+Please be available to receive your fresh delicacies!
+
+— Bam's Delicacies 🍽️`;
+
+const DEFAULT_TEMPLATE_PICKUP =
+`Hi {customer_name} 👋
+
+🎉 *Your order is ready for pickup!*
+
+Your delicacies from *Bam's Delicacies* are freshly made and ready to collect.
+
+Please come pick up your order at your convenience.
+📞 Call us if you need directions or have any questions!
+
+— Bam's Delicacies 🍽️`;
+
 const Admin: React.FC = () => {
   // Gating State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -37,8 +96,8 @@ const Admin: React.FC = () => {
   const [isShaking, setIsShaking] = useState(false);
   const [authError, setAuthError] = useState('');
 
-  // Tab State: 0 = Products, 1 = Orders
-  const [activeTab, setActiveTab] = useState<0 | 1>(1);
+  // Tab State: 0 = Products, 1 = Orders, 2 = Templates
+  const [activeTab, setActiveTab] = useState<0 | 1 | 2>(1);
 
   // Products Tab States
   const [products, setProducts] = useState<Product[]>([]);
@@ -78,6 +137,13 @@ const Admin: React.FC = () => {
   const [festivalEndDate, setFestivalEndDate] = useState('2026-06-10T23:59');
   const [festivalDeliveryDate, setFestivalDeliveryDate] = useState('2026-06-12');
   const [isSavingFestivalSettings, setIsSavingFestivalSettings] = useState(false);
+
+  // Message templates states
+  const [templateConfirmed, setTemplateConfirmed] = useState<string>(DEFAULT_TEMPLATE_CONFIRMED);
+  const [templateReady, setTemplateReady] = useState<string>(DEFAULT_TEMPLATE_READY);
+  const [templateDelivery, setTemplateDelivery] = useState<string>(DEFAULT_TEMPLATE_DELIVERY);
+  const [templatePickup, setTemplatePickup] = useState<string>(DEFAULT_TEMPLATE_PICKUP);
+  const [isSavingTemplates, setIsSavingTemplates] = useState<boolean>(false);
 
   // Image Upload States
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -254,7 +320,11 @@ const Admin: React.FC = () => {
           'max_orders_sunday',
           'festival_deal_enabled',
           'festival_deal_end_date',
-          'festival_deal_delivery_date'
+          'festival_deal_delivery_date',
+          'whatsapp_template_confirmed',
+          'whatsapp_template_ready',
+          'whatsapp_template_delivery',
+          'whatsapp_template_pickup'
         ]);
 
       if (error) throw error;
@@ -277,10 +347,65 @@ const Admin: React.FC = () => {
         if (festEnabled) {
           setActiveFilterDateStr(festDelivery);
         }
+
+        const tempConf = data.find(r => r.key === 'whatsapp_template_confirmed')?.value || DEFAULT_TEMPLATE_CONFIRMED;
+        const tempReady = data.find(r => r.key === 'whatsapp_template_ready')?.value || DEFAULT_TEMPLATE_READY;
+        const tempDeliv = data.find(r => r.key === 'whatsapp_template_delivery')?.value || DEFAULT_TEMPLATE_DELIVERY;
+        const tempPick = data.find(r => r.key === 'whatsapp_template_pickup')?.value || DEFAULT_TEMPLATE_PICKUP;
+
+        setTemplateConfirmed(tempConf);
+        setTemplateReady(tempReady);
+        setTemplateDelivery(tempDeliv);
+        setTemplatePickup(tempPick);
       }
     } catch (e) {
       console.warn('Failed to load settings.');
     }
+  };
+
+  const handleSaveTemplates = async () => {
+    try {
+      setIsSavingTemplates(true);
+      const { error } = await supabase
+        .from('settings')
+        .upsert([
+          { key: 'whatsapp_template_confirmed', value: templateConfirmed },
+          { key: 'whatsapp_template_ready', value: templateReady },
+          { key: 'whatsapp_template_delivery', value: templateDelivery },
+          { key: 'whatsapp_template_pickup', value: templatePickup }
+        ]);
+
+      if (error) throw error;
+      showToast('Message templates updated successfully! ✓', 'success');
+    } catch (err: any) {
+      alert(`Failed to save message templates. Error: ${err.message}`);
+    } finally {
+      setIsSavingTemplates(false);
+    }
+  };
+
+  const formatMessageWithOrder = (template: string, order: Order, isStage1 = false) => {
+    const itemLines = order.items.map((i) => {
+      const doz = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
+      const pcs = doz * 12;
+      const lineTotal = i.price_per_dozen !== undefined
+        ? i.price_per_dozen * doz
+        : (i as any).price * doz;
+      if (isStage1) {
+        return `• ${i.name} — ${doz} dozen (${pcs} pcs) — ₹${lineTotal}`;
+      } else {
+        return `• ${i.name} — ${doz} dozen`;
+      }
+    }).join('\n');
+
+    const deliveryFormatted = format(new Date(order.delivery_date), 'EEEE, MMM d');
+
+    return template
+      .replace(/{customer_name}/g, order.customer_name)
+      .replace(/{item_lines}/g, itemLines)
+      .replace(/{total}/g, order.total.toString())
+      .replace(/{delivery_date}/g, deliveryFormatted)
+      .replace(/{customer_address}/g, order.customer_address);
   };
 
   // Logging for mounting confirmation
@@ -746,34 +871,8 @@ const Admin: React.FC = () => {
 
   // WhatsApp Stage 1: Order Confirmed
   const buildWhatsAppConfirmedLink = (order: Order): string => {
-    const itemLines = order.items.map((i) => {
-      const doz = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
-      const pcs = doz * 12;
-      const lineTotal = i.price_per_dozen !== undefined
-        ? i.price_per_dozen * doz
-        : (i as any).price * doz;
-      return `• ${i.name} — ${doz} dozen (${pcs} pcs) — ₹${lineTotal}`;
-    }).join('\n');
-    const deliveryFormatted = format(new Date(order.delivery_date), 'EEEE, MMM d');
-    const message =
-`Hi ${order.customer_name} 👋
-
-✅ *Order Confirmed!*
-Your order from *Bam's Delicacies* has been confirmed! 🎉
-
-📦 *Order Summary:*
-${itemLines}
-
-💰 *Total: ₹${order.total}*
-📅 *Pick up: ${deliveryFormatted}*
-🏪 *Bam Delicacies pickup address:*
-A1/18 Brahma Aangan Society, 5th floor, Salunke Vihar Road, Kondhwa, Pune 411048
-
-📍 *Customer's address:*
-${order.customer_address}
-
-We're preparing your delicacies with love! Sit tight 🍽️
-— Bam's Delicacies`;
+    const rawTemplate = templateConfirmed || DEFAULT_TEMPLATE_CONFIRMED;
+    const message = formatMessageWithOrder(rawTemplate, order, true);
     const encoded = encodeURIComponent(message);
     const phone = `91${order.customer_phone}`;
     return `https://wa.me/${phone}?text=${encoded}`;
@@ -781,23 +880,8 @@ We're preparing your delicacies with love! Sit tight 🍽️
 
   // WhatsApp Stage 2: Order Ready
   const buildWhatsAppReadyLink = (order: Order): string => {
-    const itemLines = order.items.map((i) => {
-      const doz = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
-      return `• ${i.name} — ${doz} dozen`;
-    }).join('\n');
-    const message =
-`Hi ${order.customer_name} 👋
-
-🍽️ *Your Order is Ready!*
-
-Your delicacies from *Bam's Delicacies* are freshly prepared and ready for you!
-
-📦 *Your Order:*
-${itemLines}
-
-Please *pick up your order* or let us know if you'd like to schedule delivery. 📞
-
-— Bam's Delicacies`;
+    const rawTemplate = templateReady || DEFAULT_TEMPLATE_READY;
+    const message = formatMessageWithOrder(rawTemplate, order, false);
     const encoded = encodeURIComponent(message);
     const phone = `91${order.customer_phone}`;
     return `https://wa.me/${phone}?text=${encoded}`;
@@ -805,17 +889,8 @@ Please *pick up your order* or let us know if you'd like to schedule delivery. �
 
   // WhatsApp Stage 3a: Out for Delivery
   const buildWhatsAppDeliveryLink = (order: Order): string => {
-    const message =
-`Hi ${order.customer_name} 🚗
-
-Your order from *Bam's Delicacies* is *Out for Delivery!*
-
-🛵 We're on our way to:
-📍 ${order.customer_address}
-
-Please be available to receive your fresh delicacies!
-
-— Bam's Delicacies 🍽️`;
+    const rawTemplate = templateDelivery || DEFAULT_TEMPLATE_DELIVERY;
+    const message = formatMessageWithOrder(rawTemplate, order, false);
     const encoded = encodeURIComponent(message);
     const phone = `91${order.customer_phone}`;
     return `https://wa.me/${phone}?text=${encoded}`;
@@ -823,17 +898,8 @@ Please be available to receive your fresh delicacies!
 
   // WhatsApp Stage 3b: Ready for Pickup
   const buildWhatsAppPickupLink = (order: Order): string => {
-    const message =
-`Hi ${order.customer_name} 👋
-
-🎉 *Your order is ready for pickup!*
-
-Your delicacies from *Bam's Delicacies* are freshly made and ready to collect.
-
-Please come pick up your order at your convenience.
-📞 Call us if you need directions or have any questions!
-
-— Bam's Delicacies 🍽️`;
+    const rawTemplate = templatePickup || DEFAULT_TEMPLATE_PICKUP;
+    const message = formatMessageWithOrder(rawTemplate, order, false);
     const encoded = encodeURIComponent(message);
     const phone = `91${order.customer_phone}`;
     return `https://wa.me/${phone}?text=${encoded}`;
@@ -1095,6 +1161,17 @@ Please come pick up your order at your convenience.
               <span>🍱</span>
               <span>Products</span>
             </button>
+            <button
+              onClick={() => setActiveTab(2)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
+                activeTab === 2
+                  ? 'bg-surface-2 border-primary text-primary'
+                  : 'border-transparent text-text/70 hover:text-text hover:bg-surface-2/40'
+              }`}
+            >
+              <span>💬</span>
+              <span>Message Templates</span>
+            </button>
             <Link
               to="/"
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide text-text/70 hover:text-text hover:bg-surface-2/40 border-l-2 border-transparent transition-all duration-200"
@@ -1142,6 +1219,15 @@ Please come pick up your order at your convenience.
         >
           <span className="text-lg">🍱</span>
           <span>Products</span>
+        </button>
+        <button
+          onClick={() => setActiveTab(2)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-colors ${
+            activeTab === 2 ? 'text-primary' : 'text-muted'
+          }`}
+        >
+          <span className="text-lg">💬</span>
+          <span>Templates</span>
         </button>
         <Link
           to="/"
@@ -2313,6 +2399,139 @@ Please come pick up your order at your convenience.
             )}
           </div>
         )}
+
+        {/* Templates tab screen */}
+        {activeTab === 2 && (
+          <div className="flex-grow flex flex-col text-left select-none animate-fade-slide-up pb-8">
+            <div className="flex flex-col gap-3 mb-6 md:mb-8 pb-4 border-b border-border/40">
+              <h2 className="font-serif font-black text-2xl md:text-3xl text-heading">Message Templates</h2>
+              <p className="text-muted text-xs font-sans mt-1">Customize the WhatsApp notifications sent to customers.</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Form: The Textareas */}
+              <div className="lg:col-span-2 space-y-6">
+                
+                {/* Stage 1 Template */}
+                <div className="bg-surface border border-border p-5 rounded-2xl shadow-card flex flex-col gap-3">
+                  <label className="text-xs font-sans font-bold text-text uppercase tracking-wider">
+                    Stage 1: Order Confirmed Template
+                  </label>
+                  <span className="text-[11px] text-muted -mt-1.5">Sent when confirming and approving the order.</span>
+                  <textarea
+                    rows={10}
+                    value={templateConfirmed}
+                    onChange={(e) => setTemplateConfirmed(e.target.value)}
+                    className="w-full bg-bg border border-border rounded-xl p-4 text-sm font-sans text-text focus:outline-none focus:border-primary resize-y min-h-[200px]"
+                    placeholder="Enter Stage 1 message template..."
+                  />
+                </div>
+
+                {/* Stage 2 Template */}
+                <div className="bg-surface border border-border p-5 rounded-2xl shadow-card flex flex-col gap-3">
+                  <label className="text-xs font-sans font-bold text-text uppercase tracking-wider">
+                    Stage 2: Order Ready Template
+                  </label>
+                  <span className="text-[11px] text-muted -mt-1.5">Sent when the items are fully prepared.</span>
+                  <textarea
+                    rows={7}
+                    value={templateReady}
+                    onChange={(e) => setTemplateReady(e.target.value)}
+                    className="w-full bg-bg border border-border rounded-xl p-4 text-sm font-sans text-text focus:outline-none focus:border-primary resize-y min-h-[140px]"
+                    placeholder="Enter Stage 2 message template..."
+                  />
+                </div>
+
+                {/* Stage 3a Template */}
+                <div className="bg-surface border border-border p-5 rounded-2xl shadow-card flex flex-col gap-3">
+                  <label className="text-xs font-sans font-bold text-text uppercase tracking-wider">
+                    Stage 3a: Out for Delivery Template
+                  </label>
+                  <span className="text-[11px] text-muted -mt-1.5">Sent when orders are dispatched with the courier.</span>
+                  <textarea
+                    rows={6}
+                    value={templateDelivery}
+                    onChange={(e) => setTemplateDelivery(e.target.value)}
+                    className="w-full bg-bg border border-border rounded-xl p-4 text-sm font-sans text-text focus:outline-none focus:border-primary resize-y min-h-[120px]"
+                    placeholder="Enter Stage 3a message template..."
+                  />
+                </div>
+
+                {/* Stage 3b Template */}
+                <div className="bg-surface border border-border p-5 rounded-2xl shadow-card flex flex-col gap-3">
+                  <label className="text-xs font-sans font-bold text-text uppercase tracking-wider">
+                    Stage 3b: Ready for Pickup Template
+                  </label>
+                  <span className="text-[11px] text-muted -mt-1.5">Sent when items are ready to be picked up by the customer.</span>
+                  <textarea
+                    rows={6}
+                    value={templatePickup}
+                    onChange={(e) => setTemplatePickup(e.target.value)}
+                    className="w-full bg-bg border border-border rounded-xl p-4 text-sm font-sans text-text focus:outline-none focus:border-primary resize-y min-h-[120px]"
+                    placeholder="Enter Stage 3b message template..."
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    onClick={loadMaxOrders}
+                    className="px-5 py-3 border border-border rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-surface-2 transition-all duration-200"
+                  >
+                    Reset to Last Saved
+                  </button>
+                  <button
+                    onClick={handleSaveTemplates}
+                    disabled={isSavingTemplates}
+                    className="bg-primary text-white font-sans font-black text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl shadow-primary hover:bg-primary-hover active:scale-95 transition-all duration-300 disabled:opacity-50"
+                  >
+                    {isSavingTemplates ? 'Saving...' : 'Save Templates ✓'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Sidebar: Guide & Tags */}
+              <div className="space-y-6">
+                <div className="bg-surface border border-border p-6 rounded-2xl shadow-card flex flex-col gap-4 text-left">
+                  <h3 className="font-serif font-bold text-lg text-heading">Placeholder Guide</h3>
+                  <p className="text-muted text-xs font-sans leading-relaxed">You can use any of these placeholder tags in your message text. They will be automatically replaced with the customer's actual order details when sending.</p>
+                  
+                  <div className="space-y-4 font-sans text-xs">
+                    <div className="flex flex-col gap-1 border-b border-border/40 pb-2.5">
+                      <code className="text-primary font-mono font-bold bg-primary/10 px-2 py-0.5 rounded max-w-fit">{`{customer_name}`}</code>
+                      <span className="text-muted">The name of the customer.</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/40 pb-2.5">
+                      <code className="text-primary font-mono font-bold bg-primary/10 px-2 py-0.5 rounded max-w-fit">{`{item_lines}`}</code>
+                      <span className="text-muted">The list of items ordered (with quantities).</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/40 pb-2.5">
+                      <code className="text-primary font-mono font-bold bg-primary/10 px-2 py-0.5 rounded max-w-fit">{`{total}`}</code>
+                      <span className="text-muted">The total price amount (e.g. 360).</span>
+                    </div>
+                    <div className="flex flex-col gap-1 border-b border-border/40 pb-2.5">
+                      <code className="text-primary font-mono font-bold bg-primary/10 px-2 py-0.5 rounded max-w-fit">{`{delivery_date}`}</code>
+                      <span className="text-muted">The formatted delivery/pickup date.</span>
+                    </div>
+                    <div className="flex flex-col gap-1 pb-1">
+                      <code className="text-primary font-mono font-bold bg-primary/10 px-2 py-0.5 rounded max-w-fit">{`{customer_address}`}</code>
+                      <span className="text-muted">The customer's delivery address.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-surface border border-border p-6 rounded-2xl shadow-card flex flex-col gap-2">
+                  <span className="text-[28px]">💡</span>
+                  <h4 className="font-serif font-bold text-text mt-2">Formatting Tip</h4>
+                  <p className="text-muted text-xs font-sans leading-relaxed">
+                    Use asterisks for bolding text in WhatsApp, e.g. <code className="font-mono bg-surface-2 px-1 text-text">*bold text*</code>.
+                    <br/><br/>
+                    Use emojis to make the messages look friendly and premium for customers!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* ── Mobile Bottom Tab Bar (visible only on mobile) ───────── */}
@@ -2334,6 +2553,15 @@ Please come pick up your order at your convenience.
         >
           <span className="text-xl">🍱</span>
           <span className="font-sans">Products</span>
+        </button>
+        <button
+          onClick={() => setActiveTab(2)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
+            activeTab === 2 ? 'text-primary border-t-2 border-primary -mt-px' : 'text-muted/70'
+          }`}
+        >
+          <span className="text-xl">💬</span>
+          <span className="font-sans">Templates</span>
         </button>
         <Link
           to="/"
