@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { supabase } from '../utils/supabase';
 import HowItWorksModal from './HowItWorksModal';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 // ─── FILL IN YOUR DETAILS BELOW ──────────────────────────────────────────────
 const UPI_ID   = 'bfurniturewala@okicici';
@@ -25,6 +26,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onConfirmed,
   onCancel,
 }) => {
+  useScrollLock(true);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [transactionId, setTransactionId] = useState('');
   const [txnError, setTxnError] = useState('');
@@ -116,7 +119,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Dark overlay — non-dismissible to prevent accidental close */}
-      <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" />
+      <div 
+        onTouchMove={(e) => e.preventDefault()}
+        className="absolute inset-0 bg-black/85 backdrop-blur-sm touch-none" 
+      />
 
       {/* Modal card — max-width 420px per spec */}
       <div

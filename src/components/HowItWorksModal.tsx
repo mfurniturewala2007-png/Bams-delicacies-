@@ -1,4 +1,5 @@
 import React from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface HowItWorksModalProps {
   isOpen: boolean;
@@ -6,6 +7,8 @@ interface HowItWorksModalProps {
 }
 
 const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClose }) => {
+  useScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   const steps = [
@@ -34,7 +37,8 @@ const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClose }) =>
       {/* Frosted Glass Overlay */}
       <div 
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm" 
+        onTouchMove={(e) => e.preventDefault()}
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm touch-none" 
       />
 
       {/* Modal Box */}

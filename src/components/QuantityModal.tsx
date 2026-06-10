@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Product } from '../types';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface QuantityModalProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 }) => {
   const [dozens, setDozens] = useState(1);
 
+  useScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   const handleConfirmAdd = () => {
@@ -26,7 +29,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-text">
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        onTouchMove={(e) => e.preventDefault()}
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm touch-none"
       />
 
       <div
