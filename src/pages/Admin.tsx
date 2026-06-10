@@ -1043,7 +1043,7 @@ Please come pick up your order at your convenience.
   }
 
   return (
-    <div className="min-h-screen flex bg-bg text-text select-text">
+    <div className="min-h-screen flex flex-col md:flex-row bg-bg text-text select-text w-full max-w-full overflow-x-hidden">
       {/* ── Desktop Sidebar (hidden on mobile) ─────────────────── */}
       <aside className="hidden md:flex w-60 bg-surface border-r border-border h-screen sticky top-0 flex-col justify-between flex-shrink-0 z-30 select-none">
         <div>
@@ -1149,7 +1149,7 @@ Please come pick up your order at your convenience.
       </nav>
 
       {/* ── Main content area ────────────────────────────────────── */}
-      <main className="flex-grow p-4 md:p-8 overflow-y-auto h-screen pb-28 md:pb-8 bg-bg/95 relative z-10 flex flex-col">
+      <main className="flex-grow p-4 md:p-8 overflow-y-auto h-screen pb-28 md:pb-8 bg-bg/95 relative z-10 flex flex-col w-full max-w-full overflow-x-hidden">
         {/* Products tab screen */}
         {activeTab === 0 && (
           <div className="flex-grow flex flex-col">
@@ -1937,7 +1937,7 @@ Please come pick up your order at your convenience.
             </div>
 
             {/* Date Filter buttons — horizontal scroll on mobile */}
-            <div className="flex gap-2 md:gap-3 mb-6 md:mb-8 select-none overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none flex-nowrap">
+            <div className="flex gap-2 md:gap-3 mb-6 md:mb-8 select-none overflow-x-auto pb-1 scrollbar-none flex-nowrap w-full max-w-full">
               {filterOptions.map((opt) => {
                 const isActive = opt.dbStr === activeFilterDateStr;
                 return (
@@ -1962,7 +1962,7 @@ Please come pick up your order at your convenience.
             </div>
 
             {/* Order Status Sub-Tabs */}
-            <div className="flex bg-surface-2/40 p-1.5 rounded-2xl mb-8 select-none overflow-x-auto scrollbar-none flex-nowrap gap-1 border border-border/40 max-w-fit mx-auto md:mx-0">
+            <div className="flex bg-surface-2/40 p-1.5 rounded-2xl mb-8 select-none overflow-x-auto scrollbar-none flex-nowrap gap-1 border border-border/40 w-full max-w-full md:max-w-fit mx-auto md:mx-0">
               {[
                 { id: 'active', label: 'All Active', count: filteredOrders.filter(o => o.status !== 'cancelled').length, icon: '📋' },
                 { id: 'pending', label: 'Pending', count: filteredOrders.filter(o => o.status === 'pending' || o.status === 'payment_pending').length, icon: '⏳' },
