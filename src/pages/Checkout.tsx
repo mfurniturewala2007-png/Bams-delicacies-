@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useCart } from '../context/CartContext';
@@ -10,8 +10,6 @@ import { useScrollLock } from '../hooks/useScrollLock';
 
 // ─── Colour tokens ────────────────────────────────────────────────────────────
 // bg:#2B2B2B  card:#1E1E1E  border:#3D3D3D  accent:#F5C200  muted:#999
-
-const MAX_SLOTS = 15;
 
 function getSlotCount(orders: { delivery_date: string }[], dateStr: string): number {
   return orders.filter((o) => o.delivery_date === dateStr).length;
@@ -126,23 +124,125 @@ const Checkout: React.FC = () => {
 
   const [slotOrders, setSlotOrders] = useState<{ delivery_date: string }[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [settings, setSettings] = useState({
+    satCapacity: 15,
+    sunCapacity: 15,
+    festEnabled: false,
+    festDeliveryDate: '',
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await supabase
+          .from('settings')
+          .select('*')
+          .in('key', [
+            'max_orders_saturday',
+            'max_orders_sunday',
+            'max_orders_per_day',
+            'festival_deal_enabled',
+            'festival_deal_delivery_date'
+          ]);
+        if (data) {
+          const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
+          const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
+          const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
+          const festEnabled = data.find(r => r.key === 'festival_deal_enabled')?.value !== 'false';
+          const festDelivery = data.find(r => r.key === 'festival_deal_delivery_date')?.value || '';
+          setSettings({
+            satCapacity: parseInt(sat, 10),
+            sunCapacity: parseInt(sun, 10),
+            festEnabled,
+            festDeliveryDate: festDelivery,
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load settings in checkout:', err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const festDateObj = useMemo(() => {
+    if (!settings.festDeliveryDate) return null;
+    const parts = settings.festDeliveryDate.split('-');
+    if (parts.length === 3) {
+      return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    }
+    return null;
+  }, [settings.festDeliveryDate]);
+
+  const festCapacity = useMemo(() => {
+    if (!festDateObj) return settings.satCapacity;
+    const day = festDateObj.getDay();
+    if (day === 6) return settings.satCapacity;
+    if (day === 0) return settings.sunCapacity;
+    return settings.satCapacity;
+  }, [festDateObj, settings.satCapacity, settings.sunCapacity]);
 
   useEffect(() => {
     const fetchSlots = async () => {
+      const dates = [satStr, sunStr];
+      if (settings.festDeliveryDate) {
+        dates.push(settings.festDeliveryDate);
+      }
       const { data } = await supabase
         .from('orders')
         .select('delivery_date')
-        .in('delivery_date', [satStr, sunStr])
+        .in('delivery_date', dates)
         .neq('status', 'cancelled');
       if (data) setSlotOrders(data);
     };
     fetchSlots();
-  }, [satStr, sunStr]);
+  }, [satStr, sunStr, settings.festDeliveryDate]);
 
   const satCount = getSlotCount(slotOrders, satStr);
   const sunCount = getSlotCount(slotOrders, sunStr);
-  const satFull = satCount >= MAX_SLOTS;
-  const sunFull = sunCount >= MAX_SLOTS;
+  const festCount = settings.festDeliveryDate ? getSlotCount(slotOrders, settings.festDeliveryDate) : 0;
+
+  const satFull = satCount >= settings.satCapacity;
+  const sunFull = sunCount >= settings.sunCapacity;
+  const festFull = festCount >= festCapacity;
+
+  const hasCombo = useMemo(() => {
+    return items.some((item) =>
+      (item.category && item.category.toLowerCase().includes('pheli')) ||
+      (item.name && (item.name.toLowerCase().includes('combo') || item.name.toLowerCase().includes('pheli')))
+    );
+  }, [items]);
+
+  useEffect(() => {
+    if (hasCombo && settings.festEnabled && festDateObj) {
+      setSelectedDate(festDateObj);
+    }
+  }, [hasCombo, settings.festEnabled, festDateObj]);
+
+  const dateOptions = useMemo(() => {
+    const options = [
+      { date: saturday, label: 'Saturday Delivery', dateStr: satStr, isFull: satFull, capacity: settings.satCapacity, count: satCount, isFestival: false },
+      { date: sunday, label: 'Sunday Delivery', dateStr: sunStr, isFull: sunFull, capacity: settings.sunCapacity, count: sunCount, isFestival: false },
+    ];
+
+    if (settings.festEnabled && festDateObj && settings.festDeliveryDate) {
+      const existingIdx = options.findIndex(o => o.dateStr === settings.festDeliveryDate);
+      if (existingIdx !== -1) {
+        options[existingIdx].label = '✨ Pheli Raat Combo Delivery ✨';
+        options[existingIdx].isFestival = true;
+      } else {
+        options.push({
+          date: festDateObj,
+          label: '✨ Pheli Raat Combo Delivery ✨',
+          dateStr: settings.festDeliveryDate,
+          isFull: festFull,
+          capacity: festCapacity,
+          count: festCount,
+          isFestival: true
+        });
+      }
+    }
+    return options;
+  }, [saturday, sunday, satStr, sunStr, satFull, sunFull, settings.satCapacity, settings.sunCapacity, satCount, sunCount, settings.festEnabled, festDateObj, settings.festDeliveryDate, festFull, festCapacity, festCount]);
 
   // ── Accordion ─────────────────────────────────────────────────────────────
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -356,26 +456,33 @@ const Checkout: React.FC = () => {
                 Delivery Date <span style={{ color: '#ef4444' }}>*</span>
               </p>
 
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { date: saturday, label: 'Saturday', dateStr: satStr, isFull: satFull, count: satCount },
-                  { date: sunday, label: 'Sunday', dateStr: sunStr, isFull: sunFull, count: sunCount },
-                ].map(({ date, label, dateStr, isFull, count }) => {
+              {hasCombo && settings.festEnabled && festDateObj && (
+                <p className="text-[11px] mb-3 font-semibold text-yellow">
+                  🎁 Since you have a Festive Combo in your cart, your delivery is scheduled for {format(festDateObj, 'EEEE, d MMM')}. Other dates are disabled.
+                </p>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {dateOptions.map((opt) => {
+                  const { date, label, dateStr, isFull, capacity, count, isFestival } = opt;
                   const isSelected = selectedDate ? format(selectedDate, 'yyyy-MM-dd') === dateStr : false;
-                  const slotsLeft = Math.max(0, MAX_SLOTS - count);
+                  const slotsLeft = Math.max(0, capacity - count);
                   const isLow = !isFull && slotsLeft <= 5;
+
+                  // Disable if full OR if this is not the festival date and the cart has a combo
+                  const isDisabledOption = isFull || (hasCombo && !isFestival);
 
                   return (
                     <button
                       key={dateStr}
-                      disabled={isFull}
-                      onClick={() => !isFull && setSelectedDate(date)}
-                      className="relative rounded-xl py-3 px-4 text-left transition-all duration-200 border min-h-[80px]"
+                      disabled={isDisabledOption}
+                      onClick={() => !isDisabledOption && setSelectedDate(date)}
+                      className="relative rounded-xl py-3 px-4 text-left transition-all duration-200 border min-h-[85px]"
                       style={{
                         backgroundColor: isSelected ? 'rgba(245,194,0,0.1)' : '#2B2B2B',
                         borderColor: isSelected ? '#F5C200' : '#3D3D3D',
-                        opacity: isFull ? 0.5 : 1,
-                        cursor: isFull ? 'not-allowed' : 'pointer',
+                        opacity: isDisabledOption ? 0.4 : 1,
+                        cursor: isDisabledOption ? 'not-allowed' : 'pointer',
                       }}
                     >
                       {/* Selected checkmark */}
@@ -387,7 +494,7 @@ const Checkout: React.FC = () => {
                           ✓
                         </span>
                       )}
-                      <p className="text-sm font-black" style={{ color: isFull ? '#999' : '#fff' }}>{label}</p>
+                      <p className="text-sm font-black pr-5" style={{ color: isDisabledOption ? '#666' : '#fff' }}>{label}</p>
                       <p className="text-xs mt-0.5" style={{ color: '#999' }}>{format(date, 'd MMM')}</p>
 
                       {isFull ? (
