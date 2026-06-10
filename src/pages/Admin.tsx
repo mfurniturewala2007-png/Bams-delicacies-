@@ -765,7 +765,7 @@ Your order from *Bam's Delicacies* has been confirmed! 🎉
 ${itemLines}
 
 💰 *Total: ₹${order.total}*
-📅 *Delivery Date: ${deliveryFormatted}*
+📅 *Pick up: ${deliveryFormatted}*
 📍 *Address: ${order.customer_address}*
 
 We're preparing your delicacies with love! Sit tight 🍽️
