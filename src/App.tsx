@@ -6,6 +6,8 @@ import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 import PheliRaat from './pages/PheliRaat';
+import Checkout from './pages/Checkout';
+import OrderSuccess from './pages/OrderSuccess';
 
 // ─── Page Fade Wrapper ─────────────────────────────────────────────────────
 // Applies the animate-page-fade CSS keyframe on every route mount.
@@ -103,6 +105,8 @@ const App: React.FC = () => {
               <Route path="/" element={<Home />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/pheli-raat" element={<PheliRaat />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
             </Routes>
           </PageWrapper>
         </Router>
