@@ -5,11 +5,11 @@ import QuantityModal from './QuantityModal';
 
 interface ProductCardProps {
   product: Product;
-  index: number;
+  index?: number; // kept for API compatibility but no longer used
   isDark?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, index, isDark = false }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, isDark = false }) => {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,12 +39,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index, isDark = fals
   return (
     <>
       <div
-        className={`rounded-2xl border transition-all duration-300 flex flex-col justify-between group overflow-hidden opacity-0 animate-fade-slide-up ${
+        className={`rounded-2xl border transition-all duration-300 flex flex-col justify-between group overflow-hidden ${
           isDark
             ? 'bg-[#150F0A]/90 border-[#DFBA73]/15 md:hover:border-[#DFBA73]/60 md:hover:shadow-[0_0_24px_rgba(223,186,115,0.15)]'
             : 'bg-surface border-border/40 md:hover:border-primary/50 md:hover:shadow-yellow md:hover:-translate-y-1.5'
         }`}
-        style={{ animationDelay: `${index * 100}ms`, transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
       >
         {/* Product Image Cover (Aspect 4:3 Ratio for modern layouts) */}
         <div className={`relative aspect-[4/3] w-full overflow-hidden border-b ${

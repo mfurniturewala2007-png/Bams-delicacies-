@@ -31,7 +31,7 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [pathname, hash]);
 
   return (
-    <div key={pathname} className="animate-page-fade">
+    <div key={pathname}>
       {children}
     </div>
   );

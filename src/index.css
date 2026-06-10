@@ -26,6 +26,15 @@
   -webkit-tap-highlight-color: transparent; /* remove iOS tap flash */
 }
 
+/* Prevent double-tap zoom on all interactive elements */
+button,
+a,
+[role="button"],
+label[for],
+select {
+  touch-action: manipulation;
+}
+
 html {
   scroll-behavior: smooth;
   background-color: var(--color-bg);
@@ -54,6 +63,14 @@ select {
 /* ─── Safe area insets for notched iPhones ─── */
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* ─── Momentum scroll on overflow containers ─── */

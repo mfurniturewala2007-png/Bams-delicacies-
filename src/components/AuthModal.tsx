@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 const AuthModal: React.FC = () => {
   const {
@@ -40,6 +41,10 @@ const AuthModal: React.FC = () => {
   }, [isEditingProfile, profile]);
 
   if (!isAuthModalOpen) return null;
+
+  // Lock scroll when modal is open
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useScrollLock(true);
 
   // Decide which view to show
   const activeStep = isEditingProfile ? 'profile' : tab;
@@ -157,7 +162,8 @@ const AuthModal: React.FC = () => {
       {/* Dimmed overlay — only closeable if logged in */}
       <div
         onClick={closeAuthModal}
-        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+        onTouchMove={(e) => e.preventDefault()}
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm touch-none"
       />
 
       {/* Modal Card */}
@@ -197,6 +203,7 @@ const AuthModal: React.FC = () => {
                 </label>
                 <input
                   type="tel"
+                  inputMode="numeric"
                   value={phone}
                   maxLength={10}
                   onChange={(e) => {
@@ -208,11 +215,13 @@ const AuthModal: React.FC = () => {
                     fieldErrors.phone ? 'border-error' : 'border-border'
                   }`}
                 />
-                {fieldErrors.phone && (
-                  <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
-                    {fieldErrors.phone}
-                  </span>
-                )}
+                <div className="min-h-[20px]">
+                  {fieldErrors.phone && (
+                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">
+                      {fieldErrors.phone}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <button
@@ -273,14 +282,15 @@ const AuthModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Phone + Pincode row */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Phone + Pincode row — stacks on mobile */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-sans font-bold text-text/80 uppercase tracking-wider mb-1.5">
                     Phone Number <span className="text-primary">*</span>
                   </label>
                   <input
                     type="tel"
+                    inputMode="numeric"
                     value={phone}
                     maxLength={10}
                     onChange={(e) => {
@@ -292,9 +302,11 @@ const AuthModal: React.FC = () => {
                       fieldErrors.phone ? 'border-error' : 'border-border'
                     }`}
                   />
-                  {fieldErrors.phone && (
-                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.phone}</span>
-                  )}
+                  <div className="min-h-[20px]">
+                    {fieldErrors.phone && (
+                      <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.phone}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -302,7 +314,8 @@ const AuthModal: React.FC = () => {
                     Pincode <span className="text-primary">*</span>
                   </label>
                   <input
-                    type="text"
+                    type="tel"
+                    inputMode="numeric"
                     value={pincode}
                     maxLength={6}
                     onChange={(e) => {
@@ -314,9 +327,11 @@ const AuthModal: React.FC = () => {
                       fieldErrors.pincode ? 'border-error' : 'border-border'
                     }`}
                   />
-                  {fieldErrors.pincode && (
-                    <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.pincode}</span>
-                  )}
+                  <div className="min-h-[20px]">
+                    {fieldErrors.pincode && (
+                      <span className="text-error text-[10px] font-semibold font-sans mt-1 block">{fieldErrors.pincode}</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -418,7 +433,8 @@ const AuthModal: React.FC = () => {
                   Pincode <span className="text-primary">*</span>
                 </label>
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="numeric"
                   value={pincode}
                   maxLength={6}
                   onChange={(e) => {

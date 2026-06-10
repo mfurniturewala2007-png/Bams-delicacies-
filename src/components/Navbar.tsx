@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { Link } from 'react-router-dom';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface NavbarProps {
   onCartOpen: () => void;
@@ -16,6 +17,9 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const badgeRef = useRef<HTMLSpanElement>(null);
   const [isFestivalActive, setIsFestivalActive] = useState(false);
+
+  // Lock scroll when mobile menu is open
+  useScrollLock(isMobileMenuOpen);
 
   // Check if festival promo is active
   useEffect(() => {
@@ -256,22 +260,31 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
 
       {/* Mobile Navigation Dropdown Menu */}
       {isMobileMenuOpen && (
-        <div className="absolute top-20 left-0 w-full bg-surface border-b border-border shadow-2xl py-6 px-4 flex flex-col gap-4 animate-fade-slide-up md:hidden z-40">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              to={link.href}
-              onClick={handleLinkClick}
-              className={`font-sans font-semibold md:hover:text-primary md:hover:bg-surface-2 px-4 py-3.5 rounded-xl transition-all duration-200 text-base border ${
-                link.isFestive
-                  ? 'text-primary border-primary/30 bg-primary/5 font-black animate-pulse'
-                  : 'border-transparent md:hover:border-border text-text/90'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+        <>
+          {/* Backdrop to close on tap outside */}
+          <div
+            className="fixed inset-0 z-30 md:hidden"
+            onClick={handleLinkClick}
+            onTouchMove={(e) => e.preventDefault()}
+            aria-hidden="true"
+          />
+          <div className="absolute top-20 left-0 w-full bg-surface border-b border-border shadow-2xl py-6 px-4 flex flex-col gap-4 md:hidden z-40">
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                to={link.href}
+                onClick={handleLinkClick}
+                className={`font-sans font-semibold px-4 py-3.5 rounded-xl transition-all duration-200 text-base border min-h-[48px] flex items-center ${
+                  link.isFestive
+                    ? 'text-primary border-primary/30 bg-primary/5 font-black animate-pulse'
+                    : 'border-transparent text-text/90'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </>
       )}
     </nav>
   );

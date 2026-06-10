@@ -1017,21 +1017,22 @@ Please come pick up your order at your convenience.
                   if (authError) setAuthError('');
                 }}
                 placeholder="••••••••"
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3.5 text-text font-mono placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-4 text-text font-mono placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 min-h-[52px] ${
                   authError ? 'border-error' : 'border-border'
                 }`}
-                autoFocus
               />
-              {authError && (
-                <span className="text-error text-xs font-semibold mt-2 block font-sans">
-                  ⚠️ {authError}
-                </span>
-              )}
+              <div className="min-h-[20px]">
+                {authError && (
+                  <span className="text-error text-xs font-semibold mt-2 block font-sans">
+                    ⚠️ {authError}
+                  </span>
+                )}
+              </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-primary text-white font-sans font-bold py-3.5 rounded-xl hover:bg-primary-hover hover:scale-[1.02] hover:shadow-primary shadow-md active:scale-98 transition-all duration-300"
+              className="w-full bg-primary text-white font-sans font-bold py-4 rounded-xl hover:bg-primary-hover hover:scale-[1.02] hover:shadow-primary shadow-md active:scale-98 transition-all duration-300 min-h-[52px]"
             >
               Verify Credentials
             </button>
@@ -1111,8 +1112,44 @@ Please come pick up your order at your convenience.
         </div>
       </aside>
 
+      {/* ── Mobile Bottom Nav (visible only on mobile) ──────────── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border flex items-stretch"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <button
+          onClick={() => setActiveTab(1)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-colors ${
+            activeTab === 1 ? 'text-primary' : 'text-muted'
+          }`}
+        >
+          <span className="text-lg">📋</span>
+          <span>Orders</span>
+          {filteredOrders.filter(o => o.status !== 'cancelled').length > 0 && (
+            <span className="absolute -top-1 right-6 bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+              {filteredOrders.filter(o => o.status !== 'cancelled').length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab(0)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-colors ${
+            activeTab === 0 ? 'text-primary' : 'text-muted'
+          }`}
+        >
+          <span className="text-lg">🍱</span>
+          <span>Products</span>
+        </button>
+        <Link
+          to="/"
+          className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold text-muted"
+        >
+          <span className="text-lg">🏠</span>
+          <span>Home</span>
+        </Link>
+      </nav>
+
       {/* ── Main content area ────────────────────────────────────── */}
-      <main className="flex-grow p-4 md:p-8 overflow-y-auto h-screen pb-24 md:pb-8 bg-bg/95 relative z-10 flex flex-col">
+      <main className="flex-grow p-4 md:p-8 overflow-y-auto h-screen pb-28 md:pb-8 bg-bg/95 relative z-10 flex flex-col">
         {/* Products tab screen */}
         {activeTab === 0 && (
           <div className="flex-grow flex flex-col">
