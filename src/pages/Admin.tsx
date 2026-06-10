@@ -766,7 +766,11 @@ ${itemLines}
 
 💰 *Total: ₹${order.total}*
 📅 *Pick up: ${deliveryFormatted}*
-📍 *Address: ${order.customer_address}*
+🏪 *Bam Delicacies pickup address:*
+A1/18 Brahma Aangan Society, 5th floor, Salunke Vihar Road, Kondhwa, Pune 411048
+
+📍 *Customer's address:*
+${order.customer_address}
 
 We're preparing your delicacies with love! Sit tight 🍽️
 — Bam's Delicacies`;
