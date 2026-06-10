@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { supabase } from '../utils/supabase';
 
 const FestivePromoModal: React.FC = () => {
@@ -8,6 +9,8 @@ const FestivePromoModal: React.FC = () => {
   const { profile } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isFestivalActive, setIsFestivalActive] = useState(false);
+
+  useScrollLock(isOpen);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -79,7 +82,8 @@ const FestivePromoModal: React.FC = () => {
       {/* Dimmed glassmorphism backdrop */}
       <div
         onClick={handleClose}
-        className="absolute inset-0 bg-[#0D0D0D]/85 backdrop-blur-md transition-opacity duration-300"
+        onTouchMove={(e) => e.preventDefault()}
+        className="absolute inset-0 bg-[#0D0D0D]/85 backdrop-blur-md transition-opacity duration-300 touch-none"
       />
 
       {/* Starry Festive Card Container */}

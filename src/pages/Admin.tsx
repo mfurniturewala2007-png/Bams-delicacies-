@@ -1162,7 +1162,7 @@ Please come pick up your order at your convenience.
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 <button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="bg-primary text-white font-sans font-bold text-sm px-4 py-2.5 md:px-5 md:py-3 rounded-xl shadow-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all duration-300"
+                  className="bg-primary text-white font-sans font-bold text-sm px-4 py-2.5 md:px-5 md:py-3 min-h-[48px] min-w-[48px] rounded-xl shadow-primary hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all duration-300"
                 >
                   + Add
                 </button>
@@ -1170,7 +1170,7 @@ Please come pick up your order at your convenience.
                   <button
                     onClick={handleSeedMenu}
                     disabled={isSeeding}
-                    className="text-[11px] font-sans font-semibold text-muted hover:text-text bg-surface-2 hover:bg-border/30 px-3 py-1.5 rounded-lg border border-border/50 transition-all duration-200 select-none disabled:opacity-50"
+                    className="text-[11px] font-sans font-semibold text-muted hover:text-text bg-surface-2 hover:bg-border/30 px-3 py-1.5 min-h-[48px] rounded-lg border border-border/50 transition-all duration-200 select-none disabled:opacity-50"
                   >
                     {isSeeding ? 'Seeding...' : '🌱 Seed Bam\'s Menu'}
                   </button>
@@ -1207,21 +1207,23 @@ Please come pick up your order at your convenience.
                           {/* Action buttons */}
                           <div className="flex items-center gap-1 flex-shrink-0">
                             {/* Stock toggle */}
-                            <button
-                              onClick={() => handleToggleStock(prod.id, prod.in_stock)}
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-                                prod.in_stock ? 'bg-primary shadow-primary' : 'bg-surface-2 border border-border'
-                              }`}
-                              title={prod.in_stock ? 'In Stock' : 'Out of Stock'}
-                            >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
-                                prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
-                              }`} />
-                            </button>
+                            <div className="flex items-center justify-center min-h-[48px] min-w-[48px]">
+                              <button
+                                onClick={() => handleToggleStock(prod.id, prod.in_stock)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                                  prod.in_stock ? 'bg-primary shadow-primary' : 'bg-surface-2 border border-border'
+                                }`}
+                                title={prod.in_stock ? 'In Stock' : 'Out of Stock'}
+                              >
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-bg transition-transform duration-300 ${
+                                  prod.in_stock ? 'translate-x-6 bg-surface-2' : 'translate-x-1 bg-muted'
+                                }`} />
+                              </button>
+                            </div>
                             {/* Star Toggle */}
                             <button
                               onClick={() => handleToggleFeatured(prod.id, prod.is_featured ?? false)}
-                              className="p-2 hover:bg-surface-2 rounded-xl transition-all duration-200"
+                              className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-surface-2 rounded-xl transition-all duration-200"
                               title={prod.is_featured ? 'Featured' : 'Not Featured'}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "#F5C200" : "none"} stroke={prod.is_featured ? "#F5C200" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5">
@@ -1231,7 +1233,7 @@ Please come pick up your order at your convenience.
                             {/* Edit */}
                             <button
                               onClick={() => handleOpenEditModal(prod)}
-                              className="p-2 text-primary hover:bg-primary/10 rounded-xl transition-all duration-200"
+                              className="p-2 text-primary min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-primary/10 rounded-xl transition-all duration-200"
                               title="Edit"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
@@ -1241,7 +1243,7 @@ Please come pick up your order at your convenience.
                             {/* Delete */}
                             <button
                               onClick={() => handleDeleteProduct(prod.id, prod.name)}
-                              className="p-2 text-error hover:bg-error/10 rounded-xl transition-all duration-200"
+                              className="p-2 text-error min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-error/10 rounded-xl transition-all duration-200"
                               title="Delete"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
@@ -2045,7 +2047,7 @@ Please come pick up your order at your convenience.
                         <select
                           value={ord.status}
                           onChange={(e) => handleUpdateStatus(ord.id, e.target.value as any)}
-                          className={`px-2 py-1 rounded-lg border text-xs font-bold focus:outline-none cursor-pointer flex-shrink-0 ${
+                          className={`px-2 py-1 min-h-[48px] rounded-lg border text-xs font-bold focus:outline-none cursor-pointer flex-shrink-0 ${
                             ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
                             : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
                             : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-[#9E7C00]'
@@ -2097,7 +2099,7 @@ Please come pick up your order at your convenience.
                             <button
                               onClick={() => handleConfirmAndNotify(ord)}
                               disabled={confirmingOrderId === ord.id}
-                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-xl text-[10px] font-bold border transition-all duration-200 disabled:opacity-50 active:scale-[0.98] ${
+                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 min-h-[48px] rounded-xl text-[10px] font-bold border transition-all duration-200 disabled:opacity-50 active:scale-[0.98] ${
                                 whatsappSent[ord.id]?.has('confirmed')
                                   ? 'bg-[#25D366]/10 border-[#25D366]/40 text-[#1a9e4a]'
                                   : 'bg-surface-2 border-border text-text hover:border-[#25D366]/50'
@@ -2110,7 +2112,7 @@ Please come pick up your order at your convenience.
                             {/* Stage 2: Ready */}
                             <button
                               onClick={() => handleOrderReady(ord)}
-                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-xl text-[10px] font-bold border transition-all duration-200 active:scale-[0.98] ${
+                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 min-h-[48px] rounded-xl text-[10px] font-bold border transition-all duration-200 active:scale-[0.98] ${
                                 whatsappSent[ord.id]?.has('ready')
                                   ? 'bg-yellow/10 border-yellow/40 text-[#9E7C00]'
                                   : 'bg-surface-2 border-border text-text hover:border-yellow/50'
@@ -2123,7 +2125,7 @@ Please come pick up your order at your convenience.
                             {/* Stage 3: Delivery / Pickup */}
                             <button
                               onClick={() => setDeliveryTypeModalOrderId(ord.id)}
-                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 rounded-xl text-[10px] font-bold border transition-all duration-200 active:scale-[0.98] ${
+                              className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 min-h-[48px] rounded-xl text-[10px] font-bold border transition-all duration-200 active:scale-[0.98] ${
                                 whatsappSent[ord.id]?.has('delivery') || whatsappSent[ord.id]?.has('pickup')
                                   ? 'bg-primary/10 border-primary/40 text-primary'
                                   : 'bg-surface-2 border-border text-text hover:border-primary/50'
@@ -2141,7 +2143,7 @@ Please come pick up your order at your convenience.
                         <div className="pt-2 border-t border-border/50">
                           <button
                             onClick={() => handleDeleteOrder(ord.id)}
-                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-error/10 hover:bg-error/20 border border-error/30 text-error transition-all duration-200 active:scale-[0.98]"
+                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 min-h-[48px] rounded-xl text-sm font-bold bg-error/10 hover:bg-error/20 border border-error/30 text-error transition-all duration-200 active:scale-[0.98]"
                           >
                             <span>🗑️</span>
                             <span>Delete Order</span>
