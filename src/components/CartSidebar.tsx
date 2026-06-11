@@ -29,7 +29,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-[60] overflow-hidden">
       {/* Dark Overlay */}
       <div
         onClick={onClose}

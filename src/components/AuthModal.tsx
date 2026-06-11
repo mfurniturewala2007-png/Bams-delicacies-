@@ -157,7 +157,7 @@ const AuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-text">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 select-text">
       {/* Dimmed overlay — only closeable if logged in */}
       <div
         onClick={closeAuthModal}
