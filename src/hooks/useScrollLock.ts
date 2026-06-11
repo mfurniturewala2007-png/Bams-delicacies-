@@ -1,33 +1,41 @@
 import { useEffect } from 'react';
 
+// ── Global scroll-lock reference counter ───────────────────────────────────
+// Using a module-level counter means multiple components can call useScrollLock
+// simultaneously without clobbering each other's cleanup.
+let lockCount = 0;
+let savedScrollY = 0;
+
+function applyLock() {
+  if (lockCount === 0) {
+    // Save position and lock body before incrementing
+    savedScrollY = window.scrollY;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${savedScrollY}px`;
+    document.body.style.width = '100%';
+  }
+  lockCount++;
+}
+
+function releaseLock() {
+  lockCount = Math.max(0, lockCount - 1);
+  if (lockCount === 0) {
+    // Restore body and scroll position
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo({ top: savedScrollY, behavior: 'instant' as ScrollBehavior });
+  }
+}
+
 export const useScrollLock = (locked: boolean) => {
   useEffect(() => {
     if (!locked) return;
-
-    // Save current scroll position
-    const scrollY = window.scrollY;
-
-    // Get original styles to restore them correctly
-    const originalStylePosition = document.body.style.position;
-    const originalStyleTop = document.body.style.top;
-    const originalStyleWidth = document.body.style.width;
-    const originalStyleOverflowY = document.body.style.overflowY;
-
-    // Lock scroll
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    document.body.style.overflowY = 'scroll';
-
+    applyLock();
     return () => {
-      // Restore styles
-      document.body.style.position = originalStylePosition;
-      document.body.style.top = originalStyleTop;
-      document.body.style.width = originalStyleWidth;
-      document.body.style.overflowY = originalStyleOverflowY;
-
-      // Restore scroll position
-      window.scrollTo(0, scrollY);
+      releaseLock();
     };
   }, [locked]);
 };

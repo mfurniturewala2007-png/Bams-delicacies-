@@ -108,14 +108,18 @@ const EditableField: React.FC<EditableFieldProps> = ({
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const { items, totalAmount, clearCart } = useCart();
-  const { profile } = useAuth();
+  const { profile, isLoadingProfile } = useAuth();
 
   // ── Guards ────────────────────────────────────────────────────────────────
+  // NOTE: We wait for isLoadingProfile to be false before redirecting.
+  // Without this, the async session restore causes a false "!profile" on first
+  // render which incorrectly redirects logged-in users, causing the white screen.
   useEffect(() => {
+    if (isLoadingProfile) return; // still fetching — do nothing yet
     if (items.length === 0 || !profile) {
       navigate('/', { replace: true });
     }
-  }, [items.length, profile, navigate]);
+  }, [items.length, profile, isLoadingProfile, navigate]);
 
   // ── Delivery dates ────────────────────────────────────────────────────────
   const { saturday, sunday } = getAvailableDeliveryDates();
@@ -351,6 +355,21 @@ const Checkout: React.FC = () => {
   const handlePaymentCancelled = () => {
     setPaymentOrderId(null);
   };
+
+  // Show a loading spinner while profile session is being restored
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
+        <div className="flex flex-col items-center gap-4">
+          <svg className="animate-spin h-10 w-10" viewBox="0 0 24 24" fill="none" style={{ color: '#F5C200' }}>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-sm font-semibold" style={{ color: '#999' }}>Loading your session...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0 || !profile) return null;
 

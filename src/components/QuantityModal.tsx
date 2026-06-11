@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { Product } from '../types';
 import { useScrollLock } from '../hooks/useScrollLock';
 
@@ -17,6 +18,11 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 }) => {
   const [dozens, setDozens] = useState(1);
 
+  // Reset quantity to 1 every time the modal opens for a (possibly different) product
+  useEffect(() => {
+    if (isOpen) setDozens(1);
+  }, [isOpen]);
+
   useScrollLock(isOpen);
 
   if (!isOpen) return null;
@@ -25,8 +31,11 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
     onConfirm(dozens);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 select-text">
+  // Render into document.body via portal so CSS transforms on parent
+  // containers (e.g. the marquee carousel) don't create a new stacking
+  // context that traps the fixed-position modal.
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 select-text">
       <div
         onClick={onClose}
         onTouchMove={(e) => e.preventDefault()}
@@ -105,7 +114,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

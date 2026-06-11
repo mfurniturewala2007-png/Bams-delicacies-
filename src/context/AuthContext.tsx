@@ -4,6 +4,7 @@ import { UserProfile } from '../types';
 
 interface AuthContextType {
   profile: UserProfile | null;
+  isLoadingProfile: boolean;
   isAuthModalOpen: boolean;
   isEditingProfile: boolean;
   openAuthModal: () => void;
@@ -19,35 +20,41 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false); // Start with modal closed
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
 
   // Restore user session from localStorage on mount
   useEffect(() => {
     const savedPhone = localStorage.getItem('bams_user_phone');
-    if (savedPhone) {
-      const restoreSession = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('phone', savedPhone)
-            .maybeSingle();
-
-          if (error) throw error;
-
-          if (data) {
-            setProfile(data as UserProfile);
-          } else {
-            // Clean up stale phone number if not found in db
-            localStorage.removeItem('bams_user_phone');
-          }
-        } catch (err) {
-          console.warn('Failed to restore user session:', err);
-        }
-      };
-      restoreSession();
+    if (!savedPhone) {
+      // No saved session — immediately mark loading as done
+      setIsLoadingProfile(false);
+      return;
     }
+    const restoreSession = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('phone', savedPhone)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          setProfile(data as UserProfile);
+        } else {
+          // Clean up stale phone number if not found in db
+          localStorage.removeItem('bams_user_phone');
+        }
+      } catch (err) {
+        console.warn('Failed to restore user session:', err);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    restoreSession();
   }, []);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
@@ -137,6 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         profile,
+        isLoadingProfile,
         isAuthModalOpen,
         isEditingProfile,
         openAuthModal,
