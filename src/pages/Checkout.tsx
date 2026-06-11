@@ -150,9 +150,13 @@ const Checkout: React.FC = () => {
           const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
           const festEnabled = data.find(r => r.key === 'festival_deal_enabled')?.value !== 'false';
           const festDelivery = data.find(r => r.key === 'festival_deal_delivery_date')?.value || '';
+          
+          const satVal = parseInt(sat, 10);
+          const sunVal = parseInt(sun, 10);
+
           setSettings({
-            satCapacity: parseInt(sat, 10),
-            sunCapacity: parseInt(sun, 10),
+            satCapacity: isNaN(satVal) ? 15 : satVal,
+            sunCapacity: isNaN(sunVal) ? 15 : sunVal,
             festEnabled,
             festDeliveryDate: festDelivery,
           });
@@ -168,7 +172,15 @@ const Checkout: React.FC = () => {
     if (!settings.festDeliveryDate) return null;
     const parts = settings.festDeliveryDate.split('-');
     if (parts.length === 3) {
-      return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const d = new Date(year, month, day);
+        if (!isNaN(d.getTime())) {
+          return d;
+        }
+      }
     }
     return null;
   }, [settings.festDeliveryDate]);
