@@ -40,11 +40,10 @@ const AuthModal: React.FC = () => {
     }
   }, [isEditingProfile, profile]);
 
-  if (!isAuthModalOpen) return null;
+  // Lock scroll when modal is open — must be before any early return (Rules of Hooks)
+  useScrollLock(isAuthModalOpen);
 
-  // Lock scroll when modal is open
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useScrollLock(true);
+  if (!isAuthModalOpen) return null;
 
   // Decide which view to show
   const activeStep = isEditingProfile ? 'profile' : tab;

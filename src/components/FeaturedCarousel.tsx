@@ -4,7 +4,7 @@ import { supabase } from '../utils/supabase';
 import { useCart } from '../context/CartContext';
 import QuantityModal from './QuantityModal';
 
-const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }> = ({ prod, onAddClick }) => {
+const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; tabIndex?: number }> = ({ prod, onAddClick, tabIndex = 0 }) => {
   return (
     <div
       className="w-[160px] flex-shrink-0 bg-surface border border-border/40 md:hover:border-primary/50 md:hover:shadow-yellow md:hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-2.5 flex flex-col justify-between"
@@ -63,6 +63,7 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void }
         {/* Add button — 44px touch target */}
         <button
           onClick={() => onAddClick(prod)}
+          tabIndex={tabIndex}
           className="w-11 h-11 rounded-full bg-primary md:hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none flex-shrink-0"
           title="Add to Cart"
         >
@@ -183,10 +184,10 @@ const FeaturedCarousel: React.FC = () => {
                 <FeaturedCard key={`track1-${prod.id}`} prod={prod} onAddClick={handleAddClick} />
               ))}
             </div>
-            {/* Track 2 (Duplicate for seamless loop) */}
+            {/* Track 2 (Duplicate for seamless loop) — aria-hidden so AT skips it */}
             <div className="flex gap-4 shrink-0" aria-hidden="true">
               {products.map((prod) => (
-                <FeaturedCard key={`track2-${prod.id}`} prod={prod} onAddClick={handleAddClick} />
+                <FeaturedCard key={`track2-${prod.id}`} prod={prod} onAddClick={handleAddClick} tabIndex={-1} />
               ))}
             </div>
           </div>
