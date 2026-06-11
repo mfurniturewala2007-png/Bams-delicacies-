@@ -59,8 +59,19 @@ const PheliRaat: React.FC = () => {
           // Format delivery date nicely for UI
           const dateParts = delivStr.split('-');
           if (dateParts.length === 3) {
-            const dateObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-            setDeliveryDateStr(dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+            const year = parseInt(dateParts[0], 10);
+            const month = parseInt(dateParts[1], 10) - 1;
+            const day = parseInt(dateParts[2], 10);
+            if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+              const dateObj = new Date(year, month, day);
+              if (!isNaN(dateObj.getTime())) {
+                setDeliveryDateStr(dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+              } else {
+                setDeliveryDateStr(delivStr);
+              }
+            } else {
+              setDeliveryDateStr(delivStr);
+            }
           } else {
             setDeliveryDateStr(delivStr);
           }

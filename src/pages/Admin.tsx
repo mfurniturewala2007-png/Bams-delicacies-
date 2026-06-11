@@ -218,8 +218,15 @@ const Admin: React.FC = () => {
   const festivalOpt = festivalEnabled && festivalDeliveryDate ? (() => {
     const parts = festivalDeliveryDate.split('-');
     if (parts.length === 3) {
-      const dObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-      return { date: dObj, label: '✨ Pheli Raat ✨', dbStr: festivalDeliveryDate };
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const dObj = new Date(year, month, day);
+        if (!isNaN(dObj.getTime())) {
+          return { date: dObj, label: '✨ Pheli Raat ✨', dbStr: festivalDeliveryDate };
+        }
+      }
     }
     return null;
   })() : null;
@@ -398,7 +405,17 @@ const Admin: React.FC = () => {
       }
     }).join('\n');
 
-    const deliveryFormatted = format(new Date(order.delivery_date), 'EEEE, MMM d');
+    let deliveryFormatted = order.delivery_date;
+    try {
+      if (order.delivery_date) {
+        const d = new Date(order.delivery_date);
+        if (!isNaN(d.getTime())) {
+          deliveryFormatted = format(d, 'EEEE, MMM d');
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to format order delivery date:", e);
+    }
 
     return template
       .replace(/{customer_name}/g, order.customer_name)

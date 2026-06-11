@@ -29,22 +29,29 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
   if (festivalDeliveryDate) {
     const parts = festivalDeliveryDate.split('-');
     if (parts.length === 3) {
-      const festDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-      const festDateStr = format(festDate, 'yyyy-MM-dd');
-      const satStr = format(saturday, 'yyyy-MM-dd');
-      const sunStr = format(sunday, 'yyyy-MM-dd');
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const festDate = new Date(year, month, day);
+        if (!isNaN(festDate.getTime())) {
+          const festDateStr = format(festDate, 'yyyy-MM-dd');
+          const satStr = format(saturday, 'yyyy-MM-dd');
+          const sunStr = format(sunday, 'yyyy-MM-dd');
 
-      // Only add if it's today or in the future, and is not already covered by standard Saturday/Sunday
-      const todayZero = new Date();
-      todayZero.setHours(0, 0, 0, 0);
-      const festDateZero = new Date(festDate);
-      festDateZero.setHours(0, 0, 0, 0);
+          // Only add if it's today or in the future, and is not already covered by standard Saturday/Sunday
+          const todayZero = new Date();
+          todayZero.setHours(0, 0, 0, 0);
+          const festDateZero = new Date(festDate);
+          festDateZero.setHours(0, 0, 0, 0);
 
-      if (festDateZero >= todayZero && festDateStr !== satStr && festDateStr !== sunStr) {
-        options.push({
-          date: festDate,
-          label: format(festDate, 'eeee'),
-        });
+          if (festDateZero >= todayZero && festDateStr !== satStr && festDateStr !== sunStr) {
+            options.push({
+              date: festDate,
+              label: format(festDate, 'eeee'),
+            });
+          }
+        }
       }
     }
   }

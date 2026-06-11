@@ -68,10 +68,18 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
   const [festivalDeliveryDate, setFestivalDeliveryDate] = useState('2026-06-12');
 
   const formatDbDate = (dateStr: string) => {
+    if (!dateStr) return '';
     const parts = dateStr.split('-');
     if (parts.length === 3) {
-      const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-      return format(dateObj, 'eeee, MMMM d, yyyy');
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const dateObj = new Date(year, month, day);
+        if (!isNaN(dateObj.getTime())) {
+          return format(dateObj, 'eeee, MMMM d, yyyy');
+        }
+      }
     }
     return dateStr;
   };
@@ -139,14 +147,18 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
         const year = parseInt(parts[0], 10);
         const month = parseInt(parts[1], 10) - 1;
         const day = parseInt(parts[2], 10);
-        const dateObj = new Date(year, month, day);
-        setSelectedDate(dateObj);
-        if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
+        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+          const dateObj = new Date(year, month, day);
+          if (!isNaN(dateObj.getTime())) {
+            setSelectedDate(dateObj);
+            if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
+          }
+        }
       }
-    } else if (!hasFestiveItem && selectedDate && format(selectedDate, 'yyyy-MM-dd') === festivalDeliveryDate) {
+    } else if (!hasFestiveItem && selectedDate && !isNaN(selectedDate.getTime()) && format(selectedDate, 'yyyy-MM-dd') === festivalDeliveryDate) {
       setSelectedDate(null);
     }
-  }, [hasFestiveItem, festivalDeliveryDate]);
+  }, [hasFestiveItem, festivalDeliveryDate, selectedDate]);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type, visible: true });
