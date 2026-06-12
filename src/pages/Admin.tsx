@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { Product, Order } from '../types';
 import { supabase } from '../utils/supabase';
 import { getAvailableDeliveryDates } from '../utils/deliveryDates';
 import { BAMS_MENU } from '../utils/seedMenu';
+import { useAuth } from '../context/AuthContext';
 
 // Default mock menu list as fallback if Supabase returns empty
 const DEFAULT_PRODUCTS: Product[] = [
@@ -90,11 +91,8 @@ Please come pick up your order at your convenience.
 — Bam's Delicacies 🍽️`;
 
 const Admin: React.FC = () => {
-  // Gating State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [isShaking, setIsShaking] = useState(false);
-  const [authError, setAuthError] = useState('');
+  const { profile, isLoadingProfile } = useAuth();
+  const navigate = useNavigate();
 
   // Tab State: 0 = Products, 1 = Orders, 2 = Templates
   const [activeTab, setActiveTab] = useState<0 | 1 | 2>(1);
@@ -431,31 +429,12 @@ const Admin: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoadingProfile && profile?.is_admin) {
       loadProducts();
       loadOrders();
       loadMaxOrders();
     }
-  }, [isAuthenticated]);
-
-  // Auth Submit Action
-  const handleAuthSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'bamsadmin';
-
-    if (passwordInput === adminPassword) {
-      setIsAuthenticated(true);
-      setAuthError('');
-    } else {
-      setIsShaking(true);
-      setAuthError('Incorrect password');
-      setPasswordInput('');
-      setTimeout(() => {
-        setIsShaking(false);
-      }, 300);
-    }
-  };
+  }, [isLoadingProfile, profile]);
 
   // Products CRUD: Toggle Stock
   const handleToggleStock = async (id: string, currentStock: boolean) => {
@@ -1076,54 +1055,39 @@ const Admin: React.FC = () => {
   };
 
   // Gate view
-  if (!isAuthenticated) {
+  // ── Admin Gate ────────────────────────────────────────────────────────────
+  // Show a spinner while the profile is being loaded from Supabase.
+  if (isLoadingProfile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg px-4 select-text">
-        <div className="absolute inset-0 pointer-events-none opacity-20"
-          style={{ background: 'radial-gradient(circle, rgba(200,81,27,0.05) 0%, rgba(255,248,238,0) 70%)' }} />
-        
-        <div
-          className={`w-full max-w-md bg-surface border border-border p-8 rounded-2xl shadow-card text-center transition-all duration-300 ${
-            isShaking ? 'animate-shake' : ''
-          }`}
-        >
+      <div className="min-h-screen flex items-center justify-center bg-bg">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="font-sans text-muted text-sm">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in at all → redirect to home.
+  if (!profile) {
+    navigate('/');
+    return null;
+  }
+
+  // Logged in but not an admin → show access-denied screen.
+  if (!profile.is_admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg px-4">
+        <div className="w-full max-w-md bg-surface border border-border p-8 rounded-2xl shadow-card text-center">
           <img src="/logo.jpeg" alt="Bam's Delicacies Logo" className="w-20 h-20 rounded-full mx-auto mb-6 object-cover border border-border shadow-md" />
-          <h1 className="font-serif font-black text-3xl text-heading mb-2">Admin Login</h1>
-          <p className="font-sans text-muted text-xs mb-8">Manage products, orders, and slot availabilities.</p>
-
-          <form onSubmit={handleAuthSubmit} className="space-y-6">
-            <div className="text-left">
-              <label className="block text-xs font-sans font-bold text-text/70 uppercase tracking-widest mb-2.5">
-                Enter Admin Password
-              </label>
-              <input
-                type="password"
-                value={passwordInput}
-                onChange={(e) => {
-                  setPasswordInput(e.target.value);
-                  if (authError) setAuthError('');
-                }}
-                placeholder="••••••••"
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-4 text-text font-mono placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 min-h-[52px] ${
-                  authError ? 'border-error' : 'border-border'
-                }`}
-              />
-              <div className="min-h-[20px]">
-                {authError && (
-                  <span className="text-error text-xs font-semibold mt-2 block font-sans">
-                    ⚠️ {authError}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-primary text-white font-sans font-bold py-4 rounded-xl hover:bg-primary-hover hover:scale-[1.02] hover:shadow-primary shadow-md active:scale-98 transition-all duration-300 min-h-[52px]"
-            >
-              Verify Credentials
-            </button>
-          </form>
+          <h1 className="font-serif font-black text-3xl text-heading mb-2">Access Denied</h1>
+          <p className="font-sans text-muted text-sm mb-6">You do not have permission to view this page.</p>
+          <Link
+            to="/"
+            className="inline-block bg-primary text-white font-sans font-bold py-3 px-8 rounded-xl hover:bg-primary-hover transition-all duration-200"
+          >
+            Back to Home
+          </Link>
         </div>
       </div>
     );

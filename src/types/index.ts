@@ -56,5 +56,6 @@ export interface UserProfile {
   name: string;
   address: string;
   pincode: string;
+  is_admin?: boolean;
   created_at?: string;
 }

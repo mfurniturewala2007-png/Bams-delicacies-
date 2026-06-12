@@ -64,7 +64,6 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 //   VITE_SUPABASE_URL       = your Supabase project URL
 //   VITE_SUPABASE_ANON_KEY  = your Supabase anon public key
 //   VITE_VAPID_PUBLIC_KEY   = generated VAPID public key (starts with B...)
-//   VITE_ADMIN_PASSWORD     = secure admin password (min 12 chars)
 //   VITE_EMAILJS_SERVICE_ID = EmailJS service ID (optional, for email receipts)
 //   VITE_EMAILJS_TEMPLATE_ID= EmailJS template ID (optional)
 //   VITE_EMAILJS_PUBLIC_KEY = EmailJS public key (optional)
@@ -85,7 +84,6 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 //   [ ] Cart add/remove works in-session (no localStorage used)
 //   [ ] Order form submits successfully to Supabase
 //   [ ] Delivery date calculation shows next available Saturday/Sunday
-//   [ ] Admin login works with VITE_ADMIN_PASSWORD
 //   [ ] Admin can toggle product stock status
 //   [ ] Admin can add a new product with image
 //   [ ] Push notification opt-in prompts user permission
