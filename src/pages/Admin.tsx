@@ -91,7 +91,7 @@ Please come pick up your order at your convenience.
 — Bam's Delicacies 🍽️`;
 
 const Admin: React.FC = () => {
-  const { profile, isLoadingProfile } = useAuth();
+  const { profile, isLoadingProfile, signOut } = useAuth();
   const navigate = useNavigate();
 
   // Tab State: 0 = Products, 1 = Orders, 2 = Templates
@@ -1166,7 +1166,7 @@ const Admin: React.FC = () => {
         {/* Admin signout trigger */}
         <div className="p-4 border-t border-border">
           <button
-            onClick={() => { setIsAuthenticated(false); }}
+            onClick={() => { signOut(); navigate('/'); }}
             className="w-full py-2.5 px-4 rounded-xl font-sans font-bold text-xs tracking-wider text-error hover:bg-error/10 border border-transparent hover:border-error/25 transition-all duration-200 uppercase"
           >
             Sign Out
@@ -2552,7 +2552,7 @@ const Admin: React.FC = () => {
           <span className="font-sans">Website</span>
         </Link>
         <button
-          onClick={() => setIsAuthenticated(false)}
+          onClick={() => { signOut(); navigate('/'); }}
           className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold text-error/80 transition-all duration-200 active:bg-error/10"
         >
           <span className="text-xl">🚪</span>
