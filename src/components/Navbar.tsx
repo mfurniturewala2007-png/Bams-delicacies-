@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../utils/supabase';
 import { Link } from 'react-router-dom';
 import { useScrollLock } from '../hooks/useScrollLock';
 
@@ -16,31 +15,8 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const badgeRef = useRef<HTMLSpanElement>(null);
-  const [isFestivalActive, setIsFestivalActive] = useState(false);
-
   // Lock scroll when mobile menu is open
   useScrollLock(isMobileMenuOpen);
-
-  // Check if festival promo is active
-  useEffect(() => {
-    const checkFestival = async () => {
-      try {
-        const { data } = await supabase
-          .from('settings')
-          .select('*')
-          .eq('key', 'festival_deal_enabled')
-          .maybeSingle();
-        if (data && data.value === 'false') {
-          setIsFestivalActive(false);
-        } else {
-          setIsFestivalActive(true); // Default to true if not set or enabled
-        }
-      } catch (err) {
-        setIsFestivalActive(true);
-      }
-    };
-    checkFestival();
-  }, []);
 
   // Trigger badge bounce animation whenever an item is added
   useEffect(() => {
@@ -67,9 +43,8 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
+  const navLinks: { label: string; href: string; isFestive?: boolean }[] = [
     { label: 'Menu', href: '/#menu' },
-    ...(isFestivalActive ? [{ label: '🌙 Pheli Raat Combos', href: '/pheli-raat', isFestive: true }] : []),
     { label: 'Order Now', href: '/#order' },
   ];
 

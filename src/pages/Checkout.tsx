@@ -221,18 +221,7 @@ const Checkout: React.FC = () => {
   const sunFull = sunCount >= settings.sunCapacity;
   const festFull = festCount >= festCapacity;
 
-  const hasCombo = useMemo(() => {
-    return items.some((item) =>
-      (item.category && item.category.toLowerCase().includes('pheli')) ||
-      (item.name && (item.name.toLowerCase().includes('combo') || item.name.toLowerCase().includes('pheli')))
-    );
-  }, [items]);
-
-  useEffect(() => {
-    if (hasCombo && settings.festEnabled && festDateObj) {
-      setSelectedDate(festDateObj);
-    }
-  }, [hasCombo, settings.festEnabled, festDateObj]);
+  const hasCombo = false;
 
   const dateOptions = useMemo(() => {
     const options = [

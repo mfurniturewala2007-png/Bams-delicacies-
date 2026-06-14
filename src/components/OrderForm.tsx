@@ -137,28 +137,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isDark = false }) => {
     }
   }, [items, dbSatStr, dbSunStr, festivalDeliveryDate]);
 
-  const hasFestiveItem = items.some(item => item.category === 'Pheli Raat');
-
-  // Lock delivery date automatically if there is a festive item in the cart
-  useEffect(() => {
-    if (hasFestiveItem && festivalDeliveryDate) {
-      const parts = festivalDeliveryDate.split('-');
-      if (parts.length === 3) {
-        const year = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-          const dateObj = new Date(year, month, day);
-          if (!isNaN(dateObj.getTime())) {
-            setSelectedDate(dateObj);
-            if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
-          }
-        }
-      }
-    } else if (!hasFestiveItem && selectedDate && !isNaN(selectedDate.getTime()) && format(selectedDate, 'yyyy-MM-dd') === festivalDeliveryDate) {
-      setSelectedDate(null);
-    }
-  }, [hasFestiveItem, festivalDeliveryDate, selectedDate]);
+  const hasFestiveItem = false;
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type, visible: true });

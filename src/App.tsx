@@ -5,7 +5,6 @@ import { AuthProvider } from './context/AuthContext';
 import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
-import PheliRaat from './pages/PheliRaat';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 
@@ -102,7 +101,6 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/admin" element={<Admin />} />
-              <Route path="/pheli-raat" element={<PheliRaat />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-success" element={<OrderSuccess />} />
             </Routes>

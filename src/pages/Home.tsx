@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import HowItWorksModal from '../components/HowItWorksModal';
-import FestivePromoModal from '../components/FestivePromoModal';
 import FeaturedCarousel from '../components/FeaturedCarousel';
 import MenuGrid from '../components/MenuGrid';
 import OrderForm from '../components/OrderForm';
@@ -52,8 +51,6 @@ const Home: React.FC = () => {
       {/* "How It Works" Pop-up Modal */}
       <HowItWorksModal isOpen={isExplainerOpen} onClose={handleExplainerClose} />
 
-      {/* Festive Promo popup for logged-in users */}
-      <FestivePromoModal />
     </div>
   );
 };
