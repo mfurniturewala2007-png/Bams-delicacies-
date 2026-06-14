@@ -94,8 +94,8 @@ const Admin: React.FC = () => {
   const { profile, isLoadingProfile, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Tab State: 0 = Products, 1 = Orders, 2 = Templates
-  const [activeTab, setActiveTab] = useState<0 | 1 | 2>(1);
+  // Tab State: 0 = Products, 1 = Orders, 2 = Templates, 3 = Summary
+  const [activeTab, setActiveTab] = useState<0 | 1 | 2 | 3>(1);
 
   // Products Tab States
   const [products, setProducts] = useState<Product[]>([]);
@@ -1116,6 +1116,17 @@ const Admin: React.FC = () => {
               <span>💬</span>
               <span>Message Templates</span>
             </button>
+            <button
+              onClick={() => setActiveTab(3)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide transition-all duration-200 border-l-2 ${
+                activeTab === 3
+                  ? 'bg-surface-2 border-primary text-primary'
+                  : 'border-transparent text-text/70 hover:text-text hover:bg-surface-2/40'
+              }`}
+            >
+              <span>📊</span>
+              <span>Summary</span>
+            </button>
             <Link
               to="/"
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans font-semibold text-sm tracking-wide text-text/70 hover:text-text hover:bg-surface-2/40 border-l-2 border-transparent transition-all duration-200"
@@ -1172,6 +1183,15 @@ const Admin: React.FC = () => {
         >
           <span className="text-lg">💬</span>
           <span>Templates</span>
+        </button>
+        <button
+          onClick={() => setActiveTab(3)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-colors ${
+            activeTab === 3 ? 'text-primary' : 'text-muted'
+          }`}
+        >
+          <span className="text-lg">📊</span>
+          <span>Summary</span>
         </button>
         <Link
           to="/"
@@ -2423,6 +2443,206 @@ const Admin: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Summary tab screen */}
+        {activeTab === 3 && (() => {
+          // Filter June 2026 orders that contain Pheli Raat items
+          const june2026PheliOrders = orders.filter((o) => {
+            return o.delivery_date && o.delivery_date.startsWith('2026-06') &&
+              o.items.some((i) =>
+                (i.category && i.category.toLowerCase().includes('pheli')) ||
+                (i.name && (i.name.toLowerCase().includes('combo') || i.name.toLowerCase().includes('pheli')))
+              );
+          });
+
+          // Calculate statistics
+          const totalOrdersCount = june2026PheliOrders.length;
+          const statusCounts = june2026PheliOrders.reduce((acc, o) => {
+            acc[o.status] = (acc[o.status] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+
+          const confirmedOrders = june2026PheliOrders.filter(o => o.status === 'confirmed' || o.status === 'delivered');
+          const confirmedRevenue = confirmedOrders.reduce((sum, o) => sum + Number(o.total), 0);
+
+          // Items breakdown count (excluding cancelled)
+          const itemsBreakdown: Record<string, number> = {};
+          june2026PheliOrders.forEach((o) => {
+            if (o.status !== 'cancelled') {
+              o.items.forEach((i) => {
+                const qty = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
+                itemsBreakdown[i.name] = (itemsBreakdown[i.name] || 0) + qty;
+              });
+            }
+          });
+
+          return (
+            <div className="flex-grow flex flex-col text-left animate-page-fade pb-8">
+              {/* Header */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 pb-4 border-b border-border/40 select-none gap-4">
+                <div className="text-left">
+                  <h2 className="font-serif font-black text-2xl md:text-3xl text-heading">Summary Reports</h2>
+                  <p className="text-muted text-xs font-sans mt-1">Download and view seasonal sales summaries.</p>
+                </div>
+              </div>
+
+              {/* Grid Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* File list card */}
+                <div className="lg:col-span-1 bg-surface border border-border p-6 rounded-2xl shadow-card flex flex-col justify-between min-h-[260px]">
+                  <div>
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-3xl">📄</span>
+                      <div>
+                        <h3 className="font-serif font-bold text-lg text-heading">Report Archive</h3>
+                        <span className="text-[10px] uppercase font-sans font-bold text-muted tracking-wider">Spreadsheets & Exports</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-surface-2 border border-border/50 rounded-xl p-4 flex flex-col gap-1.5 mt-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-sans font-bold text-sm text-text truncate max-w-[180px]" title="pheli raat oerder - 2026 june">
+                          pheli raat oerder - 2026 june
+                        </span>
+                        <span className="text-[9px] font-sans font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase">CSV</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-muted font-sans">
+                        <span>Size: ~4.5 KB</span>
+                        <span>Date: June 2026</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-col gap-2">
+                    <a
+                      href="/pheli raat oerder - 2026 june.csv"
+                      download="pheli raat oerder - 2026 june.csv"
+                      className="w-full bg-primary text-bg font-sans font-black text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200"
+                    >
+                      Download CSV File 📥
+                    </a>
+                    <span className="text-[10px] text-muted text-center leading-normal">
+                      Contains 21 Pheli Raat festival orders from June 2026.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Dashboard Stats */}
+                <div className="lg:col-span-2 bg-surface border border-border p-6 rounded-2xl shadow-card flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-serif font-bold text-lg text-heading mb-4">Report Overview: pheli raat oerder - 2026 june</h3>
+                    
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-bg border border-border/60 p-4 rounded-xl text-center">
+                        <span className="text-[10px] font-sans uppercase font-bold text-muted block mb-1">Total Orders</span>
+                        <span className="text-2xl font-serif font-black text-primary">{totalOrdersCount}</span>
+                      </div>
+                      <div className="bg-bg border border-border/60 p-4 rounded-xl text-center">
+                        <span className="text-[10px] font-sans uppercase font-bold text-muted block mb-1">Confirmed Revenue</span>
+                        <span className="text-2xl font-serif font-black text-success">₹{confirmedRevenue}</span>
+                      </div>
+                      <div className="bg-bg border border-border/60 p-4 rounded-xl text-center">
+                        <span className="text-[10px] font-sans uppercase font-bold text-muted block mb-1">Confirmed/Deliv</span>
+                        <span className="text-2xl font-serif font-black text-text">
+                          {(statusCounts['confirmed'] || 0) + (statusCounts['delivered'] || 0)}
+                        </span>
+                      </div>
+                      <div className="bg-bg border border-border/60 p-4 rounded-xl text-center">
+                        <span className="text-[10px] font-sans uppercase font-bold text-muted block mb-1">Cancelled</span>
+                        <span className="text-2xl font-serif font-black text-error">
+                          {statusCounts['cancelled'] || 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Popular items */}
+                    <div>
+                      <h4 className="font-sans font-bold text-xs text-text uppercase tracking-wider mb-2">Item Quantities Sold (Non-Cancelled)</h4>
+                      {Object.keys(itemsBreakdown).length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans">
+                          {Object.entries(itemsBreakdown).map(([name, qty]) => (
+                            <div key={name} className="flex justify-between items-center bg-bg/50 px-3.5 py-2 rounded-lg border border-border/30">
+                              <span className="text-text/90 font-medium truncate max-w-[190px]">{name}</span>
+                              <span className="font-bold text-primary bg-primary/5 px-2.5 py-0.5 rounded-full">{qty} {name.includes('Halwa') || name.includes('Tikka') ? 'pcs' : 'doz'}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted">No non-cancelled items sold in this period.</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Table */}
+              <div className="bg-surface border border-border rounded-2xl shadow-card overflow-hidden">
+                <div className="p-5 border-b border-border/40 flex justify-between items-center select-none">
+                  <div>
+                    <h3 className="font-serif font-bold text-lg text-heading">Report Preview</h3>
+                    <p className="text-[11px] text-muted font-sans mt-0.5">Interactive spreadsheet view for verifying data.</p>
+                  </div>
+                </div>
+
+                {june2026PheliOrders.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left font-sans text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-bg text-muted uppercase tracking-wider text-[10px] border-b border-border/50 select-none">
+                          <th className="py-4 px-6 font-bold">Customer</th>
+                          <th className="py-4 px-4 font-bold">Phone</th>
+                          <th className="py-4 px-4 font-bold">Delivery Date</th>
+                          <th className="py-4 px-6 font-bold">Items</th>
+                          <th className="py-4 px-4 font-bold text-right">Total</th>
+                          <th className="py-4 px-6 font-bold text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/30 select-text">
+                        {june2026PheliOrders.map((ord) => {
+                          let statusColor = 'bg-muted/10 text-muted';
+                          if (ord.status === 'confirmed' || ord.status === 'delivered') {
+                            statusColor = 'bg-success/15 text-success border border-success/20';
+                          } else if (ord.status === 'payment_pending' || ord.status === 'pending') {
+                            statusColor = 'bg-warning/15 text-warning border border-warning/20';
+                          } else if (ord.status === 'cancelled') {
+                            statusColor = 'bg-error/15 text-error border border-error/20';
+                          }
+
+                          return (
+                            <tr key={ord.id} className="hover:bg-bg/40 transition-colors">
+                              <td className="py-4 px-6 font-bold text-text truncate max-w-[120px]" title={ord.customer_name}>
+                                {ord.customer_name}
+                              </td>
+                              <td className="py-4 px-4 font-mono text-muted/90">{ord.customer_phone}</td>
+                              <td className="py-4 px-4 font-mono text-muted/90">{ord.delivery_date}</td>
+                              <td className="py-4 px-6 text-text/80 leading-relaxed max-w-[240px]">
+                                {ord.items.map((i, idx) => (
+                                  <div key={idx} className="truncate" title={`${i.name} (${i.dozens ?? (i as any).quantity ?? 1} doz)`}>
+                                    • {i.name} ({i.dozens ?? (i as any).quantity ?? 1} {i.dozens !== undefined ? 'doz' : 'pcs'})
+                                  </div>
+                                ))}
+                              </td>
+                              <td className="py-4 px-4 text-right font-bold text-text font-mono">₹{ord.total}</td>
+                              <td className="py-4 px-6 text-center select-none">
+                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${statusColor}`}>
+                                  {ord.status.replace('_', ' ')}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-muted select-none">
+                    No matching orders found in the database.
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </main>
 
       {/* ── Mobile Bottom Tab Bar (visible only on mobile) ───────── */}
@@ -2453,6 +2673,15 @@ const Admin: React.FC = () => {
         >
           <span className="text-xl">💬</span>
           <span className="font-sans">Templates</span>
+        </button>
+        <button
+          onClick={() => setActiveTab(3)}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all duration-200 ${
+            activeTab === 3 ? 'text-primary border-t-2 border-primary -mt-px' : 'text-muted/70'
+          }`}
+        >
+          <span className="text-xl">📊</span>
+          <span className="font-sans">Summary</span>
         </button>
         <Link
           to="/"
