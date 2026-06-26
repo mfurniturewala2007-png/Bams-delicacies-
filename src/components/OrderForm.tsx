@@ -298,7 +298,7 @@ const OrderForm: React.FC = () => {
           </p>
           <a
             href="#menu"
-            className="inline-flex items-center justify-center font-sans font-bold text-lg px-6 py-3 rounded-lg transition-all duration-300 bg-[#F5C200] text-[#1E1E1E] shadow-lg hover:shadow-xl hover:bg-[#C49A00] min-h-[48px] min-w-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+            className="inline-flex font-sans font-bold text-sm px-6 py-3 rounded-full transition-all duration-300 bg-primary text-white shadow-primary hover:bg-primary-hover"
           >
             Browse Menu
           </a>
@@ -321,7 +321,7 @@ const OrderForm: React.FC = () => {
           </p>
           <button
             onClick={openAuthModal}
-            className="w-full px-6 py-3 rounded-lg bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] font-sans font-bold text-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-300 select-none min-h-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
+            className="w-full font-sans font-black uppercase tracking-wider py-3.5 rounded-xl transition-all duration-300 select-none focus:outline-none bg-yellow text-bg hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98"
           >
             Sign In to Order
           </button>
@@ -395,12 +395,12 @@ const OrderForm: React.FC = () => {
                   if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
                 }}
                 placeholder="Enter your full name"
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 transition-all duration-200 ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                   fieldErrors.name ? 'border-error' : 'border-border'
-                } focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]`}
+                }`}
               />
               {fieldErrors.name && (
-                <span className="text-red-400 text-xs font-sans font-semibold mt-1 block">
+                <span className="text-error text-xs font-sans font-semibold mt-1 block">
                   {fieldErrors.name}
                 </span>
               )}
@@ -420,12 +420,12 @@ const OrderForm: React.FC = () => {
                   if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: '' }));
                 }}
                 placeholder="Enter 10-digit contact number"
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 transition-all duration-200 ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ${
                   fieldErrors.phone ? 'border-error' : 'border-border'
-                } focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]`}
+                }`}
               />
               {fieldErrors.phone && (
-                <span className="text-red-400 text-xs font-sans font-semibold mt-1 block">
+                <span className="text-error text-xs font-sans font-semibold mt-1 block">
                   {fieldErrors.phone}
                 </span>
               )}
@@ -444,12 +444,12 @@ const OrderForm: React.FC = () => {
                 }}
                 placeholder="Provide detailed house number, landmark, street, and area info"
                 rows={3}
-                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 transition-all duration-200 resize-none ${
+                className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-sans placeholder:text-muted/65 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none ${
                   fieldErrors.address ? 'border-error' : 'border-border'
-                } focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]`}
+                }`}
               />
               {fieldErrors.address && (
-                <span className="text-red-400 text-xs font-sans font-semibold mt-1 block">
+                <span className="text-error text-xs font-sans font-semibold mt-1 block">
                   {fieldErrors.address}
                 </span>
               )}
@@ -465,10 +465,10 @@ const OrderForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('UPI')}
-                  className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 select-none focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] ${
+                  className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 select-none focus:outline-none ${
                     paymentMethod === 'UPI'
-                      ? 'bg-primary/5 border-[#F5C200] shadow-sm text-text'
-                      : 'bg-surface-2 border-border hover:border-[#F5C200]/50 text-text/80'
+                      ? 'bg-primary/5 border-primary shadow-sm text-text'
+                      : 'bg-surface-2 border-border hover:border-primary/50 text-text/80'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -483,10 +483,10 @@ const OrderForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('COD')}
-                  className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 select-none focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] ${
+                  className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 select-none focus:outline-none ${
                     paymentMethod === 'COD'
-                      ? 'bg-primary/5 border-[#F5C200] shadow-sm text-text'
-                      : 'bg-surface-2 border-border hover:border-[#F5C200]/50 text-text/80'
+                      ? 'bg-primary/5 border-primary shadow-sm text-text'
+                      : 'bg-surface-2 border-border hover:border-primary/50 text-text/80'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -513,7 +513,7 @@ const OrderForm: React.FC = () => {
                 maxOrdersSunLimit={maxOrdersSunLimit}
               />
               {fieldErrors.date && (
-                <span className="text-red-400 text-xs font-sans font-semibold text-left mt-2 block">
+                <span className="text-error text-xs font-sans font-semibold text-left mt-2 block">
                   {fieldErrors.date}
                 </span>
               )}
@@ -575,10 +575,10 @@ const OrderForm: React.FC = () => {
               <button
                 onClick={handlePlaceOrder}
                 disabled={isSubmitting}
-                className={`w-full px-6 py-3 rounded-lg font-sans font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 select-none min-h-[48px] ${
+                className={`w-full py-4 rounded-full font-sans font-bold text-base shadow-primary transition-all duration-300 flex items-center justify-center gap-2 select-none ${
                   isSubmitting
                     ? 'bg-surface-2 text-muted/50 border border-border cursor-not-allowed shadow-none'
-                    : 'bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]'
+                    : 'bg-primary text-white hover:bg-primary-hover hover:scale-[1.02] hover:shadow-primary-strong'
                 }`}
               >
                 {isSubmitting ? (

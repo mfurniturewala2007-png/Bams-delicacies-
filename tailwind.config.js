@@ -7,25 +7,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#2B2B2B',
-        surface: '#1E1E1E',
-        'surface-2': '#2B2B2B',
-        border: '#3D3D3D',
+        bg: '#FFF8EE',
+        surface: '#FFFAF4',
+        'surface-2': '#F5ECD8',
+        border: '#E8D5BE',
         yellow: {
           DEFAULT: '#F5C200',
           dim: '#C49A00',
           glow: 'rgba(245, 194, 0, 0.20)', // #F5C20033
         },
         primary: {
-          DEFAULT: '#F5C200',
-          hover: '#C49A00',
+          DEFAULT: '#C8511B',
+          hover: '#A03D12',
         },
-        heading: '#FFFFFF',
-        text: '#F3F4F6', // text-gray-100 equivalent
-        muted: '#D1D5DB', // text-gray-300 equivalent
+        heading: '#8B3A00',
+        text: '#3D2000',
+        muted: '#A07850',
         success: '#2D6A4F',
-        error: '#EF4444',
-        warning: '#F5C200',
+        error: '#B91C1C',
+        warning: '#C8511B',
       },
       fontFamily: {
         serif: ['"Playfair Display"', 'serif'],

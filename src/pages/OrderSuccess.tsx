@@ -44,7 +44,7 @@ const OrderSuccess: React.FC = () => {
 
       <button
         onClick={() => navigate('/')}
-        className="px-6 py-3 rounded-lg font-bold text-lg tracking-wide transition-all duration-200 animate-fade-slide-up bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] shadow-lg hover:shadow-xl min-h-[48px] min-w-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+        className="px-8 py-4 rounded-xl font-black text-base tracking-wide transition-all duration-200 animate-fade-slide-up bg-primary text-white hover:bg-primary-hover shadow-primary"
         style={{
           animationDelay: '0.2s',
         }}

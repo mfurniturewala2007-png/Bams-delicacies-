@@ -53,14 +53,12 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
           const isLowSlots = slotsLeft > 0 && slotsLeft <= 5;
 
           return (
-            <button
+            <div
               key={cardStr}
-              type="button"
-              disabled={isFull}
               onClick={() => {
                 if (!isFull) onSelect(date);
               }}
-              className={`p-5 rounded-2xl border text-left transition-all duration-300 select-none flex flex-col justify-between h-36 w-full focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B] ${
+              className={`p-5 rounded-2xl border text-left cursor-pointer transition-all duration-300 select-none flex flex-col justify-between h-36 ${
                 isFull
                   ? 'bg-surface border-border opacity-50 cursor-not-allowed pointer-events-none'
                   : isSelected
@@ -104,7 +102,7 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
                   </span>
                 )}
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

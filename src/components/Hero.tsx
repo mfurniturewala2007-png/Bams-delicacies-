@@ -212,13 +212,8 @@ const Hero: React.FC = () => {
           Homemade. Delivered with love.
         </p>
 
-        {/* Subtitle Value Prop Copy (Step 7) */}
-        <p className="text-gray-300 text-base md:text-lg mt-2 max-w-xl leading-relaxed font-sans font-medium">
-          Fresh homemade starters, made every weekend. Order by Friday, delivered Saturday.
-        </p>
-
         {/* Subtext explaining booking cutoff */}
-        <p className="text-gray-300 text-sm mt-2 max-w-sm px-2 leading-relaxed">
+        <p className="text-muted text-sm mt-2 max-w-sm px-2 leading-relaxed">
           Pre-orders open weekly. Cut-off every Thursday night for weekend delivery.
         </p>
 
@@ -226,7 +221,7 @@ const Hero: React.FC = () => {
         <div className="mt-8 flex flex-col items-center gap-4">
           <a
             href="#menu"
-            className="group inline-flex items-center justify-center gap-3 bg-[#F5C200] text-[#1E1E1E] font-sans text-lg font-bold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl hover:shadow-[#F5C200]/15 active:scale-95 transition-all duration-300 ease-out cursor-pointer min-h-[48px] min-w-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+            className="group inline-flex items-center gap-3 bg-primary text-white font-sans font-bold text-sm md:text-base px-8 md:px-10 py-4 rounded-full shadow-primary hover:bg-primary-hover hover:scale-[1.04] hover:shadow-primary-strong active:scale-95 transition-all duration-300 ease-out cursor-pointer"
           >
             <span>Order Now</span>
             <svg
@@ -246,7 +241,7 @@ const Hero: React.FC = () => {
             <button
               onClick={handlePushSubscribe}
               disabled={pushState === 'requesting'}
-              className="inline-flex items-center justify-center gap-2 text-xs font-sans font-semibold text-gray-300 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] min-w-[48px] px-4 py-2 rounded-md bg-surface border border-border/40 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+              className="inline-flex items-center justify-center gap-2 text-xs font-sans font-semibold text-muted md:hover:text-primary transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] py-1.5 px-4 rounded-full bg-surface-2/60 border border-border/40 active:scale-95 transition-all"
             >
               {pushState === 'requesting' ? (
                 <>
@@ -267,7 +262,7 @@ const Hero: React.FC = () => {
             </span>
           )}
           {pushState === 'error' && pushMsg && (
-            <span className="text-xs font-sans text-gray-300">{pushMsg}</span>
+            <span className="text-xs font-sans text-muted">{pushMsg}</span>
           )}
         </div>
       </div>

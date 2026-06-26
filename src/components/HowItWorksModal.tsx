@@ -49,7 +49,7 @@ const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClose }) =>
         {/* Absolute Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
+          className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary active:scale-95 transition-all duration-200"
           aria-label="Close modal"
         >
           ✕
@@ -86,7 +86,7 @@ const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ isOpen, onClose }) =>
         {/* Action Button */}
         <button
           onClick={onClose}
-          className="w-full px-6 py-3 rounded-lg bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] font-sans font-bold text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all select-none min-h-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
+          className="w-full py-4 bg-gradient-to-r from-primary to-yellow md:hover:scale-[1.03] active:scale-95 transition-all text-white font-sans font-black text-sm uppercase tracking-wider rounded-full shadow-yellow select-none focus:outline-none"
         >
           Go! 🎉
         </button>

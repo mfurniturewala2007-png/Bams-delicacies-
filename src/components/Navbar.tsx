@@ -62,7 +62,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
     >
       <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between">
         {/* Left: Brand Logo & Title */}
-        <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B] rounded-lg">
+        <Link to="/" className="flex items-center gap-3 group">
           <img src="/logo.jpeg" alt="Bam's Delicacies" style={{ height: '40px' }} />
           <span className="font-serif font-black text-lg sm:text-xl md:text-2xl text-heading tracking-tight group-hover:text-primary transition-colors duration-200">
             Bam's Delicacies
@@ -75,9 +75,9 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
             <Link
               key={link.label}
               to={link.href}
-              className={`font-sans font-medium hover:text-primary transition-colors duration-200 text-sm tracking-wide uppercase focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B] rounded px-2 py-1 ${
+              className={`font-sans font-medium hover:text-primary transition-colors duration-200 text-sm tracking-wide uppercase ${
                 link.isFestive
-                  ? 'text-primary font-black animate-pulse drop-shadow-[0_0_8px_rgba(200,81,27,0.4)] border border-primary/20 bg-primary/5 rounded-full'
+                  ? 'text-primary font-black animate-pulse drop-shadow-[0_0_8px_rgba(200,81,27,0.4)] border border-primary/20 bg-primary/5 px-3 py-1 rounded-full'
                   : 'text-text/90'
               }`}
             >
@@ -93,7 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 p-1.5 rounded-full bg-surface-2 border border-border hover:border-primary transition-all duration-200 select-none min-h-[48px] px-2 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+                className="flex items-center gap-2 p-1.5 rounded-full bg-surface-2 border border-border hover:border-primary transition-all duration-200 select-none focus:outline-none min-h-[44px]"
               >
                 {/* User's Initials Avatar */}
                 <div className="h-8 w-8 rounded-full bg-yellow text-bg font-sans font-black flex items-center justify-center text-xs shadow-md select-none">
@@ -140,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                         setIsDropdownOpen(false);
                         openProfileEdit();
                       }}
-                      className="w-full text-left font-sans font-bold text-xs text-text hover:bg-surface-2 px-4 py-3 transition-all duration-150 uppercase tracking-wider border-b border-border/40 min-h-[48px] focus:outline-none focus:bg-surface-2"
+                      className="w-full text-left font-sans font-bold text-xs text-text hover:bg-surface-2 px-4 py-2.5 transition-all duration-150 uppercase tracking-wider border-b border-border/40"
                     >
                       Edit Profile
                     </button>
@@ -149,7 +149,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                         setIsDropdownOpen(false);
                         signOut();
                       }}
-                      className="w-full text-left font-sans font-bold text-xs text-error hover:bg-error/10 px-4 py-3 transition-all duration-150 uppercase tracking-wider min-h-[48px] focus:outline-none focus:bg-error/10"
+                      className="w-full text-left font-sans font-bold text-xs text-error hover:bg-error/10 px-4 py-2.5 transition-all duration-150 uppercase tracking-wider"
                     >
                       Sign Out
                     </button>
@@ -160,7 +160,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           ) : (
             <button
               onClick={openAuthModal}
-              className="px-5 py-2 rounded-full border-2 border-yellow text-heading md:hover:bg-yellow md:hover:text-bg font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 select-none min-h-[48px] flex items-center active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+              className="px-5 py-2.5 rounded-full border-2 border-yellow text-heading md:hover:bg-yellow md:hover:text-bg font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 select-none focus:outline-none min-h-[44px] flex items-center active:scale-95"
             >
               Sign In
             </button>
@@ -169,7 +169,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           {/* Cart Icon Toggle Button */}
           <button
             onClick={onCartOpen}
-            className="relative w-12 h-12 flex items-center justify-center rounded-full bg-surface-2 border border-border text-text hover:text-primary hover:border-primary md:hover:scale-105 transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+            className="relative w-11 h-11 flex items-center justify-center rounded-full bg-surface-2 border border-border text-text hover:text-primary hover:border-primary md:hover:scale-105 transition-all duration-200 focus:outline-none active:scale-95"
             aria-label="Open Shopping Cart"
           >
             <svg
@@ -187,11 +187,11 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               />
             </svg>
 
-            {/* Redesigned Item Count Badge */}
+            {/* Redesigned Orange Item Count Badge */}
             {totalCount > 0 && (
               <span
                 ref={badgeRef}
-                className="absolute -top-1.5 -right-1.5 h-5 w-5 bg-[#F5C200] text-[#1E1E1E] font-sans font-bold text-xs rounded-full flex items-center justify-center border border-bg shadow-md"
+                className="absolute -top-1.5 -right-1.5 h-5 w-5 bg-primary text-white font-sans font-bold text-xs rounded-full flex items-center justify-center border border-bg shadow-primary"
               >
                 {totalCount}
               </span>
@@ -201,7 +201,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
           {/* Mobile Menu Hamburger Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden w-12 h-12 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#2B2B2B]"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-surface-2 border border-border text-text hover:text-primary hover:border-primary focus:outline-none transition-all duration-200 active:scale-95"
             aria-label="Toggle Navigation Menu"
           >
             {isMobileMenuOpen ? (
@@ -249,7 +249,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                 key={link.label}
                 to={link.href}
                 onClick={handleLinkClick}
-                className={`font-sans font-semibold px-4 py-3 rounded-xl transition-all duration-200 text-base border min-h-[48px] flex items-center focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] ${
+                className={`font-sans font-semibold px-4 py-3.5 rounded-xl transition-all duration-200 text-base border min-h-[48px] flex items-center ${
                   link.isFestive
                     ? 'text-primary border-primary/30 bg-primary/5 font-black animate-pulse'
                     : 'border-transparent text-text/90'

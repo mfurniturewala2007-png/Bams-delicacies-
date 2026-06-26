@@ -74,23 +74,23 @@ const EditableField: React.FC<EditableFieldProps> = ({
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onBlur={() => setEditing(false)}
-              className="w-full bg-transparent outline-none text-text text-sm font-medium border-b pb-0.5 border-primary focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
+              className="w-full bg-transparent outline-none text-text text-sm font-medium border-b pb-0.5 border-primary focus:border-primary-hover"
               style={{ fontSize: '16px' }}
             />
           ) : (
-            <p className={`text-sm font-medium truncate ${value ? 'text-text' : 'text-muted'}`}>
+            <p className={`text-sm font-medium truncate ${value ? 'text-text' : 'text-muted/60'}`}>
               {value || `Enter ${label.toLowerCase()}`}
             </p>
           )}
           <div className="min-h-[18px]">
             {error && (
-              <p className="text-[11px] mt-1 font-semibold text-red-400">{error}</p>
+              <p className="text-[11px] mt-1 font-semibold text-error">{error}</p>
             )}
           </div>
         </div>
         <button
           onClick={() => setEditing((e) => !e)}
-          className={`flex-shrink-0 p-2 rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${editing ? 'text-primary' : 'text-muted'} focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]`}
+          className={`flex-shrink-0 p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${editing ? 'text-primary' : 'text-muted'}`}
           aria-label={`Edit ${label}`}
         >
           <PencilIcon />
@@ -308,7 +308,7 @@ const Checkout: React.FC = () => {
         <header className="sticky top-0 z-40 flex items-center gap-3 px-4 py-4 border-b bg-surface border-border/60 shadow-sm">
           <button
             onClick={() => navigate(-1)}
-            className="w-12 h-12 flex items-center justify-center rounded-xl transition-colors flex-shrink-0 min-w-[48px] bg-surface-2 text-muted border border-border/40 hover:border-[#F5C200]/50 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
+            className="w-11 h-11 flex items-center justify-center rounded-xl transition-colors flex-shrink-0 min-w-[44px] bg-surface-2 text-muted border border-border/40 hover:border-primary/50"
             aria-label="Go back"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -321,7 +321,7 @@ const Checkout: React.FC = () => {
           </h1>
 
           {/* Total badge */}
-          <span className="text-sm font-bold px-3 py-1.5 rounded-full flex-shrink-0 bg-[#F5C200] text-[#1E1E1E] shadow-md">
+          <span className="text-sm font-black px-3 py-1.5 rounded-full flex-shrink-0 bg-primary text-white shadow-primary">
             ₹{totalAmount}
           </span>
         </header>
@@ -336,7 +336,7 @@ const Checkout: React.FC = () => {
             <div className="rounded-2xl overflow-hidden border bg-surface border-border/40 text-text shadow-card">
               <button
                 onClick={() => setSummaryOpen((o) => !o)}
-                className="w-full flex items-center justify-between px-4 py-4 text-left min-h-[56px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
+                className="w-full flex items-center justify-between px-4 py-4 text-left min-h-[56px]"
                 aria-expanded={summaryOpen}
               >
                 <span className="text-sm font-bold text-text">
@@ -406,10 +406,10 @@ const Checkout: React.FC = () => {
                       key={dateStr}
                       disabled={isDisabledOption}
                       onClick={() => !isDisabledOption && setSelectedDate(date)}
-                      className={`relative rounded-xl py-3 px-4 text-left transition-all duration-200 border min-h-[85px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] ${
+                      className={`relative rounded-xl py-3 px-4 text-left transition-all duration-200 border min-h-[85px] ${
                         isSelected
-                          ? 'bg-primary/10 border-[#F5C200] shadow-md text-text'
-                          : 'bg-surface-2 border-border/40 text-text/85 hover:border-[#F5C200]/50'
+                          ? 'bg-primary/10 border-primary shadow-primary text-text'
+                          : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
                       }`}
                       style={{
                         opacity: isDisabledOption ? 0.4 : 1,
@@ -418,7 +418,7 @@ const Checkout: React.FC = () => {
                     >
                       {/* Selected checkmark */}
                       {isSelected && (
-                        <span className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black bg-[#F5C200] text-[#1E1E1E]">
+                        <span className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black bg-primary text-white">
                           ✓
                         </span>
                       )}
@@ -426,7 +426,7 @@ const Checkout: React.FC = () => {
                       <p className="text-xs mt-0.5 text-muted">{format(date, 'd MMM')}</p>
 
                       {isFull ? (
-                        <span className="mt-2 inline-block text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-error/15 text-red-400 border border-error/35">
+                        <span className="mt-2 inline-block text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-error/15 text-error border border-error/35">
                           Sold Out
                         </span>
                       ) : isLow ? (
@@ -486,10 +486,10 @@ const Checkout: React.FC = () => {
               {/* UPI card */}
               <button
                 onClick={() => setPaymentMethod('UPI')}
-                className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 min-h-[64px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] ${
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 min-h-[64px] ${
                   paymentMethod === 'UPI'
-                    ? 'bg-primary/10 border-[#F5C200] shadow-md text-text'
-                    : 'bg-surface-2 border-border/40 text-text/85 hover:border-[#F5C200]/50'
+                    ? 'bg-primary/10 border-primary shadow-primary text-text'
+                    : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
                 }`}
               >
                 <span className="text-2xl">📲</span>
@@ -498,7 +498,7 @@ const Checkout: React.FC = () => {
                   <p className="text-xs mt-0.5 text-muted">Scan QR · GPay / PhonePe / Paytm</p>
                 </div>
                 {paymentMethod === 'UPI' && (
-                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black flex-shrink-0 bg-[#F5C200] text-[#1E1E1E]">
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black flex-shrink-0 bg-primary text-white">
                     ✓
                   </span>
                 )}
@@ -507,10 +507,10 @@ const Checkout: React.FC = () => {
               {/* COD card */}
               <button
                 onClick={() => setPaymentMethod('COD')}
-                className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 min-h-[64px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] ${
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 min-h-[64px] ${
                   paymentMethod === 'COD'
-                    ? 'bg-primary/10 border-[#F5C200] shadow-md text-text'
-                    : 'bg-surface-2 border-border/40 text-text/85 hover:border-[#F5C200]/50'
+                    ? 'bg-primary/10 border-primary shadow-primary text-text'
+                    : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
                 }`}
               >
                 <span className="text-2xl">💵</span>
@@ -519,7 +519,7 @@ const Checkout: React.FC = () => {
                   <p className="text-xs mt-0.5 text-muted">Pay ₹{totalAmount} on arrival</p>
                 </div>
                 {paymentMethod === 'COD' && (
-                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black flex-shrink-0 bg-[#F5C200] text-[#1E1E1E]">
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black flex-shrink-0 bg-primary text-white">
                     ✓
                   </span>
                 )}
@@ -544,10 +544,10 @@ const Checkout: React.FC = () => {
         <button
           onClick={handlePlaceOrder}
           disabled={isDisabled}
-          className={`w-full px-6 py-3 rounded-lg font-bold text-lg tracking-wide transition-all duration-200 flex items-center justify-center gap-2 min-h-[48px] ${
+          className={`w-full py-4 rounded-xl font-black text-base tracking-wide transition-all duration-200 flex items-center justify-center gap-2 min-h-[52px] ${
             isDisabled
-              ? 'bg-surface-2 text-muted/60 border border-border/40 cursor-not-allowed shadow-none'
-              : 'bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]'
+              ? 'bg-surface-2 text-muted border border-border/40 cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-primary-hover shadow-primary'
           }`}
           style={{
             fontFamily: "'DM Sans', sans-serif",
