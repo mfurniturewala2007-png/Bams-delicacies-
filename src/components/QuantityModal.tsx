@@ -68,7 +68,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         <div className="flex items-center gap-5 my-2">
           <button
             onClick={() => setDozens((prev) => Math.max(1, prev - 1))}
-            className="w-12 h-12 rounded-xl bg-surface-2 border border-border text-heading hover:text-primary hover:border-primary flex items-center justify-center font-sans font-black text-xl select-none transition-all duration-200"
+            className="w-12 h-12 rounded-xl bg-surface-2 border border-border text-heading hover:text-primary hover:border-primary flex items-center justify-center font-sans font-black text-xl select-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
           >
             −
           </button>
@@ -82,7 +82,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
           </div>
           <button
             onClick={() => setDozens((prev) => prev + 1)}
-            className="w-12 h-12 rounded-xl bg-surface-2 border border-border text-heading hover:text-primary hover:border-primary flex items-center justify-center font-sans font-black text-xl select-none transition-all duration-200"
+            className="w-12 h-12 rounded-xl bg-surface-2 border border-border text-heading hover:text-primary hover:border-primary flex items-center justify-center font-sans font-black text-xl select-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
           >
             +
           </button>
@@ -99,16 +99,16 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         </div>
 
         {/* Actions button row */}
-        <div className="w-full flex gap-3">
+        <div className="w-full flex items-center gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-3 bg-surface-2 hover:bg-border/30 border border-border rounded-full font-sans font-bold text-sm text-text transition-all duration-200"
+            className="flex-1 px-4 py-2 rounded-md bg-surface-2 hover:bg-border/30 border border-border font-sans font-bold text-sm text-text transition-all duration-200 min-h-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
           >
             Cancel
           </button>
           <button
             onClick={handleConfirmAdd}
-            className="flex-1 py-3 bg-primary hover:bg-primary-hover rounded-full font-sans font-bold text-sm text-white shadow-primary transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex-1 px-6 py-3 rounded-lg bg-[#F5C200] hover:bg-[#C49A00] font-sans font-bold text-sm text-[#1E1E1E] shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] min-h-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
           >
             Add to Cart ✓
           </button>

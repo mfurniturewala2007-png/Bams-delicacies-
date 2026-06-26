@@ -101,12 +101,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <button
               onClick={handleOpenModal}
               disabled={!product.in_stock}
-              className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all duration-300 md:hover:scale-[1.08] active:scale-90 select-none flex-shrink-0 focus:outline-none ${
+              className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 md:hover:scale-[1.08] active:scale-90 select-none flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] ${
                 !product.in_stock
                   ? 'bg-surface-2 text-muted/40 border border-border/60 cursor-not-allowed shadow-none'
                   : isAdded
                   ? 'bg-success text-white'
-                  : 'bg-primary text-white md:hover:bg-primary-hover shadow-primary/20'
+                  : 'bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] shadow-[#F5C200]/10 hover:shadow-xl hover:shadow-[#F5C200]/20'
               }`}
               title={product.in_stock ? 'Add to Cart' : 'Out of Stock'}
             >

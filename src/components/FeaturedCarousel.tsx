@@ -60,11 +60,11 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; 
           </span>
         </div>
 
-        {/* Add button — 44px touch target */}
+        {/* Add button — 48px touch target */}
         <button
           onClick={() => onAddClick(prod)}
           tabIndex={tabIndex}
-          className="w-11 h-11 rounded-full bg-primary md:hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none flex-shrink-0"
+          className="w-12 h-12 rounded-full bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] active:scale-90 flex items-center justify-center shadow-lg hover:shadow-xl shadow-[#F5C200]/10 hover:shadow-[#F5C200]/25 transition-all duration-200 select-none focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E] flex-shrink-0"
           title="Add to Cart"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">

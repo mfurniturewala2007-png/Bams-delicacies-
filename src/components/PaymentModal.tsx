@@ -147,11 +147,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <div className="bg-white p-3 rounded-xl shadow-lg inline-flex items-center justify-center">
               {qrError ? (
                 <div
-                  className="flex flex-col items-center justify-center gap-2 text-gray-500"
+                  className="flex flex-col items-center justify-center gap-2 text-gray-700"
                   style={{ width: 220, height: 220 }}
                 >
                   <span className="text-3xl">⚠️</span>
-                  <span className="text-xs text-center font-sans">
+                  <span className="text-sm text-center font-sans">
                     QR failed to generate.<br />Use UPI ID below to pay.
                   </span>
                 </div>
@@ -192,10 +192,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <button
               onClick={handleCopyUpiId}
               title="Copy UPI ID"
-              className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-border text-xs font-sans font-bold uppercase tracking-wider transition-all duration-200 md:hover:border-yellow md:hover:text-yellow active:scale-95 min-h-[44px]"
+              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-md border border-border text-xs font-sans font-bold uppercase tracking-wider transition-all duration-200 hover:border-yellow hover:text-yellow active:scale-95 min-h-[48px] min-w-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
             >
               {copied ? (
-                <span className="text-success">✓ Copied!</span>
+                <span className="text-success font-bold">✓ Copied!</span>
               ) : (
                 <>
                   <span>📋</span>
@@ -227,10 +227,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 if (txnError) setTxnError('');
               }}
               placeholder="e.g. 407291836472"
-              className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-mono placeholder:text-muted/40 focus:outline-none focus:border-yellow focus:ring-2 transition-all duration-200 ${
+              className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-mono placeholder:text-muted/40 transition-all duration-200 ${
                 txnError ? 'border-error' : 'border-border'
-              }`}
-              style={{ focusRingColor: 'rgba(245,194,0,0.2)' } as React.CSSProperties}
+              } focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]`}
             />
             <p className="text-xs font-sans mt-1.5" style={{ color: '#999999' }}>
               Find it in your UPI app under transaction history
@@ -243,32 +242,21 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
 
           {/* ── Action Buttons ── */}
-          <div className="flex gap-3 pt-1 pb-2">
+          <div className="flex gap-3 pt-1 pb-2 items-center">
             {/* Cancel — red text button, left */}
             <button
               onClick={handleCancelOrder}
               disabled={isCancelling || isSubmitting}
-              className="flex-shrink-0 min-h-[44px] py-2.5 px-4 font-sans font-bold text-sm text-error hover:underline transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
+              className="flex-shrink-0 min-h-[48px] min-w-[48px] px-4 py-2 rounded-md font-sans font-bold text-sm text-error hover:underline transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
             >
               {isCancelling ? 'Cancelling...' : 'Cancel'}
             </button>
 
-            {/* I've Paid — yellow, full width, rounded-full */}
+            {/* I've Paid — yellow, full width, standardized rounded-lg */}
             <button
               onClick={handleConfirmPayment}
               disabled={isSubmitting || isCancelling}
-              className="flex-1 py-4 rounded-full font-sans font-black text-sm uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center"
-              style={{
-                backgroundColor: '#F5C200',
-                color: '#1E1E1E',
-                boxShadow: '0 0 20px rgba(245,194,0,0.2)',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#C49A00';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#F5C200';
-              }}
+              className="flex-1 px-6 py-3 rounded-lg bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] font-sans font-bold text-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
             >
               {isSubmitting ? 'Confirming...' : "I've Paid ✓"}
             </button>
