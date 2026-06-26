@@ -127,8 +127,6 @@ const Checkout: React.FC = () => {
   const [settings, setSettings] = useState({
     satCapacity: 15,
     sunCapacity: 15,
-    festEnabled: false,
-    festDeliveryDate: '',
   });
 
   useEffect(() => {
@@ -141,15 +139,11 @@ const Checkout: React.FC = () => {
             'max_orders_saturday',
             'max_orders_sunday',
             'max_orders_per_day',
-            'festival_deal_enabled',
-            'festival_deal_delivery_date'
           ]);
         if (data) {
           const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
           const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
           const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
-          const festEnabled = data.find(r => r.key === 'festival_deal_enabled')?.value !== 'false';
-          const festDelivery = data.find(r => r.key === 'festival_deal_delivery_date')?.value || '';
           
           const satVal = parseInt(sat, 10);
           const sunVal = parseInt(sun, 10);
@@ -157,8 +151,6 @@ const Checkout: React.FC = () => {
           setSettings({
             satCapacity: isNaN(satVal) ? 15 : satVal,
             sunCapacity: isNaN(sunVal) ? 15 : sunVal,
-            festEnabled,
-            festDeliveryDate: festDelivery,
           });
         }
       } catch (err) {

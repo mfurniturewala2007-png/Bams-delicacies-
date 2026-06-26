@@ -185,11 +185,6 @@ const Admin: React.FC = () => {
   const [notifyState, setNotifyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [notifyResult, setNotifyResult] = useState<string | null>(null);
 
-  // Helper: detect if an order is a combo/festival order
-  const isComboOrder = (_order: Order): boolean => {
-    return false;
-  };
-
   // Date Filters
   const { saturday: thisSat, sunday: thisSun } = getAvailableDeliveryDates();
   const nextSat = addDays(thisSat, 7);
@@ -203,10 +198,9 @@ const Admin: React.FC = () => {
     { date: nextSun, label: 'Next Sunday', dbStr: format(nextSun, 'yyyy-MM-dd') },
   ];
 
-  // 3. Deduplicate standard options with festival options
   const initialOptions: typeof baseOptions = [...baseOptions];
 
-  // 4. Scan loaded orders to dynamically extract and add other dates (e.g. June 12)
+  // 3. Scan loaded orders to dynamically extract and add other dates
   const existingDbStrs = new Set(initialOptions.map((o) => o.dbStr));
   const additionalOptions: typeof baseOptions = [];
   const uniqueOrderDates = Array.from(new Set(orders.map((o) => o.delivery_date))).sort();
@@ -216,10 +210,9 @@ const Admin: React.FC = () => {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
         const dObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        const hasFestive = orders.some((o) => o.delivery_date === dateStr && isComboOrder(o));
         additionalOptions.push({
           date: dObj,
-          label: hasFestive ? '✨ Festive Combo ✨' : 'Other Date',
+          label: 'Other Date',
           dbStr: dateStr,
         });
       }
@@ -286,9 +279,6 @@ const Admin: React.FC = () => {
           'max_orders_per_day',
           'max_orders_saturday',
           'max_orders_sunday',
-          'festival_deal_enabled',
-          'festival_deal_end_date',
-          'festival_deal_delivery_date',
           'whatsapp_template_confirmed',
           'whatsapp_template_ready',
           'whatsapp_template_delivery',
@@ -762,6 +752,37 @@ const Admin: React.FC = () => {
       console.error('Failed to update status in Supabase:', err);
       alert('Error updating order status in database.');
     }
+  };
+
+  const handleDownloadCSV = () => {
+    const headers = ['Order ID', 'Customer Name', 'Phone', 'Delivery Date', 'Items', 'Total Amount', 'Status', 'Address', 'Created At'];
+    const rows = orders.map((o) => {
+      const itemsSummary = o.items
+        .map((i) => `${i.name} (${i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1} doz)`)
+        .join('; ');
+      return [
+        o.id,
+        o.customer_name,
+        o.customer_phone,
+        o.delivery_date,
+        itemsSummary,
+        o.total,
+        o.status,
+        o.customer_address,
+        o.created_at
+      ].map(val => `"${String(val ?? '').replace(/"/g, '""')}"`);
+    });
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bams_orders_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Orders CRUD: Delete Cancelled Order
@@ -1974,15 +1995,12 @@ const Admin: React.FC = () => {
                 {/* ── Mobile order cards (hidden on md+) ── */}
                 <div className="md:hidden flex flex-col gap-4">
                   {displayedOrders.map((ord, idx) => {
-                    const hasCombo = false;
                     return (
                     <div
                       key={ord.id}
                       className={`bg-surface border rounded-2xl p-4 shadow-card flex flex-col gap-3 ${
                         ord.status === 'payment_pending'
                           ? 'border-warning border-l-4'
-                          : hasCombo
-                          ? 'border-yellow/60 border-l-4'
                           : 'border-border'
                       }`}
                     >
@@ -1994,11 +2012,6 @@ const Admin: React.FC = () => {
                               {ord.status === 'payment_pending' && <span className="mr-1">⚠️</span>}
                               #{idx + 1} — {ord.customer_name}
                             </p>
-                            {hasCombo && (
-                              <span className="inline-flex items-center gap-1 bg-yellow/15 border border-yellow/40 text-yellow text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse-glow">
-                                🎁 Festive Combo
-                              </span>
-                            )}
                           </div>
                           <p className="text-xs text-muted font-mono mt-0.5">{ord.customer_phone}</p>
                         </div>
@@ -2133,15 +2146,12 @@ const Admin: React.FC = () => {
                       </thead>
                       <tbody className="divide-y divide-border/60 text-sm font-sans">
                         {displayedOrders.map((ord, idx) => {
-                          const hasCombo = false;
                           return (
                           <tr
                             key={ord.id}
                             className={`hover:bg-surface-2/30 transition-colors duration-150 ${
                               ord.status === 'payment_pending'
                                 ? 'bg-warning/5 border-l-2 border-warning'
-                                : hasCombo
-                                ? 'bg-yellow/[0.03] border-l-2 border-yellow/50'
                                 : ''
                             }`}
                           >
@@ -2152,11 +2162,6 @@ const Admin: React.FC = () => {
                             <td className="py-4 px-6 text-left">
                               <div className="flex flex-col gap-1">
                                 <span className="font-bold text-text">{ord.customer_name}</span>
-                                {hasCombo && (
-                                  <span className="inline-flex items-center gap-1 bg-yellow/15 border border-yellow/40 text-yellow text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider w-fit">
-                                    🎁 Festive Combo
-                                  </span>
-                                )}
                               </div>
                             </td>
                             <td className="py-4 px-6 font-mono text-text/80 text-left">{ord.customer_phone}</td>
@@ -2466,13 +2471,12 @@ const Admin: React.FC = () => {
                   </div>
 
                   <div className="mt-6 flex flex-col gap-2">
-                    <a
-                      href="/all_orders_export.csv"
-                      download="all_orders_export.csv"
-                      className="w-full bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] font-sans font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-lg hover:shadow-xl transition-all duration-200"
+                    <button
+                      onClick={handleDownloadCSV}
+                      className="w-full bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] font-sans font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
                     >
                       Download CSV File 📥
-                    </a>
+                    </button>
                     <span className="text-[10px] text-muted text-center leading-normal">
                       Contains all order records exported from the database.
                     </span>
