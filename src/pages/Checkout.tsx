@@ -168,37 +168,9 @@ const Checkout: React.FC = () => {
     fetchSettings();
   }, []);
 
-  const festDateObj = useMemo(() => {
-    if (!settings.festDeliveryDate) return null;
-    const parts = settings.festDeliveryDate.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        const d = new Date(year, month, day);
-        if (!isNaN(d.getTime())) {
-          return d;
-        }
-      }
-    }
-    return null;
-  }, [settings.festDeliveryDate]);
-
-  const festCapacity = useMemo(() => {
-    if (!festDateObj) return settings.satCapacity;
-    const day = festDateObj.getDay();
-    if (day === 6) return settings.satCapacity;
-    if (day === 0) return settings.sunCapacity;
-    return settings.satCapacity;
-  }, [festDateObj, settings.satCapacity, settings.sunCapacity]);
-
   useEffect(() => {
     const fetchSlots = async () => {
       const dates = [satStr, sunStr];
-      if (settings.festDeliveryDate) {
-        dates.push(settings.festDeliveryDate);
-      }
       const { data } = await supabase
         .from('orders')
         .select('delivery_date')
@@ -207,43 +179,18 @@ const Checkout: React.FC = () => {
       if (data) setSlotOrders(data);
     };
     fetchSlots();
-  }, [satStr, sunStr, settings.festDeliveryDate]);
+  }, [satStr, sunStr]);
 
   const satCount = getSlotCount(slotOrders, satStr);
   const sunCount = getSlotCount(slotOrders, sunStr);
-  const festCount = settings.festDeliveryDate ? getSlotCount(slotOrders, settings.festDeliveryDate) : 0;
 
   const satFull = satCount >= settings.satCapacity;
   const sunFull = sunCount >= settings.sunCapacity;
-  const festFull = festCount >= festCapacity;
 
-  const hasCombo = false;
-
-  const dateOptions = useMemo(() => {
-    const options = [
-      { date: saturday, label: 'Saturday Delivery', dateStr: satStr, isFull: satFull, capacity: settings.satCapacity, count: satCount, isFestival: false },
-      { date: sunday, label: 'Sunday Delivery', dateStr: sunStr, isFull: sunFull, capacity: settings.sunCapacity, count: sunCount, isFestival: false },
-    ];
-
-    if (settings.festEnabled && festDateObj && settings.festDeliveryDate) {
-      const existingIdx = options.findIndex(o => o.dateStr === settings.festDeliveryDate);
-      if (existingIdx !== -1) {
-        options[existingIdx].label = '✨ Pheli Raat Combo Delivery ✨';
-        options[existingIdx].isFestival = true;
-      } else {
-        options.push({
-          date: festDateObj,
-          label: '✨ Pheli Raat Combo Delivery ✨',
-          dateStr: settings.festDeliveryDate,
-          isFull: festFull,
-          capacity: festCapacity,
-          count: festCount,
-          isFestival: true
-        });
-      }
-    }
-    return options;
-  }, [saturday, sunday, satStr, sunStr, satFull, sunFull, settings.satCapacity, settings.sunCapacity, satCount, sunCount, settings.festEnabled, festDateObj, settings.festDeliveryDate, festFull, festCapacity, festCount]);
+  const dateOptions = useMemo(() => [
+    { date: saturday, label: 'Saturday Delivery', dateStr: satStr, isFull: satFull, capacity: settings.satCapacity, count: satCount },
+    { date: sunday, label: 'Sunday Delivery', dateStr: sunStr, isFull: sunFull, capacity: settings.sunCapacity, count: sunCount },
+  ], [saturday, sunday, satStr, sunStr, satFull, sunFull, settings.satCapacity, settings.sunCapacity, satCount, sunCount]);
 
   // ── Accordion ─────────────────────────────────────────────────────────────
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -454,21 +401,13 @@ const Checkout: React.FC = () => {
                 Delivery Date <span style={{ color: '#ef4444' }}>*</span>
               </p>
 
-              {hasCombo && settings.festEnabled && festDateObj && (
-                <p className="text-[11px] mb-3 font-semibold text-primary">
-                  🎁 Since you have a Festive Combo in your cart, your delivery is scheduled for {format(festDateObj, 'EEEE, d MMM')}. Other dates are disabled.
-                </p>
-              )}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {dateOptions.map((opt) => {
-                  const { date, label, dateStr, isFull, capacity, count, isFestival } = opt;
+                  const { date, label, dateStr, isFull, capacity, count } = opt;
                   const isSelected = selectedDate ? format(selectedDate, 'yyyy-MM-dd') === dateStr : false;
                   const slotsLeft = Math.max(0, capacity - count);
                   const isLow = !isFull && slotsLeft <= 5;
-
-                  // Disable if full OR if this is not the festival date and the cart has a combo
-                  const isDisabledOption = isFull || (hasCombo && !isFestival);
+                  const isDisabledOption = isFull;
 
                   return (
                     <button

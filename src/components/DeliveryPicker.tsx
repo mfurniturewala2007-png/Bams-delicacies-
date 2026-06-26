@@ -8,7 +8,6 @@ interface DeliveryPickerProps {
   orders: { delivery_date: string }[];
   maxOrdersSatLimit?: number;
   maxOrdersSunLimit?: number;
-  festivalDeliveryDate?: string;
 }
 
 const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
@@ -17,7 +16,6 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
   orders,
   maxOrdersSatLimit = 15,
   maxOrdersSunLimit = 15,
-  festivalDeliveryDate,
 }) => {
   const { saturday, sunday } = getAvailableDeliveryDates();
 
@@ -25,36 +23,6 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
     { date: saturday, label: 'Saturday' },
     { date: sunday, label: 'Sunday' },
   ];
-
-  if (festivalDeliveryDate) {
-    const parts = festivalDeliveryDate.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        const festDate = new Date(year, month, day);
-        if (!isNaN(festDate.getTime())) {
-          const festDateStr = format(festDate, 'yyyy-MM-dd');
-          const satStr = format(saturday, 'yyyy-MM-dd');
-          const sunStr = format(sunday, 'yyyy-MM-dd');
-
-          // Only add if it's today or in the future, and is not already covered by standard Saturday/Sunday
-          const todayZero = new Date();
-          todayZero.setHours(0, 0, 0, 0);
-          const festDateZero = new Date(festDate);
-          festDateZero.setHours(0, 0, 0, 0);
-
-          if (festDateZero >= todayZero && festDateStr !== satStr && festDateStr !== sunStr) {
-            options.push({
-              date: festDate,
-              label: format(festDate, 'eeee'),
-            });
-          }
-        }
-      }
-    }
-  }
 
   const selectedStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
 
@@ -71,7 +39,7 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
       </label>
 
       {/* Side-by-Side Weekend Picker Grid */}
-      <div className={`grid grid-cols-1 ${options.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {options.map(({ date, label }) => {
           const cardStr = format(date, 'yyyy-MM-dd');
           const isSelected = cardStr === selectedStr;

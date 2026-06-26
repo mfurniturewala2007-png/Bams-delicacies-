@@ -61,32 +61,11 @@ const OrderForm: React.FC = () => {
 
   const [maxOrdersSatLimit, setMaxOrdersSatLimit] = useState(15);
   const [maxOrdersSunLimit, setMaxOrdersSunLimit] = useState(15);
-  const [festivalDeliveryDate, setFestivalDeliveryDate] = useState('2026-06-12');
-
-  const formatDbDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        const dateObj = new Date(year, month, day);
-        if (!isNaN(dateObj.getTime())) {
-          return format(dateObj, 'eeee, MMMM d, yyyy');
-        }
-      }
-    }
-    return dateStr;
-  };
 
   // Fetch orders count on mount to populate slot calculations
   const fetchOrdersForWeekend = async () => {
     try {
       const datesToFetch = [dbSatStr, dbSunStr];
-      if (festivalDeliveryDate && !datesToFetch.includes(festivalDeliveryDate)) {
-        datesToFetch.push(festivalDeliveryDate);
-      }
       const { data, error } = await supabase
         .from('orders')
         .select('delivery_date')
@@ -106,17 +85,15 @@ const OrderForm: React.FC = () => {
       const { data } = await supabase
         .from('settings')
         .select('*')
-        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday', 'festival_deal_delivery_date']);
+        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday']);
 
       if (data) {
         const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
         const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
         const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
-        const festDeliv = data.find(r => r.key === 'festival_deal_delivery_date')?.value || '2026-06-12';
         
         setMaxOrdersSatLimit(Number(sat));
         setMaxOrdersSunLimit(Number(sun));
-        setFestivalDeliveryDate(festDeliv);
       }
     } catch (err) {
       console.warn('Failed to fetch settings from Supabase. Falling back to defaults.');
@@ -131,9 +108,7 @@ const OrderForm: React.FC = () => {
     if (items.length > 0) {
       fetchOrdersForWeekend();
     }
-  }, [items, dbSatStr, dbSunStr, festivalDeliveryDate]);
-
-  const hasFestiveItem = false;
+  }, [items, dbSatStr, dbSunStr]);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type, visible: true });
@@ -525,38 +500,18 @@ const OrderForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Embedded Delivery Slot Picker / Lock Banner */}
+            {/* Embedded Delivery Slot Picker */}
             <div className="pt-2">
-              {hasFestiveItem ? (
-                <div className="w-full">
-                  <label className="block text-left text-sm font-sans font-semibold text-text uppercase tracking-wider mb-3">
-                    Delivery Date <span className="text-primary">*</span>
-                  </label>
-                  <div className="p-5 rounded-2xl bg-gradient-to-r from-primary/15 to-yellow/15 border border-primary/30 text-left shadow-yellow animate-pulse-glow">
-                    <div className="flex items-center gap-2 text-primary font-black uppercase tracking-wider text-xs mb-1.5">
-                      <span>✨ Pheli Raat Special Delivery Slot ✨</span>
-                    </div>
-                    <p className="text-text font-black text-lg">
-                      {selectedDate ? format(selectedDate, 'eeee, MMMM d, yyyy') : formatDbDate(festivalDeliveryDate)}
-                    </p>
-                    <p className="text-muted text-xs mt-1 leading-relaxed">
-                      Your order contains premium Pheli Raat festival combos and is locked for special festival-day delivery.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <DeliveryPicker
-                  selectedDate={selectedDate}
-                  onSelect={(date) => {
-                    setSelectedDate(date);
-                    if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
-                  }}
-                  orders={orders}
-                  maxOrdersSatLimit={maxOrdersSatLimit}
-                  maxOrdersSunLimit={maxOrdersSunLimit}
-                  festivalDeliveryDate={festivalDeliveryDate}
-                />
-              )}
+              <DeliveryPicker
+                selectedDate={selectedDate}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
+                }}
+                orders={orders}
+                maxOrdersSatLimit={maxOrdersSatLimit}
+                maxOrdersSunLimit={maxOrdersSunLimit}
+              />
               {fieldErrors.date && (
                 <span className="text-red-400 text-xs font-sans font-semibold text-left mt-2 block">
                   {fieldErrors.date}

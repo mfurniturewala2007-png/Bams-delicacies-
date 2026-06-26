@@ -130,9 +130,6 @@ const Admin: React.FC = () => {
   const [maxOrdersSunInput, setMaxOrdersSunInput] = useState('15');
   const [isSavingMaxOrders, setIsSavingMaxOrders] = useState(false);
 
-  // Festival settings states
-  const [festivalEnabled, setFestivalEnabled] = useState(true);
-  const [festivalDeliveryDate, setFestivalDeliveryDate] = useState('2026-06-12');
   // Message templates states
   const [templateConfirmed, setTemplateConfirmed] = useState<string>(DEFAULT_TEMPLATE_CONFIRMED);
   const [templateReady, setTemplateReady] = useState<string>(DEFAULT_TEMPLATE_READY);
@@ -189,11 +186,8 @@ const Admin: React.FC = () => {
   const [notifyResult, setNotifyResult] = useState<string | null>(null);
 
   // Helper: detect if an order is a combo/festival order
-  const isComboOrder = (order: Order): boolean => {
-    return order.items.some((i) =>
-      (i.category && i.category.toLowerCase().includes('pheli')) ||
-      (i.name && (i.name.toLowerCase().includes('combo') || i.name.toLowerCase().includes('pheli')))
-    );
+  const isComboOrder = (_order: Order): boolean => {
+    return false;
   };
 
   // Date Filters
@@ -209,36 +203,8 @@ const Admin: React.FC = () => {
     { date: nextSun, label: 'Next Sunday', dbStr: format(nextSun, 'yyyy-MM-dd') },
   ];
 
-  // 2. Build festival option if enabled and valid
-  const festivalOpt = festivalEnabled && festivalDeliveryDate ? (() => {
-    const parts = festivalDeliveryDate.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        const dObj = new Date(year, month, day);
-        if (!isNaN(dObj.getTime())) {
-          return { date: dObj, label: '✨ Pheli Raat ✨', dbStr: festivalDeliveryDate };
-        }
-      }
-    }
-    return null;
-  })() : null;
-
   // 3. Deduplicate standard options with festival options
-  const initialOptions: typeof baseOptions = [];
-  if (festivalOpt) {
-    initialOptions.push(festivalOpt);
-  }
-  baseOptions.forEach((opt) => {
-    if (!festivalOpt || opt.dbStr !== festivalOpt.dbStr) {
-      initialOptions.push(opt);
-    } else {
-      // Merge: append label to show it's both
-      festivalOpt.label = `✨ Pheli Raat (${opt.label}) ✨`;
-    }
-  });
+  const initialOptions: typeof baseOptions = [...baseOptions];
 
   // 4. Scan loaded orders to dynamically extract and add other dates (e.g. June 12)
   const existingDbStrs = new Set(initialOptions.map((o) => o.dbStr));
@@ -338,15 +304,7 @@ const Admin: React.FC = () => {
         setMaxOrdersSatInput(sat);
         setMaxOrdersSunInput(sun);
 
-        const festEnabled = data.find(r => r.key === 'festival_deal_enabled')?.value !== 'false';
-        const festDelivery = data.find(r => r.key === 'festival_deal_delivery_date')?.value || '2026-06-12';
-        
-        setFestivalEnabled(festEnabled);
-        setFestivalDeliveryDate(festDelivery);
 
-        if (festEnabled) {
-          setActiveFilterDateStr(festDelivery);
-        }
 
         const tempConf = data.find(r => r.key === 'whatsapp_template_confirmed')?.value || DEFAULT_TEMPLATE_CONFIRMED;
         const tempReady = data.find(r => r.key === 'whatsapp_template_ready')?.value || DEFAULT_TEMPLATE_READY;
@@ -2016,7 +1974,7 @@ const Admin: React.FC = () => {
                 {/* ── Mobile order cards (hidden on md+) ── */}
                 <div className="md:hidden flex flex-col gap-4">
                   {displayedOrders.map((ord, idx) => {
-                    const hasCombo = isComboOrder(ord) && ord.delivery_date === festivalDeliveryDate;
+                    const hasCombo = false;
                     return (
                     <div
                       key={ord.id}
@@ -2175,7 +2133,7 @@ const Admin: React.FC = () => {
                       </thead>
                       <tbody className="divide-y divide-border/60 text-sm font-sans">
                         {displayedOrders.map((ord, idx) => {
-                          const hasCombo = isComboOrder(ord) && ord.delivery_date === festivalDeliveryDate;
+                          const hasCombo = false;
                           return (
                           <tr
                             key={ord.id}
@@ -2446,28 +2404,22 @@ const Admin: React.FC = () => {
 
         {/* Summary tab screen */}
         {activeTab === 3 && (() => {
-          // Filter June 2026 orders that contain Pheli Raat items
-          const june2026PheliOrders = orders.filter((o) => {
-            return o.delivery_date && o.delivery_date.startsWith('2026-06') &&
-              o.items.some((i) =>
-                (i.category && i.category.toLowerCase().includes('pheli')) ||
-                (i.name && (i.name.toLowerCase().includes('combo') || i.name.toLowerCase().includes('pheli')))
-              );
-          });
+          // Use all orders in the database for general summary
+          const allOrdersReport = orders;
 
           // Calculate statistics
-          const totalOrdersCount = june2026PheliOrders.length;
-          const statusCounts = june2026PheliOrders.reduce((acc, o) => {
+          const totalOrdersCount = allOrdersReport.length;
+          const statusCounts = allOrdersReport.reduce((acc, o) => {
             acc[o.status] = (acc[o.status] || 0) + 1;
             return acc;
           }, {} as Record<string, number>);
 
-          const confirmedOrders = june2026PheliOrders.filter(o => o.status === 'confirmed' || o.status === 'delivered');
+          const confirmedOrders = allOrdersReport.filter(o => o.status === 'confirmed' || o.status === 'delivered');
           const confirmedRevenue = confirmedOrders.reduce((sum, o) => sum + Number(o.total), 0);
 
           // Items breakdown count (excluding cancelled)
           const itemsBreakdown: Record<string, number> = {};
-          june2026PheliOrders.forEach((o) => {
+          allOrdersReport.forEach((o) => {
             if (o.status !== 'cancelled') {
               o.items.forEach((i) => {
                 const qty = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
@@ -2482,7 +2434,7 @@ const Admin: React.FC = () => {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 pb-4 border-b border-border/40 select-none gap-4">
                 <div className="text-left">
                   <h2 className="font-serif font-black text-2xl md:text-3xl text-heading">Summary Reports</h2>
-                  <p className="text-muted text-xs font-sans mt-1">Download and view seasonal sales summaries.</p>
+                  <p className="text-muted text-xs font-sans mt-1">Download and view sales summaries.</p>
                 </div>
               </div>
 
@@ -2501,28 +2453,28 @@ const Admin: React.FC = () => {
                     
                     <div className="bg-surface-2 border border-border/50 rounded-xl p-4 flex flex-col gap-1.5 mt-2">
                       <div className="flex justify-between items-center">
-                        <span className="font-sans font-bold text-sm text-text truncate max-w-[180px]" title="pheli raat oerder - 2026 june">
-                          pheli raat oerder - 2026 june
+                        <span className="font-sans font-bold text-sm text-text truncate max-w-[180px]" title="all orders export">
+                          all orders export
                         </span>
                         <span className="text-[9px] font-sans font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase">CSV</span>
                       </div>
                       <div className="flex justify-between text-[11px] text-muted font-sans">
-                        <span>Size: ~4.5 KB</span>
-                        <span>Date: June 2026</span>
+                        <span>Size: ~5.0 KB</span>
+                        <span>Date: Current</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-6 flex flex-col gap-2">
                     <a
-                      href="/pheli raat oerder - 2026 june.csv"
-                      download="pheli raat oerder - 2026 june.csv"
-                      className="w-full bg-primary text-bg font-sans font-black text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-primary hover:bg-primary-hover active:scale-[0.98] transition-all duration-200"
+                      href="/all_orders_export.csv"
+                      download="all_orders_export.csv"
+                      className="w-full bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] font-sans font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       Download CSV File 📥
                     </a>
                     <span className="text-[10px] text-muted text-center leading-normal">
-                      Contains 21 Pheli Raat festival orders from June 2026.
+                      Contains all order records exported from the database.
                     </span>
                   </div>
                 </div>
@@ -2530,7 +2482,7 @@ const Admin: React.FC = () => {
                 {/* Dashboard Stats */}
                 <div className="lg:col-span-2 bg-surface border border-border p-6 rounded-2xl shadow-card flex flex-col justify-between">
                   <div>
-                    <h3 className="font-serif font-bold text-lg text-heading mb-4">Report Overview: pheli raat oerder - 2026 june</h3>
+                    <h3 className="font-serif font-bold text-lg text-heading mb-4">Report Overview: all orders export</h3>
                     
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                       <div className="bg-bg border border-border/60 p-4 rounded-xl text-center">
@@ -2584,7 +2536,7 @@ const Admin: React.FC = () => {
                   </div>
                 </div>
 
-                {june2026PheliOrders.length > 0 ? (
+                {allOrdersReport.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left font-sans text-xs border-collapse">
                       <thead>
@@ -2598,7 +2550,7 @@ const Admin: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/30 select-text">
-                        {june2026PheliOrders.map((ord) => {
+                        {allOrdersReport.map((ord) => {
                           let statusColor = 'bg-muted/10 text-muted';
                           if (ord.status === 'confirmed' || ord.status === 'delivered') {
                             statusColor = 'bg-success/15 text-success border border-success/20';
