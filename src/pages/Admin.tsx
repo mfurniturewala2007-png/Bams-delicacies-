@@ -1260,7 +1260,7 @@ const Admin: React.FC = () => {
                               className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-surface-2 rounded-xl transition-all duration-200"
                               title={prod.is_featured ? 'Featured' : 'Not Featured'}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "var(--color-yellow)" : "none"} stroke={prod.is_featured ? "var(--color-yellow)" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "var(--color-gold)" : "none"} stroke={prod.is_featured ? "var(--color-gold)" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.172-.468.868-.468 1.04 0l2.125 5.757a1 1 0 00.95.69h6.04c.5 0 .708.641.304.933l-4.887 3.555a1 1 0 00-.364 1.118l1.867 5.06a1 1 0 00-1.54 1.118l-4.888-3.555a1 1 0 00-1.176 0l-4.888 3.555a1 1 0 00-1.54-1.118l1.867-5.06a1 1 0 00-.364-1.118L2.093 10.88c-.404-.292-.196-.933.304-.933h6.04a1 1 0 00.95-.69l2.125-5.757z" />
                               </svg>
                             </button>
@@ -1343,7 +1343,7 @@ const Admin: React.FC = () => {
                                 className="p-2 hover:bg-surface-2 rounded-xl transition-all duration-200 inline-block align-middle"
                                 title={prod.is_featured ? 'Featured' : 'Not Featured'}
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "var(--color-yellow)" : "none"} stroke={prod.is_featured ? "var(--color-yellow)" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "var(--color-gold)" : "none"} stroke={prod.is_featured ? "var(--color-gold)" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5 mx-auto">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.172-.468.868-.468 1.04 0l2.125 5.757a1 1 0 00.95.69h6.04c.5 0 .708.641.304.933l-4.887 3.555a1 1 0 00-.364 1.118l1.867 5.06a1 1 0 00-1.54 1.118l-4.888-3.555a1 1 0 00-1.176 0l-4.888 3.555a1 1 0 00-1.54-1.118l1.867-5.06a1 1 0 00-.364-1.118L2.093 10.88c-.404-.292-.196-.933.304-.933h6.04a1 1 0 00.95-.69l2.125-5.757z" />
                                 </svg>
                               </button>
