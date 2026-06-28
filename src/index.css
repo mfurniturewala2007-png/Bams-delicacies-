@@ -3,21 +3,70 @@
 @tailwind utilities;
 
 :root {
-  --color-bg:         #FFF8EE;   /* Main background — warm cream */
-  --color-surface:    #FFFAF4;   /* Cards, modals, panels */
-  --color-surface-2:  #F5ECD8;   /* Elevated surfaces, inputs */
-  --color-border:     #E8D5BE;   /* Borders, dividers */
-  --color-yellow:     #F5C200;   /* Primary brand yellow (saffron badge only) */
-  --color-yellow-dim: #C49A00;   /* Hover state for yellow */
-  --color-yellow-glow:#F5C20033; /* Yellow glow (20% opacity) */
-  --color-primary:    #C8511B;   /* Tandoor orange for CTAs */
-  --color-primary-hover: #A03D12; /* CTA hover */
-  --color-heading:    #8B3A00;   /* Dark spice for headings */
-  --color-text:       #3D2000;   /* Espresso for body text */
-  --color-muted:      #A07850;   /* Cinnamon for secondary text */
-  --color-success:    #2D6A4F;   /* Order confirmed */
-  --color-error:      #B91C1C;   /* Errors, full slots */
-  --color-warning:    #C8511B;   /* Low slots warning */
+  /* Backgrounds */
+  --color-bg:           #FDF6ED;
+  --color-surface:      #FFF9F2;
+  --color-surface-2:    #F2E6D2;
+  --color-border:       #E8D0B0;
+
+  /* Brand — terracotta (refined) */
+  --color-primary:      #B85C30;
+  --color-primary-hover:#8F4220;
+  --color-primary-tint: #F8EDE6;
+  --color-heading:      #6B2800;
+  --color-text:         #3D1F00;
+  --color-muted:        #8A6030;
+
+  /* Accent — golden amber */
+  --color-amber:        #D4A830;
+  --color-amber-dim:    #A87C10;
+  --color-amber-tint:   #FDF0D0;
+  --color-on-amber:     #6B4400;
+
+  /* Semantic */
+  --color-success:      #2D6A4F;
+  --color-warning:      #A87C10;
+  --color-error:        #B91C1C;
+
+  /* Custom Brand Integrations */
+  --color-whatsapp:      #25D366;
+  --color-whatsapp-dark: #1a9e4a;
+
+  /* Yellow Aliases for Compatibility */
+  --color-yellow:       var(--color-amber);
+  --color-yellow-dim:   var(--color-amber-dim);
+  --color-yellow-glow:  rgba(212, 168, 48, 0.20);
+  --color-on-yellow:    var(--color-on-amber);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg:            #1C1208;
+    --color-surface:       #261808;
+    --color-surface-2:     #311E0A;
+    --color-border:        #4A2E0F;
+    --color-primary:       #E8683A;
+    --color-primary-hover: #F07848;
+    --color-primary-tint:  #311E0A;
+    --color-heading:       #F5A060;
+    --color-text:          #F5E6D0;
+    --color-muted:         #A07860;
+    --color-amber:         #F5C200;
+    --color-amber-dim:     #C49A00;
+    --color-amber-tint:    #311E0A;
+    --color-on-amber:      #1C1208;
+    --color-success:       #3D9970;
+    --color-error:         #f87171;
+    --color-warning:       #F5C200;
+    --color-whatsapp:      #25D366;
+    --color-whatsapp-dark: #1a9e4a;
+
+    /* Yellow Aliases for Compatibility */
+    --color-yellow:       var(--color-amber);
+    --color-yellow-dim:   var(--color-amber-dim);
+    --color-yellow-glow:  rgba(245, 194, 0, 0.20);
+    --color-on-yellow:    var(--color-on-amber);
+  }
 }
 
 /* Global resets & scroll dynamics */
@@ -114,12 +163,12 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 4px 24px rgba(61, 32, 0, 0.08);
 }
 
-.shadow-yellow {
-  box-shadow: 0 0 20px rgba(245, 194, 0, 0.15);
+.shadow-yellow, .shadow-accent {
+  box-shadow: 0 0 20px var(--color-yellow-glow);
 }
 
-.shadow-yellow-strong {
-  box-shadow: 0 0 32px rgba(245, 194, 0, 0.35);
+.shadow-yellow-strong, .shadow-accent-strong {
+  box-shadow: 0 0 32px var(--color-yellow-glow);
 }
 
 .shadow-primary {
