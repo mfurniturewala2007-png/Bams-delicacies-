@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { Product, Order } from '../types';
 import { supabase } from '../utils/supabase';
-import { getAvailableDeliveryDates } from '../utils/deliveryDates';
 import { BAMS_MENU } from '../utils/seedMenu';
 import { useAuth } from '../context/AuthContext';
 
@@ -185,34 +184,35 @@ const Admin: React.FC = () => {
   const [notifyState, setNotifyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [notifyResult, setNotifyResult] = useState<string | null>(null);
 
-  // Date Filters
-  const { saturday: thisSat, sunday: thisSun } = getAvailableDeliveryDates();
-  const nextSat = addDays(thisSat, 7);
-  const nextSun = addDays(thisSun, 7);
+  // Date Filters — generate next 14 days + any order dates not in that range
+  const filterScrollRef = useRef<HTMLDivElement>(null);
 
-  // 1. Define standard weekend options
-  const baseOptions = [
-    { date: thisSat, label: 'This Saturday', dbStr: format(thisSat, 'yyyy-MM-dd') },
-    { date: thisSun, label: 'This Sunday', dbStr: format(thisSun, 'yyyy-MM-dd') },
-    { date: nextSat, label: 'Next Saturday', dbStr: format(nextSat, 'yyyy-MM-dd') },
-    { date: nextSun, label: 'Next Sunday', dbStr: format(nextSun, 'yyyy-MM-dd') },
-  ];
+  const next14Days = React.useMemo(() => {
+    const days: { date: Date; label: string; dbStr: string }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (let i = 0; i <= 14; i++) {
+      const d = addDays(today, i);
+      days.push({
+        date: d,
+        label: i === 0 ? 'Today' : format(d, 'EEEE'),
+        dbStr: format(d, 'yyyy-MM-dd'),
+      });
+    }
+    return days;
+  }, []);
 
-  const initialOptions: typeof baseOptions = [...baseOptions];
-
-  // 3. Scan loaded orders to dynamically extract and add other dates
-  const existingDbStrs = new Set(initialOptions.map((o) => o.dbStr));
-  const additionalOptions: typeof baseOptions = [];
+  const next14Strs = new Set(next14Days.map((d) => d.dbStr));
   const uniqueOrderDates = Array.from(new Set(orders.map((o) => o.delivery_date))).sort();
-
+  const extraOrderDates: { date: Date; label: string; dbStr: string }[] = [];
   uniqueOrderDates.forEach((dateStr) => {
-    if (!existingDbStrs.has(dateStr)) {
+    if (!next14Strs.has(dateStr)) {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
         const dObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        additionalOptions.push({
+        extraOrderDates.push({
           date: dObj,
-          label: 'Other Date',
+          label: format(dObj, 'EEEE'),
           dbStr: dateStr,
         });
       }
@@ -221,8 +221,8 @@ const Admin: React.FC = () => {
 
   const filterOptions = [
     { date: new Date(), label: 'All Orders', dbStr: 'all' },
-    ...initialOptions,
-    ...additionalOptions,
+    ...next14Days,
+    ...extraOrderDates,
   ];
 
   const [activeFilterDateStr, setActiveFilterDateStr] = useState<string>('all');
@@ -1916,29 +1916,58 @@ const Admin: React.FC = () => {
 
 
 
-            {/* Date Filter buttons — horizontal scroll on mobile */}
-            <div className="flex gap-2 md:gap-3 mb-6 md:mb-8 select-none overflow-x-auto pb-1 scrollbar-none flex-nowrap w-full max-w-full">
-              {filterOptions.map((opt) => {
-                const isActive = opt.dbStr === activeFilterDateStr;
-                return (
-                  <button
-                    key={opt.dbStr}
-                    onClick={() => setActiveFilterDateStr(opt.dbStr)}
-                    className={`flex-shrink-0 px-4 py-2 border rounded-xl font-sans text-xs font-semibold tracking-wider transition-all duration-300 ${
-                      isActive
-                        ? 'bg-primary border-primary text-white shadow-primary'
-                        : 'bg-surface border-border text-text/80 hover:text-primary hover:border-primary'
-                    }`}
-                  >
-                    <div className="flex flex-col text-left">
-                      <span>{opt.label}</span>
-                      <span className={`text-[10px] font-normal mt-0.5 ${isActive ? 'text-white/75' : 'text-muted'}`}>
-                        {opt.dbStr === 'all' ? 'All Dates' : format(opt.date, 'MMM d')}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+            {/* Date Filter buttons — arrow carousel (no scrollbar) */}
+            <div className="relative flex items-center gap-2 mb-6 md:mb-8 select-none w-full">
+              {/* Left arrow */}
+              <button
+                onClick={() => filterScrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' })}
+                className="flex-shrink-0 w-9 h-9 rounded-full bg-surface border border-border/60 flex items-center justify-center text-muted hover:text-primary hover:border-primary transition-all duration-200 shadow-sm z-10"
+                aria-label="Scroll left"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+
+              {/* Scrollable strip — hidden scrollbar */}
+              <div
+                ref={filterScrollRef}
+                className="flex gap-2 flex-nowrap overflow-x-auto flex-1"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {filterOptions.map((opt) => {
+                  const isActive = opt.dbStr === activeFilterDateStr;
+                  return (
+                    <button
+                      key={opt.dbStr}
+                      onClick={() => setActiveFilterDateStr(opt.dbStr)}
+                      className={`flex-shrink-0 px-4 py-2 border rounded-xl font-sans text-xs font-semibold tracking-wider transition-all duration-300 ${
+                        isActive
+                          ? 'bg-primary border-primary text-white shadow-primary'
+                          : 'bg-surface border-border text-text/80 hover:text-primary hover:border-primary'
+                      }`}
+                    >
+                      <div className="flex flex-col text-left">
+                        <span>{opt.label}</span>
+                        <span className={`text-[10px] font-normal mt-0.5 ${isActive ? 'text-white/75' : 'text-muted'}`}>
+                          {opt.dbStr === 'all' ? 'All Dates' : format(opt.date, 'MMM d')}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right arrow */}
+              <button
+                onClick={() => filterScrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' })}
+                className="flex-shrink-0 w-9 h-9 rounded-full bg-surface border border-border/60 flex items-center justify-center text-muted hover:text-primary hover:border-primary transition-all duration-200 shadow-sm z-10"
+                aria-label="Scroll right"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
             </div>
 
             {/* Order Status Sub-Tabs */}
