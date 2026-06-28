@@ -226,7 +226,11 @@ const Checkout: React.FC = () => {
       fetch('/api/notify-telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: data?.id, ...orderPayload }),
+        body: JSON.stringify({
+          order_id: data?.id,
+          ...orderPayload,
+          payment_method: paymentMethod,
+        }),
       }).catch(() => {});
 
       if (paymentMethod === 'COD') {

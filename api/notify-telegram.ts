@@ -11,6 +11,8 @@ interface NotifyBody {
   order_id: string;
   customer_name: string;
   customer_phone: string;
+  customer_address: string;
+  payment_method: string;
   total: number;
   delivery_date: string;
   items: OrderItem[];
@@ -23,6 +25,8 @@ export default async function handler(req: any, res: any) {
     order_id,
     customer_name,
     customer_phone,
+    customer_address,
+    payment_method,
     total,
     delivery_date,
     items,
@@ -47,6 +51,8 @@ export default async function handler(req: any, res: any) {
 
   const safeName = escapeHtml(customer_name);
   const safePhone = escapeHtml(customer_phone);
+  const safeAddress = escapeHtml(customer_address);
+  const safePayment = escapeHtml(payment_method);
   const safeDate = escapeHtml(delivery_date);
   const safeOrderId = escapeHtml(order_id);
 
@@ -61,7 +67,9 @@ export default async function handler(req: any, res: any) {
     `🛒 <b>New Order!</b>`,
     `👤 ${safeName}`,
     `📞 ${safePhone}`,
+    `📍 ${safeAddress}`,
     `📅 ${safeDate}`,
+    `💳 Payment: <b>${safePayment || 'Not Specified'}</b>`,
     ``,
     `<b>Items:</b>`,
     itemLines,
