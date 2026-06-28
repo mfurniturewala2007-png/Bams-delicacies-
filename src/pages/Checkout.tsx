@@ -174,6 +174,7 @@ const Checkout: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null);
   const [paymentTotal, setPaymentTotal] = useState(0);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useScrollLock(!!paymentOrderId);
 
@@ -242,6 +243,7 @@ const Checkout: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Order failed:', err);
+      setSubmitError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -548,8 +550,15 @@ const Checkout: React.FC = () => {
           paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
         }}
       >
+        {/* Error message if order submission failed */}
+        {submitError && (
+          <div className="mb-3 px-4 py-3 rounded-xl bg-error/10 border border-error/30 text-error text-sm font-sans text-center">
+            ⚠️ {submitError}
+          </div>
+        )}
+
         <button
-          onClick={handlePlaceOrder}
+          onClick={() => { setSubmitError(null); handlePlaceOrder(); }}
           disabled={isDisabled}
           className={`w-full py-4 rounded-xl font-black text-base tracking-wide transition-all duration-200 flex items-center justify-center gap-2 min-h-[52px] ${
             isDisabled

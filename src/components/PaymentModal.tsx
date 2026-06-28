@@ -35,7 +35,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [qrError, setQrError] = useState(false);
-  const [showExplainer, setShowExplainer] = useState(true);
+  const [showExplainer, setShowExplainer] = useState(false);
 
   // Generate QR code onto canvas whenever totalAmount changes
   useEffect(() => {
@@ -262,7 +262,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
 
           <p className="text-[10px] font-sans text-center leading-relaxed pb-1 text-text/60">
-            Your order will be confirmed after the admin verifies your payment. You'll receive updates via WhatsApp or phone.
+            You'll receive a confirmation via WhatsApp or phone once your order is processed.{' '}
+            <button
+              onClick={() => setShowExplainer(true)}
+              className="underline text-accent hover:text-accent-dim transition-colors"
+            >
+              How does it work?
+            </button>
           </p>
         </div>
       </div>
