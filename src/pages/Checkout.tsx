@@ -349,7 +349,7 @@ const Checkout: React.FC = () => {
                             {item.dozens} doz × {item.dozens * 12} pcs
                           </p>
                           {item.fried ? (
-                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow/20 text-yellow-dim border border-yellow/30">
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-accent/20 text-accent-dim border border-accent/30">
                               🍳 Fried
                             </span>
                           ) : (
@@ -359,7 +359,7 @@ const Checkout: React.FC = () => {
                           )}
                         </div>
                       </div>
-                      <span className="text-sm font-black flex-shrink-0 text-yellow">
+                      <span className="text-sm font-black flex-shrink-0 text-accent">
                         ₹{lineTotal}
                       </span>
                     </div>
@@ -369,7 +369,7 @@ const Checkout: React.FC = () => {
                   {/* Summary total row */}
                   <div className="flex items-center justify-between py-3">
                     <span className="text-xs font-bold uppercase tracking-wider text-muted">Total</span>
-                    <span className="text-lg font-black text-yellow">₹{totalAmount}</span>
+                    <span className="text-lg font-black text-accent">₹{totalAmount}</span>
                   </div>
                 </div>
               )}
@@ -378,7 +378,7 @@ const Checkout: React.FC = () => {
             {/* ── [3] DELIVERY DATE ─────────────────────────────────────── */}
             <div className="rounded-2xl border px-4 py-4 bg-surface border-border/40 shadow-card">
               <p className="text-xs font-bold uppercase tracking-wider mb-3 text-muted">
-                Delivery Date <span style={{ color: '#ef4444' }}>*</span>
+                Delivery Date <span className="text-error">*</span>
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2.5">
@@ -399,14 +399,14 @@ const Checkout: React.FC = () => {
                         isSelected
                           ? 'bg-primary/10 border-primary shadow-primary text-text'
                           : isWeekend && !isFull
-                          ? 'bg-yellow/5 border-yellow/40 text-text/90 hover:border-yellow/70'
+                          ? 'bg-accent/5 border-accent/40 text-text/90 hover:border-accent/70'
                           : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
                       }`}
                       style={{
                         opacity: isFull ? 0.4 : 1,
                         cursor: isFull ? 'not-allowed' : 'pointer',
                         boxShadow: isWeekend && !isFull && !isSelected
-                          ? '0 0 10px rgba(245, 194, 0, 0.18)'
+                          ? '0 0 10px var(--color-yellow-glow)'
                           : undefined,
                       }}
                     >
@@ -419,12 +419,12 @@ const Checkout: React.FC = () => {
 
                       {/* Preferred badge for weekends */}
                       {isWeekend && !isFull && !isSelected && (
-                        <span className="absolute top-1.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow/20 text-yellow-dim border border-yellow/30">
+                        <span className="absolute top-1.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-accent/20 text-accent-dim border border-accent/30">
                           Preferred
                         </span>
                       )}
 
-                      <p className={`text-[11px] font-black pr-1 ${isFull ? 'text-muted/40' : isWeekend ? 'text-yellow-dim' : 'text-text'}`}>
+                      <p className={`text-[11px] font-black pr-1 ${isFull ? 'text-muted/40' : isWeekend ? 'text-accent-dim' : 'text-text'}`}>
                         {format(date, 'EEE')}
                       </p>
                       <p className="text-base font-black leading-tight mt-0.5 text-text">

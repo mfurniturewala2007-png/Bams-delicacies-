@@ -23,7 +23,7 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
       <label className="block text-left text-sm font-sans font-semibold text-text uppercase tracking-wider mb-3 flex items-center justify-between">
         <span>Select Delivery Date <span className="text-primary">*</span></span>
         {!selectedDate && (
-          <span className="text-[10px] text-yellow font-bold uppercase tracking-wider animate-pulse flex items-center gap-1">
+          <span className="text-[10px] text-accent font-bold uppercase tracking-wider animate-pulse flex items-center gap-1">
             <span>⚠️</span>
             <span>Please Select A Slot</span>
           </span>
@@ -52,13 +52,13 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
                   : isSelected
                   ? 'bg-surface-2 border-primary shadow-primary text-text'
                   : isWeekend
-                  ? 'bg-yellow/5 border-yellow/40 hover:border-yellow/70 text-text/90'
+                  ? 'bg-accent/5 border-accent/40 hover:border-accent/70 text-text/90'
                   : 'bg-surface border-border hover:border-primary/50 text-text/80'
               }`}
               style={{
                 boxShadow:
                   isWeekend && !isFull && !isSelected
-                    ? '0 0 10px rgba(245, 194, 0, 0.18)'
+                    ? '0 0 10px var(--color-yellow-glow)'
                     : undefined,
               }}
             >
@@ -72,7 +72,7 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
               {/* Day abbreviation */}
               <span
                 className={`font-sans font-extrabold text-[11px] tracking-tight ${
-                  isFull ? 'text-muted/40' : isWeekend ? 'text-yellow-dim' : 'text-muted'
+                  isFull ? 'text-muted/40' : isWeekend ? 'text-accent-dim' : 'text-muted'
                 }`}
               >
                 {format(date, 'EEE')}
@@ -90,7 +90,7 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
 
               {/* Preferred badge for weekends */}
               {isWeekend && !isFull && !isSelected && (
-                <span className="mt-1 text-[7px] font-black px-1 py-0.5 rounded-full uppercase tracking-wider bg-yellow/20 text-yellow-dim border border-yellow/30">
+                <span className="mt-1 text-[7px] font-black px-1 py-0.5 rounded-full uppercase tracking-wider bg-accent/20 text-accent-dim border border-accent/30">
                   Preferred
                 </span>
               )}

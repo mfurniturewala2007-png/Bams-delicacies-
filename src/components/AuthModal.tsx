@@ -226,7 +226,7 @@ const AuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
+                className="w-full bg-accent text-on-accent font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-accent-dim hover:scale-[1.02] shadow-accent active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
               >
                 {isSubmitting ? 'Signing In...' : 'Sign In'}
               </button>
@@ -359,7 +359,7 @@ const AuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
+                className="w-full bg-accent text-on-accent font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-accent-dim hover:scale-[1.02] shadow-accent active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating Account...' : 'Create Account'}
               </button>
@@ -474,7 +474,7 @@ const AuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-yellow text-bg font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
+                className="w-full bg-accent text-on-accent font-sans font-black uppercase tracking-wider py-4 rounded-xl hover:bg-accent-dim hover:scale-[1.02] shadow-accent active:scale-98 transition-all duration-300 mt-2 disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>

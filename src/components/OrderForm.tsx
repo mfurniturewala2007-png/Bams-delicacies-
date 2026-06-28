@@ -315,7 +315,7 @@ const OrderForm: React.FC = () => {
           </p>
           <button
             onClick={openAuthModal}
-            className="w-full font-sans font-black uppercase tracking-wider py-3.5 rounded-xl transition-all duration-300 select-none focus:outline-none bg-yellow text-bg hover:bg-yellow-dim hover:scale-[1.02] shadow-yellow active:scale-98"
+            className="w-full font-sans font-black uppercase tracking-wider py-3.5 rounded-xl transition-all duration-300 select-none focus:outline-none bg-accent text-on-accent hover:bg-accent-dim hover:scale-[1.02] shadow-accent active:scale-98"
           >
             Sign In to Order
           </button>
@@ -547,7 +547,7 @@ const OrderForm: React.FC = () => {
                 <span className="font-sans font-semibold text-muted text-xs uppercase tracking-wider">
                   Total Amount
                 </span>
-                <span className="font-serif text-3xl font-black text-yellow">
+                <span className="font-serif text-3xl font-black text-accent">
                   ₹{totalAmount}
                 </span>
               </div>

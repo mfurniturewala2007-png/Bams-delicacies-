@@ -39,7 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <>
       <div
-        className="rounded-2xl border transition-all duration-300 flex flex-col justify-between group overflow-hidden bg-surface border-border/40 md:hover:border-primary/50 md:hover:shadow-yellow md:hover:-translate-y-1.5"
+        className="rounded-2xl border transition-all duration-300 flex flex-col justify-between group overflow-hidden bg-surface border-border/40 md:hover:border-primary/50 md:hover:shadow-accent md:hover:-translate-y-1.5"
       >
         {/* Product Image Cover (Aspect 4:3 Ratio for modern layouts) */}
         <div className="relative aspect-[4/3] w-full overflow-hidden border-b bg-surface-2 border-border/40">
@@ -91,7 +91,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Modern Snappy Bottom Row: Price on left, Floating Add circle on right */}
           <div className="mt-3 flex items-center justify-between gap-2 text-left border-t pt-2.5 border-border/20">
             <div className="flex flex-col">
-              <span className="font-serif text-lg font-black text-yellow leading-tight">
+              <span className="font-serif text-lg font-black text-accent leading-tight">
                 ₹{product.price}
               </span>
               <span className="text-[10px] font-sans mt-0.5 text-muted">

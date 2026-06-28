@@ -135,7 +135,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           <h2 className="font-serif font-black text-[22px] text-heading leading-tight">
             Pay to Confirm Order
           </h2>
-          <p className="font-sans text-sm mt-1" style={{ color: '#999999' }}>
+          <p className="font-sans text-sm mt-1 text-muted">
             Scan with any UPI app
           </p>
         </div>
@@ -165,10 +165,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
             {/* Amount pill — Playfair Display, yellow, bold */}
             <span
-              className="font-serif font-bold rounded-full shadow-yellow px-5 py-1.5"
+              className="font-serif font-bold rounded-full shadow-accent px-5 py-1.5 bg-accent text-on-accent"
               style={{
-                backgroundColor: '#F5C200',
-                color: '#1E1E1E',
                 fontSize: '20px',
               }}
             >
@@ -176,7 +174,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             </span>
 
             {/* App hint */}
-            <p className="text-xs font-sans" style={{ color: '#999999' }}>
+            <p className="text-xs font-sans text-text/60">
               GPay · PhonePe · Paytm · any UPI app
             </p>
           </div>
@@ -184,7 +182,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           {/* ── UPI ID + Copy ── */}
           <div className="flex items-center justify-between bg-surface-2 border border-border rounded-xl px-4 py-3 gap-3">
             <div className="text-left min-w-0">
-              <p className="text-[10px] font-sans font-bold uppercase tracking-wider mb-0.5" style={{ color: '#999999' }}>
+              <p className="text-[10px] font-sans font-bold uppercase tracking-wider mb-0.5 text-text/60">
                 UPI ID:
               </p>
               <p className="font-mono text-sm text-text truncate">{UPI_ID}</p>
@@ -192,7 +190,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <button
               onClick={handleCopyUpiId}
               title="Copy UPI ID"
-              className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-border text-xs font-sans font-bold uppercase tracking-wider transition-all duration-200 md:hover:border-yellow md:hover:text-yellow active:scale-95 min-h-[44px]"
+              className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-border text-xs font-sans font-bold uppercase tracking-wider transition-all duration-200 md:hover:border-accent md:hover:text-accent active:scale-95 min-h-[44px]"
             >
               {copied ? (
                 <span className="text-success">✓ Copied!</span>
@@ -208,7 +206,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           {/* ── Divider ── */}
           <div className="flex items-center gap-3">
             <div className="flex-grow h-px bg-border/60" />
-            <span className="text-[11px] font-sans uppercase tracking-widest" style={{ color: '#999999' }}>
+            <span className="text-[11px] font-sans uppercase tracking-widest text-text/60">
               After paying
             </span>
             <div className="flex-grow h-px bg-border/60" />
@@ -227,12 +225,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 if (txnError) setTxnError('');
               }}
               placeholder="e.g. 407291836472"
-              className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-mono placeholder:text-muted/40 focus:outline-none focus:border-yellow focus:ring-2 transition-all duration-200 ${
+              className={`w-full bg-surface-2 border rounded-xl px-4 py-3 text-text font-mono placeholder:text-muted/40 focus:outline-none focus:border-accent focus:ring-2 transition-all duration-200 ${
                 txnError ? 'border-error' : 'border-border'
               }`}
-              style={{ focusRingColor: 'rgba(245,194,0,0.2)' } as React.CSSProperties}
+              style={{ focusRingColor: 'var(--color-yellow-glow)' } as React.CSSProperties}
             />
-            <p className="text-xs font-sans mt-1.5" style={{ color: '#999999' }}>
+            <p className="text-xs font-sans mt-1.5 text-text/60">
               Find it in your UPI app under transaction history
             </p>
             {txnError && (
@@ -257,24 +255,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <button
               onClick={handleConfirmPayment}
               disabled={isSubmitting || isCancelling}
-              className="flex-1 py-4 rounded-full font-sans font-black text-sm uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center"
-              style={{
-                backgroundColor: '#F5C200',
-                color: '#1E1E1E',
-                boxShadow: '0 0 20px rgba(245,194,0,0.2)',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#C49A00';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#F5C200';
-              }}
+              className="flex-1 py-4 rounded-full font-sans font-black text-sm uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center bg-accent text-on-accent hover:bg-accent-dim shadow-accent"
             >
               {isSubmitting ? 'Confirming...' : "I've Paid ✓"}
             </button>
           </div>
 
-          <p className="text-[10px] font-sans text-center leading-relaxed pb-1" style={{ color: '#999999' }}>
+          <p className="text-[10px] font-sans text-center leading-relaxed pb-1 text-text/60">
             Your order will be confirmed after the admin verifies your payment. You'll receive updates via WhatsApp or phone.
           </p>
         </div>

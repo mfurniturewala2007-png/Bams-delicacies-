@@ -96,7 +96,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
                 className="flex items-center gap-2 p-1.5 rounded-full bg-surface-2 border border-border hover:border-primary transition-all duration-200 select-none focus:outline-none min-h-[44px]"
               >
                 {/* User's Initials Avatar */}
-                <div className="h-8 w-8 rounded-full bg-yellow text-bg font-sans font-black flex items-center justify-center text-xs shadow-md select-none">
+                <div className="h-8 w-8 rounded-full bg-accent text-on-accent font-sans font-black flex items-center justify-center text-xs shadow-md select-none">
                   {profile?.name
                     ? profile.name
                         .split(' ')
@@ -158,9 +158,9 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
               )}
             </div>
           ) : (
-            <button
+             <button
               onClick={openAuthModal}
-              className="px-5 py-2.5 rounded-full border-2 border-yellow text-heading md:hover:bg-yellow md:hover:text-bg font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 select-none focus:outline-none min-h-[44px] flex items-center active:scale-95"
+              className="px-5 py-2.5 rounded-full border-2 border-accent text-heading md:hover:bg-accent md:hover:text-on-accent font-sans font-bold text-xs tracking-wider uppercase transition-all duration-300 select-none focus:outline-none min-h-[44px] flex items-center active:scale-95"
             >
               Sign In
             </button>

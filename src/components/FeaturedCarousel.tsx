@@ -7,7 +7,7 @@ import QuantityModal from './QuantityModal';
 const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; tabIndex?: number }> = ({ prod, onAddClick, tabIndex = 0 }) => {
   return (
     <div
-      className="w-[160px] flex-shrink-0 bg-surface border border-border/40 md:hover:border-primary/50 md:hover:shadow-yellow md:hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-2.5 flex flex-col justify-between"
+      className="w-[160px] flex-shrink-0 bg-surface border border-border/40 md:hover:border-primary/50 md:hover:shadow-accent md:hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-2.5 flex flex-col justify-between"
       style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
     >
       <div>
@@ -52,7 +52,7 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; 
       {/* Bottom CTA & Pricing: Price on left, Floating Plus circle on right */}
       <div className="mt-2.5 flex items-center justify-between gap-1.5 border-t border-border/20 pt-2">
         <div className="flex flex-col text-left">
-          <span className="font-serif text-sm sm:text-base font-black text-yellow leading-tight">
+          <span className="font-serif text-sm sm:text-base font-black text-accent leading-tight">
             ₹{prod.price}
           </span>
           <span className="text-muted text-[10px] sm:text-xs font-sans mt-0.5">

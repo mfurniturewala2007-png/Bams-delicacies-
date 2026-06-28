@@ -1236,7 +1236,7 @@ const Admin: React.FC = () => {
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <p className="font-bold text-text text-sm leading-tight truncate">{prod.name}</p>
-                            <p className="text-xs text-muted mt-0.5">{prod.category} · <span className="text-yellow font-bold">₹{prod.price}</span> <span className="text-muted">/ {prod.unit_label || '12 pcs'}</span></p>
+                            <p className="text-xs text-muted mt-0.5">{prod.category} · <span className="text-accent font-bold">₹{prod.price}</span> <span className="text-muted">/ {prod.unit_label || '12 pcs'}</span></p>
                           </div>
                           {/* Action buttons */}
                           <div className="flex items-center gap-1 flex-shrink-0">
@@ -1260,7 +1260,7 @@ const Admin: React.FC = () => {
                               className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-surface-2 rounded-xl transition-all duration-200"
                               title={prod.is_featured ? 'Featured' : 'Not Featured'}
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "#F5C200" : "none"} stroke={prod.is_featured ? "#F5C200" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "var(--color-yellow)" : "none"} stroke={prod.is_featured ? "var(--color-yellow)" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.172-.468.868-.468 1.04 0l2.125 5.757a1 1 0 00.95.69h6.04c.5 0 .708.641.304.933l-4.887 3.555a1 1 0 00-.364 1.118l1.867 5.06a1 1 0 00-1.54 1.118l-4.888-3.555a1 1 0 00-1.176 0l-4.888 3.555a1 1 0 00-1.54-1.118l1.867-5.06a1 1 0 00-.364-1.118L2.093 10.88c-.404-.292-.196-.933.304-.933h6.04a1 1 0 00.95-.69l2.125-5.757z" />
                               </svg>
                             </button>
@@ -1324,7 +1324,7 @@ const Admin: React.FC = () => {
                               </div>
                             </td>
                             <td className="py-4 px-6 capitalize text-text/80">{prod.category}</td>
-                            <td className="py-4 px-6 font-serif font-semibold text-yellow">₹{prod.price} <span className="text-xs font-sans text-muted">/ {prod.unit_label || '12 pcs'}</span></td>
+                            <td className="py-4 px-6 font-serif font-semibold text-accent">₹{prod.price} <span className="text-xs font-sans text-muted">/ {prod.unit_label || '12 pcs'}</span></td>
                             <td className="py-4 px-6 select-none">
                               <button
                                 onClick={() => handleToggleStock(prod.id, prod.in_stock)}
@@ -1343,7 +1343,7 @@ const Admin: React.FC = () => {
                                 className="p-2 hover:bg-surface-2 rounded-xl transition-all duration-200 inline-block align-middle"
                                 title={prod.is_featured ? 'Featured' : 'Not Featured'}
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "#F5C200" : "none"} stroke={prod.is_featured ? "#F5C200" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={prod.is_featured ? "var(--color-yellow)" : "none"} stroke={prod.is_featured ? "var(--color-yellow)" : "#9CA3AF"} strokeWidth="2" className="w-5 h-5 mx-auto">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.172-.468.868-.468 1.04 0l2.125 5.757a1 1 0 00.95.69h6.04c.5 0 .708.641.304.933l-4.887 3.555a1 1 0 00-.364 1.118l1.867 5.06a1 1 0 00-1.54 1.118l-4.888-3.555a1 1 0 00-1.176 0l-4.888 3.555a1 1 0 00-1.54-1.118l1.867-5.06a1 1 0 00-.364-1.118L2.093 10.88c-.404-.292-.196-.933.304-.933h6.04a1 1 0 00.95-.69l2.125-5.757z" />
                                 </svg>
                               </button>
@@ -1862,10 +1862,10 @@ const Admin: React.FC = () => {
                   </button>
                   {/* Slots Count Display badge */}
                   <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface border border-border">
-                    <span className="text-yellow text-xs font-bold uppercase tracking-wider">
+                    <span className="text-accent text-xs font-bold uppercase tracking-wider">
                       {activeFilterDateStr === 'all' ? 'Total Orders:' : 'Slots:'}
                     </span>
-                    <span className="bg-yellow text-bg font-sans font-black text-xs px-2 py-0.5 rounded-full shadow-yellow">
+                    <span className="bg-accent text-on-accent font-sans font-black text-xs px-2 py-0.5 rounded-full shadow-accent">
                       {activeFilterDateStr === 'all' ? filteredOrders.length : `${slotsCount} / ${getActiveLimit()}`}
                     </span>
                   </div>
@@ -2052,7 +2052,7 @@ const Admin: React.FC = () => {
                           className={`px-2 py-1 min-h-[48px] rounded-lg border text-xs font-bold focus:outline-none cursor-pointer flex-shrink-0 ${
                             ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
                             : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
-                            : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-[#9E7C00]'
+                            : ord.status === 'confirmed' ? 'bg-accent/10 border-accent/35 text-accent-dim'
                             : ord.status === 'delivered' ? 'bg-success/10 border-success/35 text-success'
                             : 'bg-error/10 border-error/35 text-error'
                           }`}
@@ -2079,7 +2079,7 @@ const Admin: React.FC = () => {
 
                       {/* Total + Txn row */}
                       <div className="flex items-center justify-between">
-                        <span className="font-serif font-bold text-yellow text-base">₹{ord.total}</span>
+                        <span className="font-serif font-bold text-accent text-base">₹{ord.total}</span>
                         {ord.upi_transaction_id && (
                           <span className="font-mono text-xs text-text/70 bg-surface-2 border border-border px-2 py-1 rounded-lg">
                             {ord.upi_transaction_id.slice(0, 12)}
@@ -2103,8 +2103,8 @@ const Admin: React.FC = () => {
                               disabled={confirmingOrderId === ord.id}
                               className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 min-h-[48px] rounded-xl text-[10px] font-bold border transition-all duration-200 disabled:opacity-50 active:scale-[0.98] ${
                                 whatsappSent[ord.id]?.has('confirmed')
-                                  ? 'bg-[#25D366]/10 border-[#25D366]/40 text-[#1a9e4a]'
-                                  : 'bg-surface-2 border-border text-text hover:border-[#25D366]/50'
+                                  ? 'bg-whatsapp/10 border-whatsapp/40 text-whatsapp-dark'
+                                  : 'bg-surface-2 border-border text-text hover:border-whatsapp/50'
                               }`}
                             >
                               <span className="text-lg">✅</span>
@@ -2116,8 +2116,8 @@ const Admin: React.FC = () => {
                               onClick={() => handleOrderReady(ord)}
                               className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 min-h-[48px] rounded-xl text-[10px] font-bold border transition-all duration-200 active:scale-[0.98] ${
                                 whatsappSent[ord.id]?.has('ready')
-                                  ? 'bg-yellow/10 border-yellow/40 text-[#9E7C00]'
-                                  : 'bg-surface-2 border-border text-text hover:border-yellow/50'
+                                  ? 'bg-accent/10 border-accent/40 text-accent-dim'
+                                  : 'bg-surface-2 border-border text-text hover:border-accent/50'
                               }`}
                             >
                               <span className="text-lg">🍽️</span>
@@ -2208,7 +2208,7 @@ const Admin: React.FC = () => {
                                 ))}
                               </ul>
                             </td>
-                            <td className="py-4 px-6 font-serif font-semibold text-yellow">₹{ord.total}</td>
+                            <td className="py-4 px-6 font-serif font-semibold text-accent">₹{ord.total}</td>
                             <td className="py-4 px-6">
                               {ord.upi_transaction_id ? (
                                 <span className="font-mono text-xs text-text/80 bg-surface-2 border border-border px-2 py-1 rounded-lg" title={ord.upi_transaction_id}>
@@ -2225,14 +2225,14 @@ const Admin: React.FC = () => {
                                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold focus:outline-none transition-colors duration-250 cursor-pointer ${
                                   ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
                                   : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
-                                  : ord.status === 'confirmed' ? 'bg-yellow/10 border-yellow/35 text-[#9E7C00]'
+                                  : ord.status === 'confirmed' ? 'bg-accent/10 border-accent/35 text-accent-dim'
                                   : ord.status === 'delivered' ? 'bg-success/10 border-success/35 text-success'
                                   : 'bg-error/10 border-error/35 text-error'
                                 }`}
                               >
                                 <option value="payment_pending" className="bg-surface text-muted font-bold">⏳ Payment Pending</option>
                                 <option value="pending" className="bg-surface text-warning font-bold">🟠 Pending</option>
-                                <option value="confirmed" className="bg-surface text-yellow font-bold">🟡 Confirmed</option>
+                                <option value="confirmed" className="bg-surface text-accent font-bold">🟡 Confirmed</option>
                                 <option value="delivered" className="bg-surface text-success font-bold">✅ Delivered</option>
                                 <option value="cancelled" className="bg-surface text-error font-bold">❌ Cancelled</option>
                               </select>
@@ -2248,8 +2248,8 @@ const Admin: React.FC = () => {
                                     title="Send WhatsApp: Order Confirmed"
                                     className={`inline-flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 disabled:opacity-50 border ${
                                       whatsappSent[ord.id]?.has('confirmed')
-                                        ? 'bg-[#25D366] border-[#25D366] text-white shadow-sm'
-                                        : 'bg-surface-2 border-border text-text hover:border-[#25D366] hover:bg-[#25D366]/10 hover:text-[#1a9e4a]'
+                                        ? 'bg-whatsapp border-whatsapp text-white shadow-sm'
+                                        : 'bg-surface-2 border-border text-text hover:border-whatsapp hover:bg-whatsapp/10 hover:text-whatsapp-dark'
                                     }`}
                                   >
                                     <span className="text-sm">✅</span>
@@ -2261,8 +2261,8 @@ const Admin: React.FC = () => {
                                     title="Send WhatsApp: Order Ready"
                                     className={`inline-flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 border ${
                                       whatsappSent[ord.id]?.has('ready')
-                                        ? 'bg-yellow border-yellow text-bg shadow-sm'
-                                        : 'bg-surface-2 border-border text-text hover:border-yellow hover:bg-yellow/10 hover:text-[#9E7C00]'
+                                        ? 'bg-accent border-accent text-on-accent shadow-sm'
+                                        : 'bg-surface-2 border-border text-text hover:border-accent hover:bg-accent/10 hover:text-accent-dim'
                                     }`}
                                   >
                                     <span className="text-sm">🍽️</span>
@@ -2503,7 +2503,7 @@ const Admin: React.FC = () => {
                   <div className="mt-6 flex flex-col gap-2">
                     <button
                       onClick={handleDownloadCSV}
-                      className="w-full bg-[#F5C200] text-[#1E1E1E] hover:bg-[#C49A00] font-sans font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] focus:outline-none focus:ring-2 focus:ring-[#F5C200] focus:ring-offset-2 focus:ring-offset-[#1E1E1E]"
+                      className="w-full bg-accent text-on-accent hover:bg-accent-dim font-sans font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface"
                     >
                       Download CSV File 📥
                     </button>
@@ -2727,7 +2727,7 @@ const Admin: React.FC = () => {
                 {/* Ready for Pickup */}
                 <button
                   onClick={() => handleReadyForPickup(ord)}
-                  className="group w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-yellow/60 bg-surface-2 hover:bg-yellow/5 transition-all duration-200 text-left"
+                  className="group w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-accent/60 bg-surface-2 hover:bg-accent/5 transition-all duration-200 text-left"
                 >
                   <span className="text-3xl group-hover:scale-110 transition-transform duration-200">🏠</span>
                   <div>

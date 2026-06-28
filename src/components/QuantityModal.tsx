@@ -95,19 +95,19 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
               onClick={() => setFried(true)}
               className={`flex flex-col items-center gap-1.5 py-3 px-3 rounded-xl border transition-all duration-200 ${
                 fried
-                  ? 'bg-yellow/10 border-yellow shadow-yellow'
-                  : 'bg-surface-2 border-border/60 hover:border-yellow/50'
+                  ? 'bg-accent/10 border-accent shadow-accent'
+                  : 'bg-surface-2 border-border/60 hover:border-accent/50'
               }`}
             >
               <span className="text-2xl">🍳</span>
-              <span className={`font-sans font-black text-sm ${fried ? 'text-yellow-dim' : 'text-text/80'}`}>
+              <span className={`font-sans font-black text-sm ${fried ? 'text-accent-dim' : 'text-text/80'}`}>
                 Fried
               </span>
-              <span className={`font-sans text-[10px] font-semibold ${fried ? 'text-yellow-dim/80' : 'text-muted'}`}>
+              <span className={`font-sans text-[10px] font-semibold ${fried ? 'text-accent-dim/80' : 'text-muted'}`}>
                 +₹{FRYING_CHARGE_PER_DOZEN}/dozen
               </span>
               {fried && (
-                <span className="w-4 h-4 rounded-full bg-yellow text-[#1E1E1E] text-[9px] font-black flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-accent text-on-accent text-[9px] font-black flex items-center justify-center">
                   ✓
                 </span>
               )}
@@ -117,8 +117,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 
         {/* Dozen info badge */}
         <span
-          className="font-sans font-bold text-xs rounded-full px-3.5 py-1 text-center"
-          style={{ backgroundColor: '#F5C200', color: '#1E1E1E' }}
+          className="font-sans font-bold text-xs rounded-full px-3.5 py-1 text-center bg-accent text-on-accent"
         >
           1 dozen = 12 pieces
         </span>
@@ -147,7 +146,6 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
           </button>
         </div>
 
-        {/* Subtotal breakdown */}
         <div className="w-full bg-surface-2 border border-border/60 p-4 rounded-xl space-y-1.5">
           <div className="flex justify-between items-center">
             <span className="font-sans text-xs text-muted">
@@ -157,17 +155,17 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
           </div>
           {fried && (
             <div className="flex justify-between items-center">
-              <span className="font-sans text-xs text-yellow-dim">
+              <span className="font-sans text-xs text-accent-dim">
                 Frying ({dozens} doz × ₹{FRYING_CHARGE_PER_DOZEN})
               </span>
-              <span className="font-sans text-xs font-semibold text-yellow-dim">+₹{fryingCharge}</span>
+              <span className="font-sans text-xs font-semibold text-accent-dim">+₹{fryingCharge}</span>
             </div>
           )}
           <div className="flex justify-between items-center pt-1.5 border-t border-border/40">
             <span className="font-sans text-xs font-bold text-muted uppercase tracking-wider">
               Subtotal
             </span>
-            <span className="font-serif text-2xl font-black text-yellow">
+            <span className="font-serif text-2xl font-black text-accent">
               ₹{subtotal}
             </span>
           </div>
