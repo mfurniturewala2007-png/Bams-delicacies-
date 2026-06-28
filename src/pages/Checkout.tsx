@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { getNext7DeliveryDays } from '../utils/deliveryDates';
+import { FRYING_CHARGE_PER_DOZEN } from '../types';
 import PaymentModal from '../components/PaymentModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 
@@ -324,9 +325,12 @@ const Checkout: React.FC = () => {
               {/* Expanded rows */}
               {summaryOpen && (
                 <div className="border-t px-4 pb-2 border-border/40">
-                  {items.map((item) => (
+                  {items.map((item) => {
+                    const effectivePrice = item.price_per_dozen + (item.fried ? FRYING_CHARGE_PER_DOZEN : 0);
+                    const lineTotal = effectivePrice * item.dozens;
+                    return (
                     <div
-                      key={item.product_id}
+                      key={`${item.product_id}__${item.fried}`}
                       className="flex items-center gap-3 py-3 border-b last:border-b-0 border-border/40"
                     >
                       {/* 48px thumbnail */}
@@ -340,15 +344,27 @@ const Checkout: React.FC = () => {
                         <p className="text-sm font-bold truncate text-text">
                           {item.name}
                         </p>
-                        <p className="text-xs mt-0.5 text-muted">
-                          {item.dozens} doz × {item.dozens * 12} pcs
-                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          <p className="text-xs text-muted">
+                            {item.dozens} doz × {item.dozens * 12} pcs
+                          </p>
+                          {item.fried ? (
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow/20 text-yellow-dim border border-yellow/30">
+                              🍳 Fried
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-surface border border-border/60 text-muted">
+                              🥙 Unfried
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <span className="text-sm font-black flex-shrink-0 text-yellow">
-                        ₹{item.price_per_dozen * item.dozens}
+                        ₹{lineTotal}
                       </span>
                     </div>
-                  ))}
+                    );
+                  })}
 
                   {/* Summary total row */}
                   <div className="flex items-center justify-between py-3">

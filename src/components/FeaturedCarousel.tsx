@@ -114,7 +114,7 @@ const FeaturedCarousel: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleConfirmAdd = (dozens: number) => {
+  const handleConfirmAdd = (dozens: number, fried: boolean) => {
     if (!selectedProduct) return;
     addItem({
       product_id: selectedProduct.id,
@@ -123,6 +123,7 @@ const FeaturedCarousel: React.FC = () => {
       dozens: dozens,
       image_url: selectedProduct.image_url || '',
       category: selectedProduct.category || '',
+      fried,
     });
     setIsModalOpen(false);
   };

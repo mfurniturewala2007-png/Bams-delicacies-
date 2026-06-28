@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
-import { CartItem } from '../types';
+import { CartItem, FRYING_CHARGE_PER_DOZEN } from '../types';
 
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string) => void;
-  updateQty: (productId: string, dozens: number) => void;
+  removeItem: (productId: string, fried: boolean) => void;
+  updateQty: (productId: string, fried: boolean, dozens: number) => void;
   clearCart: () => void;
   totalAmount: number;
   totalCount: number;
@@ -15,6 +15,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // CRITICAL RULE: Keeping all cart items strictly in React State. No localStorage or sessionStorage.
   const [items, setItems] = useState<CartItem[]>([]);
@@ -23,10 +24,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addItem = (newItem: CartItem) => {
     setLastAddedAt(Date.now());
     setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.product_id === newItem.product_id);
-      if (existingItem) {
+      const existing = prevItems.find(
+        (item) => item.product_id === newItem.product_id && item.fried === newItem.fried
+      );
+      if (existing) {
         return prevItems.map((item) =>
-          item.product_id === newItem.product_id
+          item.product_id === newItem.product_id && item.fried === newItem.fried
             ? { ...item, dozens: item.dozens + newItem.dozens }
             : item
         );
@@ -35,18 +38,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.product_id !== productId));
+  const removeItem = (productId: string, fried: boolean) => {
+    setItems((prevItems) =>
+      prevItems.filter((item) => !(item.product_id === productId && item.fried === fried))
+    );
   };
 
-  const updateQty = (productId: string, dozens: number) => {
+  const updateQty = (productId: string, fried: boolean, dozens: number) => {
     if (dozens <= 0) {
-      removeItem(productId);
+      removeItem(productId, fried);
       return;
     }
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.product_id === productId ? { ...item, dozens } : item
+        item.product_id === productId && item.fried === fried ? { ...item, dozens } : item
       )
     );
   };
@@ -56,7 +61,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const totalAmount = useMemo(() => {
-    return items.reduce((sum, item) => sum + item.price_per_dozen * item.dozens, 0);
+    return items.reduce(
+      (sum, item) =>
+        sum + (item.price_per_dozen + (item.fried ? FRYING_CHARGE_PER_DOZEN : 0)) * item.dozens,
+      0
+    );
   }, [items]);
 
   const totalCount = useMemo(() => {

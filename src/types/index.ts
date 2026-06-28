@@ -14,13 +14,17 @@ export interface Product {
 export interface CartItem {
   product_id: string;
   name: string;
-  price_per_dozen: number;   // price for 12 pcs
+  price_per_dozen: number;   // base price for 12 pcs
   dozens: number;            // how many sets of 12 the user wants
   image_url: string;
   category: string;
+  fried: boolean;            // true = customer wants fried (+₹50/doz)
 }
 
-export const cartItemTotal = (item: CartItem) => item.price_per_dozen * item.dozens;
+export const FRYING_CHARGE_PER_DOZEN = 50;
+
+export const cartItemTotal = (item: CartItem) =>
+  (item.price_per_dozen + (item.fried ? FRYING_CHARGE_PER_DOZEN : 0)) * item.dozens;
 
 export interface Order {
   id: string;

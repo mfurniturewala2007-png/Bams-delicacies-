@@ -18,7 +18,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     setIsModalOpen(true);
   };
 
-  const handleConfirmAdd = (dozens: number) => {
+  const handleConfirmAdd = (dozens: number, fried: boolean) => {
     addItem({
       product_id: product.id,
       name: product.name,
@@ -26,6 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       dozens: dozens,
       image_url: product.image_url || '',
       category: product.category || '',
+      fried,
     });
 
     setIsModalOpen(false);

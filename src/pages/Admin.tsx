@@ -339,10 +339,11 @@ const Admin: React.FC = () => {
       const lineTotal = i.price_per_dozen !== undefined
         ? i.price_per_dozen * doz
         : (i as any).price * doz;
+      const style = (i as any).fried ? '🍳 Fried' : '🥙 Unfried';
       if (isStage1) {
-        return `• ${i.name} — ${doz} dozen (${pcs} pcs) — ₹${lineTotal}`;
+        return `• ${i.name} — ${doz} dozen (${pcs} pcs) [${style}] — ₹${lineTotal}`;
       } else {
-        return `• ${i.name} — ${doz} dozen`;
+        return `• ${i.name} — ${doz} dozen [${style}]`;
       }
     }).join('\n');
 

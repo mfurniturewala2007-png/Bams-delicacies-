@@ -4,6 +4,7 @@
 interface OrderItem {
   name: string;
   dozens: number;
+  fried?: boolean;
 }
 
 interface NotifyBody {
@@ -50,7 +51,10 @@ export default async function handler(req: any, res: any) {
   const safeOrderId = escapeHtml(order_id);
 
   const itemLines = (items ?? [])
-    .map((item) => `  • ${escapeHtml(item.name)} × ${item.dozens} doz`)
+    .map((item) => {
+      const style = item.fried ? '🍳 Fried' : '🥙 Unfried';
+      return `  • ${escapeHtml(item.name)} × ${item.dozens} doz [${style}]`;
+    })
     .join('\n');
 
   const message = [
