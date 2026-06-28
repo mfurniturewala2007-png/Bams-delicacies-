@@ -39,10 +39,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <>
       <div
-        className="rounded-2xl border transition-all duration-300 flex flex-col justify-between group overflow-hidden bg-surface border-border/40 md:hover:border-primary/50 md:hover:shadow-accent md:hover:-translate-y-1.5"
+        className="rounded-xl sm:rounded-2xl border transition-all duration-300 flex flex-col justify-between group overflow-hidden bg-surface border-border/20 sm:border-border/40 md:hover:border-primary/50 md:hover:shadow-accent md:hover:-translate-y-1.5"
       >
         {/* Product Image Cover (Aspect 4:3 Ratio for modern layouts) */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden border-b bg-surface-2 border-border/40">
+        <div className="relative aspect-[4/3] w-full overflow-hidden border-b bg-surface-2 border-border/20 sm:border-border/40">
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -68,7 +68,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Dynamic Category Pill Badge */}
           {product.category && (
-            <span className="absolute top-3 right-3 backdrop-blur-md border text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm capitalize bg-bg/85 border-border/40 text-primary">
+            <span className="absolute top-3 right-3 backdrop-blur-md border text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm capitalize bg-bg/85 border-border/20 sm:border-border/40 text-primary">
               {product.category}
             </span>
           )}
@@ -89,7 +89,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           {/* Modern Snappy Bottom Row: Price on left, Floating Add circle on right */}
-          <div className="mt-3 flex items-center justify-between gap-2 text-left border-t pt-2.5 border-border/20">
+          <div className="mt-3 flex items-center justify-between gap-2 text-left border-t pt-2.5 border-border/10 sm:border-border/20">
             <div className="flex flex-col">
               <span className="font-serif text-lg font-black text-accent leading-tight">
                 ₹{product.price}
@@ -102,12 +102,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <button
               onClick={handleOpenModal}
               disabled={!product.in_stock}
-              className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all duration-300 md:hover:scale-[1.08] active:scale-90 select-none flex-shrink-0 focus:outline-none ${
+              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 md:hover:scale-[1.08] active:scale-90 select-none flex-shrink-0 focus:outline-none ${
                 !product.in_stock
                   ? 'bg-surface-2 text-muted/40 border border-border/60 cursor-not-allowed shadow-none'
                   : isAdded
                   ? 'bg-success text-white'
-                  : 'bg-primary text-white md:hover:bg-primary-hover shadow-primary/20'
+                  : 'bg-primary text-white md:hover:bg-primary-hover shadow-none sm:shadow-md shadow-primary/20'
               }`}
               title={product.in_stock ? 'Add to Cart' : 'Out of Stock'}
             >

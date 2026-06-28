@@ -160,23 +160,55 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Design System Utilities */
 .shadow-card {
-  box-shadow: 0 4px 24px rgba(61, 32, 0, 0.08);
+  box-shadow: none; /* Flat on mobile for cleaner look */
+  border-color: rgba(232, 208, 176, 0.2); /* Soften borders on mobile */
+}
+
+@media (min-width: 768px) {
+  .shadow-card {
+    box-shadow: 0 4px 20px rgba(61, 32, 0, 0.05); /* Softer card shadow on desktop */
+    border-color: rgba(232, 208, 176, 0.4);
+  }
 }
 
 .shadow-yellow, .shadow-accent {
-  box-shadow: 0 0 20px var(--color-yellow-glow);
+  box-shadow: 0 0 10px var(--color-yellow-glow);
+}
+
+@media (min-width: 768px) {
+  .shadow-yellow, .shadow-accent {
+    box-shadow: 0 0 20px var(--color-yellow-glow);
+  }
 }
 
 .shadow-yellow-strong, .shadow-accent-strong {
-  box-shadow: 0 0 32px var(--color-yellow-glow);
+  box-shadow: 0 0 16px var(--color-yellow-glow);
+}
+
+@media (min-width: 768px) {
+  .shadow-yellow-strong, .shadow-accent-strong {
+    box-shadow: 0 0 32px var(--color-yellow-glow);
+  }
 }
 
 .shadow-primary {
-  box-shadow: 0 0 20px rgba(200, 81, 27, 0.2);
+  box-shadow: 0 0 10px rgba(200, 81, 27, 0.12);
+}
+
+@media (min-width: 768px) {
+  .shadow-primary {
+    box-shadow: 0 0 20px rgba(200, 81, 27, 0.2);
+  }
 }
 
 .shadow-primary-strong {
-  box-shadow: 0 0 32px rgba(200, 81, 27, 0.35);
+  box-shadow: 0 0 16px rgba(200, 81, 27, 0.22);
+}
+
+@media (min-width: 768px) {
+  .shadow-primary-strong {
+    box-shadow: 0 0 32px rgba(200, 81, 27, 0.35);
+  }
 }
 
 /* Keyframes & Custom Animations from Section 5 */

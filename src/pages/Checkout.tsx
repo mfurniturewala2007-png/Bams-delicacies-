@@ -60,7 +60,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   }, [editing]);
 
   return (
-    <div className="py-3 border-b last:border-b-0 border-border/40">
+    <div className="py-3 border-b last:border-b-0 border-border/20 sm:border-border/40">
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5 text-muted">
@@ -346,7 +346,7 @@ const Checkout: React.FC = () => {
           <div className="space-y-4">
 
             {/* ── [2] ORDER SUMMARY accordion ─────────────────────────── */}
-            <div className="rounded-2xl overflow-hidden border bg-surface border-border/40 text-text shadow-card">
+            <div className="rounded-2xl overflow-hidden border bg-surface border-border/20 sm:border-border/40 text-text shadow-card">
               <button
                 onClick={() => setSummaryOpen((o) => !o)}
                 className="w-full flex items-center justify-between px-4 py-4 text-left min-h-[56px]"
@@ -364,20 +364,20 @@ const Checkout: React.FC = () => {
 
               {/* Expanded rows */}
               {summaryOpen && (
-                <div className="border-t px-4 pb-2 border-border/40">
+                <div className="border-t px-4 pb-2 border-border/20 sm:border-border/40">
                   {items.map((item) => {
                     const effectivePrice = item.price_per_dozen + (item.fried ? FRYING_CHARGE_PER_DOZEN : 0);
                     const lineTotal = effectivePrice * item.dozens;
                     return (
                     <div
                       key={`${item.product_id}__${item.fried}`}
-                      className="flex items-center gap-3 py-3 border-b last:border-b-0 border-border/40"
+                      className="flex items-center gap-3 py-3 border-b last:border-b-0 border-border/20 sm:border-border/40"
                     >
                       {/* 48px thumbnail */}
                       <img
                         src={item.image_url || '/logo.jpeg'}
                         alt={item.name}
-                        className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-border/40"
+                        className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-border/20 sm:border-border/40"
                         loading="lazy"
                       />
                       <div className="flex-1 min-w-0">
@@ -425,7 +425,7 @@ const Checkout: React.FC = () => {
             </div>
 
             {/* ── [3] DELIVERY DATE ─────────────────────────────────────── */}
-            <div className="rounded-2xl border px-4 py-4 bg-surface border-border/40 shadow-card">
+            <div className="rounded-2xl border px-4 py-4 bg-surface border-border/20 sm:border-border/40 shadow-card">
               <p className="text-xs font-bold uppercase tracking-wider mb-3 text-muted">
                 Delivery Date <span className="text-error">*</span>
               </p>
@@ -449,7 +449,7 @@ const Checkout: React.FC = () => {
                           ? 'bg-primary/10 border-primary shadow-primary text-text'
                           : isWeekend && !isFull
                           ? 'bg-accent/5 border-accent/40 text-text/90 hover:border-accent/70'
-                          : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
+                          : 'bg-surface-2 border-border/20 sm:border-border/40 text-text/85 hover:border-primary/50'
                       }`}
                       style={{
                         opacity: isFull ? 0.4 : 1,
@@ -502,7 +502,7 @@ const Checkout: React.FC = () => {
           <div className="space-y-4 mt-4 lg:mt-0">
 
             {/* ── [4] DELIVERY DETAILS ──────────────────────────────────── */}
-            <div className="rounded-2xl border px-4 py-4 bg-surface border-border/40 shadow-card">
+            <div className="rounded-2xl border px-4 py-4 bg-surface border-border/20 sm:border-border/40 shadow-card">
               <p className="text-xs font-bold uppercase tracking-wider mb-1 text-muted">
                 Delivery Details
               </p>
@@ -530,7 +530,7 @@ const Checkout: React.FC = () => {
             </div>
 
             {/* ── [5] PAYMENT METHOD ────────────────────────────────────── */}
-            <div className="rounded-2xl border px-4 py-4 space-y-3 bg-surface border-border/40 shadow-card">
+            <div className="rounded-2xl border px-4 py-4 space-y-3 bg-surface border-border/20 sm:border-border/40 shadow-card">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">
                 Payment Method
               </p>
@@ -541,7 +541,7 @@ const Checkout: React.FC = () => {
                 className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 min-h-[64px] ${
                   paymentMethod === 'UPI'
                     ? 'bg-primary/10 border-primary shadow-primary text-text'
-                    : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
+                    : 'bg-surface-2 border-border/20 sm:border-border/40 text-text/85 hover:border-primary/50'
                 }`}
               >
                 <span className="text-2xl">📲</span>
@@ -562,7 +562,7 @@ const Checkout: React.FC = () => {
                 className={`w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 min-h-[64px] ${
                   paymentMethod === 'COD'
                     ? 'bg-primary/10 border-primary shadow-primary text-text'
-                    : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
+                    : 'bg-surface-2 border-border/20 sm:border-border/40 text-text/85 hover:border-primary/50'
                 }`}
               >
                 <span className="text-2xl">💵</span>

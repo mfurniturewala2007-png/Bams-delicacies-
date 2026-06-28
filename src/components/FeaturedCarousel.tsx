@@ -7,12 +7,12 @@ import QuantityModal from './QuantityModal';
 const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; tabIndex?: number }> = ({ prod, onAddClick, tabIndex = 0 }) => {
   return (
     <div
-      className="w-[160px] flex-shrink-0 bg-surface border border-border/40 md:hover:border-primary/50 md:hover:shadow-accent md:hover:-translate-y-1.5 transition-all duration-300 rounded-2xl p-2.5 flex flex-col justify-between"
+      className="w-[150px] sm:w-[160px] flex-shrink-0 bg-surface border border-border/20 sm:border-border/40 md:hover:border-primary/50 md:hover:shadow-accent md:hover:-translate-y-1.5 transition-all duration-300 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between"
       style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
     >
       <div>
         {/* Aspect Square Image Cover */}
-        <div className="relative aspect-square w-full bg-surface-2 rounded-xl overflow-hidden mb-2.5 border border-border/40">
+        <div className="relative aspect-square w-full bg-surface-2 rounded-lg sm:rounded-xl overflow-hidden mb-2 sm:mb-2.5 border border-border/20 sm:border-border/40">
           {prod.image_url ? (
             <img
               src={prod.image_url}
@@ -37,7 +37,7 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; 
 
           {/* Category badge */}
           {prod.category && (
-            <span className="absolute top-2 right-2 bg-bg/85 backdrop-blur-md border border-border/40 text-primary text-[7px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+            <span className="absolute top-2 right-2 bg-bg/85 backdrop-blur-md border border-border/20 sm:border-border/40 text-primary text-[7px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
               {prod.category}
             </span>
           )}
@@ -50,7 +50,7 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; 
       </div>
 
       {/* Bottom CTA & Pricing: Price on left, Floating Plus circle on right */}
-      <div className="mt-2.5 flex items-center justify-between gap-1.5 border-t border-border/20 pt-2">
+      <div className="mt-2 sm:mt-2.5 flex items-center justify-between gap-1.5 border-t border-border/10 sm:border-border/20 pt-2">
         <div className="flex flex-col text-left">
           <span className="font-serif text-sm sm:text-base font-black text-accent leading-tight">
             ₹{prod.price}
@@ -64,7 +64,7 @@ const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; 
         <button
           onClick={() => onAddClick(prod)}
           tabIndex={tabIndex}
-          className="w-11 h-11 rounded-full bg-primary md:hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-200 select-none focus:outline-none flex-shrink-0"
+          className="w-11 h-11 rounded-full bg-primary md:hover:bg-primary-hover active:scale-90 text-white flex items-center justify-center transition-all duration-200 select-none focus:outline-none flex-shrink-0 shadow-none sm:shadow-md shadow-primary/20"
           title="Add to Cart"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
