@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
 import { supabase } from '../utils/supabase';
-import { getAvailableDeliveryDates } from '../utils/deliveryDates';
+import { getNext7DeliveryDays } from '../utils/deliveryDates';
 import DeliveryPicker from './DeliveryPicker';
 import PaymentModal from './PaymentModal';
 
@@ -55,21 +55,18 @@ const OrderForm: React.FC = () => {
     visible: false,
   });
 
-  const { saturday, sunday } = getAvailableDeliveryDates();
-  const dbSatStr = format(saturday, 'yyyy-MM-dd');
-  const dbSunStr = format(sunday, 'yyyy-MM-dd');
+  const deliveryDays7 = React.useMemo(() => getNext7DeliveryDays(), []);
+  const allDateStrs7 = React.useMemo(() => deliveryDays7.map(d => format(d.date, 'yyyy-MM-dd')), [deliveryDays7]);
 
   const [maxOrdersSatLimit, setMaxOrdersSatLimit] = useState(15);
-  const [maxOrdersSunLimit, setMaxOrdersSunLimit] = useState(15);
 
   // Fetch orders count on mount to populate slot calculations
-  const fetchOrdersForWeekend = async () => {
+  const fetchOrdersForWeek = async () => {
     try {
-      const datesToFetch = [dbSatStr, dbSunStr];
       const { data, error } = await supabase
         .from('orders')
         .select('delivery_date')
-        .in('delivery_date', datesToFetch);
+        .in('delivery_date', allDateStrs7);
 
       if (error) throw error;
       if (data) {
@@ -85,15 +82,12 @@ const OrderForm: React.FC = () => {
       const { data } = await supabase
         .from('settings')
         .select('*')
-        .in('key', ['max_orders_per_day', 'max_orders_saturday', 'max_orders_sunday']);
+        .in('key', ['max_orders_per_day', 'max_orders_saturday']);
 
       if (data) {
         const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
         const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
-        const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
-        
         setMaxOrdersSatLimit(Number(sat));
-        setMaxOrdersSunLimit(Number(sun));
       }
     } catch (err) {
       console.warn('Failed to fetch settings from Supabase. Falling back to defaults.');
@@ -106,9 +100,9 @@ const OrderForm: React.FC = () => {
 
   useEffect(() => {
     if (items.length > 0) {
-      fetchOrdersForWeekend();
+      fetchOrdersForWeek();
     }
-  }, [items, dbSatStr, dbSunStr]);
+  }, [items, allDateStrs7]);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type, visible: true });
@@ -509,8 +503,7 @@ const OrderForm: React.FC = () => {
                   if (fieldErrors.date) setFieldErrors((prev) => ({ ...prev, date: '' }));
                 }}
                 orders={orders}
-                maxOrdersSatLimit={maxOrdersSatLimit}
-                maxOrdersSunLimit={maxOrdersSunLimit}
+                maxOrdersLimit={maxOrdersSatLimit}
               />
               {fieldErrors.date && (
                 <span className="text-error text-xs font-sans font-semibold text-left mt-2 block">

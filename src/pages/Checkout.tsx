@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
-import { getAvailableDeliveryDates } from '../utils/deliveryDates';
+import { getNext7DeliveryDays } from '../utils/deliveryDates';
 import PaymentModal from '../components/PaymentModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 
@@ -118,16 +118,12 @@ const Checkout: React.FC = () => {
   }, [items.length, profile, isLoadingProfile, navigate]);
 
   // ── Delivery dates ────────────────────────────────────────────────────────
-  const { saturday, sunday } = getAvailableDeliveryDates();
-  const satStr = format(saturday, 'yyyy-MM-dd');
-  const sunStr = format(sunday, 'yyyy-MM-dd');
+  const deliveryDays = useMemo(() => getNext7DeliveryDays(), []);
+  const allDateStrs = useMemo(() => deliveryDays.map(d => format(d.date, 'yyyy-MM-dd')), [deliveryDays]);
 
   const [slotOrders, setSlotOrders] = useState<{ delivery_date: string }[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [settings, setSettings] = useState({
-    satCapacity: 15,
-    sunCapacity: 15,
-  });
+  const [defaultCapacity, setDefaultCapacity] = useState(15);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -135,23 +131,11 @@ const Checkout: React.FC = () => {
         const { data } = await supabase
           .from('settings')
           .select('*')
-          .in('key', [
-            'max_orders_saturday',
-            'max_orders_sunday',
-            'max_orders_per_day',
-          ]);
+          .in('key', ['max_orders_per_day']);
         if (data) {
           const general = data.find(r => r.key === 'max_orders_per_day')?.value || '15';
-          const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
-          const sun = data.find(r => r.key === 'max_orders_sunday')?.value || general;
-          
-          const satVal = parseInt(sat, 10);
-          const sunVal = parseInt(sun, 10);
-
-          setSettings({
-            satCapacity: isNaN(satVal) ? 15 : satVal,
-            sunCapacity: isNaN(sunVal) ? 15 : sunVal,
-          });
+          const val = parseInt(general, 10);
+          setDefaultCapacity(isNaN(val) ? 15 : val);
         }
       } catch (err) {
         console.warn('Failed to load settings in checkout:', err);
@@ -162,27 +146,15 @@ const Checkout: React.FC = () => {
 
   useEffect(() => {
     const fetchSlots = async () => {
-      const dates = [satStr, sunStr];
       const { data } = await supabase
         .from('orders')
         .select('delivery_date')
-        .in('delivery_date', dates)
+        .in('delivery_date', allDateStrs)
         .neq('status', 'cancelled');
       if (data) setSlotOrders(data);
     };
     fetchSlots();
-  }, [satStr, sunStr]);
-
-  const satCount = getSlotCount(slotOrders, satStr);
-  const sunCount = getSlotCount(slotOrders, sunStr);
-
-  const satFull = satCount >= settings.satCapacity;
-  const sunFull = sunCount >= settings.sunCapacity;
-
-  const dateOptions = useMemo(() => [
-    { date: saturday, label: 'Saturday Delivery', dateStr: satStr, isFull: satFull, capacity: settings.satCapacity, count: satCount },
-    { date: sunday, label: 'Sunday Delivery', dateStr: sunStr, isFull: sunFull, capacity: settings.sunCapacity, count: sunCount },
-  ], [saturday, sunday, satStr, sunStr, satFull, sunFull, settings.satCapacity, settings.sunCapacity, satCount, sunCount]);
+  }, [allDateStrs]);
 
   // ── Accordion ─────────────────────────────────────────────────────────────
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -393,51 +365,66 @@ const Checkout: React.FC = () => {
                 Delivery Date <span style={{ color: '#ef4444' }}>*</span>
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {dateOptions.map((opt) => {
-                  const { date, label, dateStr, isFull, capacity, count } = opt;
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2.5">
+                {deliveryDays.map(({ date, isWeekend }) => {
+                  const dateStr = format(date, 'yyyy-MM-dd');
                   const isSelected = selectedDate ? format(selectedDate, 'yyyy-MM-dd') === dateStr : false;
-                  const slotsLeft = Math.max(0, capacity - count);
+                  const count = getSlotCount(slotOrders, dateStr);
+                  const slotsLeft = Math.max(0, defaultCapacity - count);
+                  const isFull = slotsLeft === 0;
                   const isLow = !isFull && slotsLeft <= 5;
-                  const isDisabledOption = isFull;
 
                   return (
                     <button
                       key={dateStr}
-                      disabled={isDisabledOption}
-                      onClick={() => !isDisabledOption && setSelectedDate(date)}
-                      className={`relative rounded-xl py-3 px-4 text-left transition-all duration-200 border min-h-[85px] ${
+                      disabled={isFull}
+                      onClick={() => !isFull && setSelectedDate(date)}
+                      className={`relative rounded-xl py-3 px-3 text-left transition-all duration-200 border ${
                         isSelected
                           ? 'bg-primary/10 border-primary shadow-primary text-text'
+                          : isWeekend && !isFull
+                          ? 'bg-yellow/5 border-yellow/40 text-text/90 hover:border-yellow/70'
                           : 'bg-surface-2 border-border/40 text-text/85 hover:border-primary/50'
                       }`}
                       style={{
-                        opacity: isDisabledOption ? 0.4 : 1,
-                        cursor: isDisabledOption ? 'not-allowed' : 'pointer',
+                        opacity: isFull ? 0.4 : 1,
+                        cursor: isFull ? 'not-allowed' : 'pointer',
+                        boxShadow: isWeekend && !isFull && !isSelected
+                          ? '0 0 10px rgba(245, 194, 0, 0.18)'
+                          : undefined,
                       }}
                     >
                       {/* Selected checkmark */}
                       {isSelected && (
-                        <span className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black bg-primary text-white">
+                        <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black bg-primary text-white">
                           ✓
                         </span>
                       )}
-                      <p className={`text-sm font-black pr-5 ${isDisabledOption ? 'text-muted/40' : 'text-text'}`}>{label}</p>
-                      <p className="text-xs mt-0.5 text-muted">{format(date, 'd MMM')}</p>
 
-                      {isFull ? (
-                        <span className="mt-2 inline-block text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-error/15 text-error border border-error/35">
-                          Sold Out
-                        </span>
-                      ) : isLow ? (
-                        <span className="mt-2 block text-[10px] font-bold text-primary">
-                          ⚠️ {slotsLeft} left!
-                        </span>
-                      ) : (
-                        <span className="mt-2 block text-[10px] font-semibold text-muted">
-                          {slotsLeft} slots left
+                      {/* Preferred badge for weekends */}
+                      {isWeekend && !isFull && !isSelected && (
+                        <span className="absolute top-1.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow/20 text-yellow-dim border border-yellow/30">
+                          Preferred
                         </span>
                       )}
+
+                      <p className={`text-[11px] font-black pr-1 ${isFull ? 'text-muted/40' : isWeekend ? 'text-yellow-dim' : 'text-text'}`}>
+                        {format(date, 'EEE')}
+                      </p>
+                      <p className="text-base font-black leading-tight mt-0.5 text-text">
+                        {format(date, 'd')}
+                      </p>
+                      <p className="text-[10px] text-muted mt-0.5">{format(date, 'MMM')}</p>
+
+                      {isFull ? (
+                        <span className="mt-2 inline-block text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-error/15 text-error border border-error/35">
+                          Full
+                        </span>
+                      ) : isLow ? (
+                        <span className="mt-1.5 block text-[9px] font-bold text-primary">
+                          ⚠️ {slotsLeft} left
+                        </span>
+                      ) : null}
                     </button>
                   );
                 })}

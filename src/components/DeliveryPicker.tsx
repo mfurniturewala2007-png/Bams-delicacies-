@@ -1,29 +1,21 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { getAvailableDeliveryDates } from '../utils/deliveryDates';
+import { getNext7DeliveryDays } from '../utils/deliveryDates';
 
 interface DeliveryPickerProps {
   selectedDate: Date | null;
   onSelect: (date: Date) => void;
   orders: { delivery_date: string }[];
-  maxOrdersSatLimit?: number;
-  maxOrdersSunLimit?: number;
+  maxOrdersLimit?: number;
 }
 
 const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
   selectedDate,
   onSelect,
   orders,
-  maxOrdersSatLimit = 15,
-  maxOrdersSunLimit = 15,
+  maxOrdersLimit = 15,
 }) => {
-  const { saturday, sunday } = getAvailableDeliveryDates();
-
-  const options = [
-    { date: saturday, label: 'Saturday' },
-    { date: sunday, label: 'Sunday' },
-  ];
-
+  const deliveryDays = React.useMemo(() => getNext7DeliveryDays(), []);
   const selectedStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
 
   return (
@@ -38,17 +30,13 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
         )}
       </label>
 
-      {/* Side-by-Side Weekend Picker Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {options.map(({ date, label }) => {
+      {/* 7-Day Picker Grid */}
+      <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+        {deliveryDays.map(({ date, isWeekend }) => {
           const cardStr = format(date, 'yyyy-MM-dd');
           const isSelected = cardStr === selectedStr;
-          
-          // Calculate slots dynamically based on the passed dynamic capacities
-          const limit = label === 'Saturday' ? maxOrdersSatLimit : maxOrdersSunLimit;
           const count = orders.filter((o) => o.delivery_date === cardStr).length;
-          const slotsLeft = Math.max(0, limit - count);
-
+          const slotsLeft = Math.max(0, maxOrdersLimit - count);
           const isFull = slotsLeft === 0;
           const isLowSlots = slotsLeft > 0 && slotsLeft <= 5;
 
@@ -58,58 +46,70 @@ const DeliveryPicker: React.FC<DeliveryPickerProps> = ({
               onClick={() => {
                 if (!isFull) onSelect(date);
               }}
-              className={`p-5 rounded-2xl border text-left cursor-pointer transition-all duration-300 select-none flex flex-col justify-between h-36 ${
+              className={`relative p-2.5 rounded-xl border text-center cursor-pointer transition-all duration-300 select-none flex flex-col items-center justify-between ${
                 isFull
                   ? 'bg-surface border-border opacity-50 cursor-not-allowed pointer-events-none'
                   : isSelected
-                  ? 'bg-surface-2 border-primary shadow-primary text-text hover:scale-[1.01]'
-                  : !selectedDate
-                  ? 'bg-surface border-primary/50 animate-pulse-glow shadow-yellow text-text/85 hover:scale-[1.01]'
-                  : 'bg-surface border-border hover:border-primary/50 text-text/80 hover:scale-[1.01]'
+                  ? 'bg-surface-2 border-primary shadow-primary text-text'
+                  : isWeekend
+                  ? 'bg-yellow/5 border-yellow/40 hover:border-yellow/70 text-text/90'
+                  : 'bg-surface border-border hover:border-primary/50 text-text/80'
               }`}
+              style={{
+                boxShadow:
+                  isWeekend && !isFull && !isSelected
+                    ? '0 0 10px rgba(245, 194, 0, 0.18)'
+                    : undefined,
+              }}
             >
-              {/* Day & Date Header */}
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="font-sans font-extrabold text-lg tracking-tight">
-                    {label}
-                  </span>
-                  {isFull && (
-                    <span className="bg-error/15 border border-error text-error text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                      Full 🔴
-                    </span>
-                  )}
-                </div>
-                <span className="font-sans text-xs text-muted font-medium mt-1 block">
-                  {format(date, 'MMMM d, yyyy')}
+              {/* Selected checkmark */}
+              {isSelected && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black bg-primary text-white shadow-sm">
+                  ✓
                 </span>
-              </div>
+              )}
 
-              {/* Dynamic Slots Tracker Status */}
-              <div className="mt-4">
-                {isFull ? (
-                  <span className="font-sans font-semibold text-muted/70 text-xs">
-                    0 slots left — Booking Closed
-                  </span>
-                ) : isLowSlots ? (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/15 border border-warning text-warning text-xs font-bold animate-pulse-glow shadow-primary">
-                    <span>⚠️</span>
-                    <span>Only {slotsLeft} left!</span>
-                  </div>
-                ) : (
-                  <span className="font-sans font-bold text-xs text-yellow">
-                    {slotsLeft} slots left
-                  </span>
-                )}
-              </div>
+              {/* Day abbreviation */}
+              <span
+                className={`font-sans font-extrabold text-[11px] tracking-tight ${
+                  isFull ? 'text-muted/40' : isWeekend ? 'text-yellow-dim' : 'text-muted'
+                }`}
+              >
+                {format(date, 'EEE')}
+              </span>
+
+              {/* Date number */}
+              <span className="font-sans font-black text-lg leading-tight mt-0.5 text-text">
+                {format(date, 'd')}
+              </span>
+
+              {/* Month */}
+              <span className="font-sans text-[10px] text-muted font-medium">
+                {format(date, 'MMM')}
+              </span>
+
+              {/* Preferred badge for weekends */}
+              {isWeekend && !isFull && !isSelected && (
+                <span className="mt-1 text-[7px] font-black px-1 py-0.5 rounded-full uppercase tracking-wider bg-yellow/20 text-yellow-dim border border-yellow/30">
+                  Preferred
+                </span>
+              )}
+
+              {/* Status */}
+              {isFull ? (
+                <span className="mt-1 font-sans font-semibold text-muted/70 text-[9px]">
+                  Full
+                </span>
+              ) : isLowSlots ? (
+                <div className="mt-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-warning/15 border border-warning text-warning text-[8px] font-bold animate-pulse-glow">
+                  <span>⚠️</span>
+                  <span>{slotsLeft} left</span>
+                </div>
+              ) : null}
             </div>
           );
         })}
       </div>
-      
-      <p className="text-muted text-[11px] font-sans text-left mt-2 leading-relaxed">
-        * Orders close once a day reaches its cap (Saturday: {maxOrdersSatLimit}, Sunday: {maxOrdersSunLimit}) to maintain supreme home-cooked quality.
-      </p>
     </div>
   );
 };
