@@ -8,6 +8,8 @@ import OrderForm from '../components/OrderForm';
 import CartSidebar from '../components/CartSidebar';
 import Footer from '../components/Footer';
 
+import ArtisanDivider from '../components/ArtisanDivider';
+
 const Home: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isExplainerOpen, setIsExplainerOpen] = useState(false);
@@ -33,11 +35,17 @@ const Home: React.FC = () => {
       {/* 2. Dynamic Hero Landing Page */}
       <Hero />
 
+      <ArtisanDivider icon="spice" className="px-6" />
+
       {/* 4. Featured Products Horizontal Carousel */}
       <FeaturedCarousel />
 
+      <ArtisanDivider icon="star" className="px-6" />
+
       {/* 5. Supabase connected Menu Grid listing */}
       <MenuGrid />
+
+      <ArtisanDivider icon="leaf" className="px-6" />
 
       {/* 5. Complete Order input form section */}
       <OrderForm />

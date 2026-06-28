@@ -62,13 +62,13 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
           <div className="min-w-0 text-left">
             <h4 className="font-sans font-bold text-sm text-text truncate">{item.name}</h4>
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-              <p className="font-serif text-xs text-yellow font-semibold">
+              <p className="font-serif text-xs text-accent font-semibold">
                 ₹{effectivePricePerDozen}{' '}
                 <span className="font-sans text-muted/80 font-normal">/ doz</span>
               </p>
               {/* Cooking style badge */}
               {item.fried ? (
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-yellow/20 text-yellow-dim border border-yellow/30">
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-accent/20 text-accent-dim border border-accent/30">
                   🍳 Fried
                 </span>
               ) : (
@@ -171,7 +171,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
           <div className="border-t border-border bg-surface-2 px-4 pt-4 pb-2 space-y-3 flex-shrink-0">
             <div className="flex items-baseline justify-between">
               <span className="font-sans font-semibold text-muted text-sm uppercase tracking-wider">Total</span>
-              <span className="font-serif text-3xl font-black text-yellow">₹{totalAmount}</span>
+              <span className="font-serif text-3xl font-black text-accent">₹{totalAmount}</span>
             </div>
             <button
               onClick={handleProceedToOrder}
@@ -222,7 +222,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
               <div className="border-t border-border bg-surface-2 p-4 sm:p-6 space-y-4 flex-shrink-0" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
                 <div className="flex items-baseline justify-between">
                   <span className="font-sans font-semibold text-muted text-sm uppercase tracking-wider">Total</span>
-                  <span className="font-serif text-3xl font-black text-yellow">₹{totalAmount}</span>
+                  <span className="font-serif text-3xl font-black text-accent">₹{totalAmount}</span>
                 </div>
                 <button
                   onClick={handleProceedToOrder}

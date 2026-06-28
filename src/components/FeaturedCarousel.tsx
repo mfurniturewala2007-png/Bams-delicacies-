@@ -168,7 +168,10 @@ const FeaturedCarousel: React.FC = () => {
 
       <div className="max-w-7xl mx-auto">
         {/* Header Block */}
-        <div className="text-left mb-8">
+        <div className="text-left mb-8 relative">
+          <span className="block font-serif italic text-xs md:text-sm text-accent-dim tracking-wider font-semibold pointer-events-none select-none mb-0.5">
+            ~ chef's weekly highlights ~
+          </span>
           <h2 className="font-serif font-black text-3xl md:text-5xl text-heading tracking-tight">
             Featured Delicacies
           </h2>

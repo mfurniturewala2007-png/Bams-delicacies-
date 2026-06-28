@@ -109,7 +109,10 @@ const MenuGrid: React.FC = () => {
     <section id="menu" className="py-16 md:py-24 px-4 md:px-12 bg-surface border-t border-border/40 relative">
       <div className="max-w-7xl mx-auto">
         {/* Section Heading */}
-        <div className="text-center mb-10 md:mb-16">
+        <div className="text-center mb-10 md:mb-16 relative">
+          <span className="block font-serif italic text-xs md:text-sm text-accent-dim tracking-wider font-semibold pointer-events-none select-none mb-1">
+            ~ prepared fresh in small batches ~
+          </span>
           <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight">
             This Week's Menu
           </h2>

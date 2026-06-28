@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
           </p>
           <a
             href="/admin"
-            className="text-[12px] text-[#555] no-underline md:hover:text-[#F5C200] transition-colors duration-200 py-1.5 px-3 rounded-lg border border-transparent hover:border-border min-h-[44px] flex items-center justify-center"
+            className="text-[12px] text-text/60 no-underline md:hover:text-accent transition-colors duration-200 py-1.5 px-3 rounded-lg border border-transparent hover:border-border min-h-[44px] flex items-center justify-center"
           >
             Admin
           </a>

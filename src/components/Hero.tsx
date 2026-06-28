@@ -185,7 +185,7 @@ const Hero: React.FC = () => {
           className={`mb-5 inline-flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-2.5 rounded-full bg-surface-2 border border-border text-xs md:text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
             isLowSlots
               ? 'border-error/50 text-error animate-pulse-glow shadow-primary-strong bg-surface'
-              : 'text-yellow shadow-yellow'
+              : 'text-accent shadow-accent'
           }`}
         >
           <span>🗓</span>
@@ -203,7 +203,7 @@ const Hero: React.FC = () => {
         </div>
 
         {/* Primary Hero Heading */}
-        <h1 className="font-serif font-black text-4xl sm:text-5xl md:text-8xl bg-gradient-to-r from-[#8B3A00] via-[#C8511B] to-[#F5C200] bg-clip-text text-transparent leading-tight tracking-tight drop-shadow-md pb-2 select-none">
+        <h1 className="font-serif font-black text-4xl sm:text-5xl md:text-8xl bg-gradient-to-r from-heading via-primary to-accent bg-clip-text text-transparent leading-tight tracking-tight drop-shadow-md pb-2 select-none">
           Bam's Delicacies
         </h1>
 

@@ -360,7 +360,10 @@ const OrderForm: React.FC = () => {
 
       <div className="max-w-6xl mx-auto">
         {/* Section Heading */}
-        <div className="text-center mb-10 md:mb-16">
+        <div className="text-center mb-10 md:mb-16 relative">
+          <span className="block font-serif italic text-xs md:text-sm text-accent-dim tracking-wider font-semibold pointer-events-none select-none mb-1">
+            ~ reserve a delivery slot ~
+          </span>
           <h2 className="font-serif font-black text-3xl md:text-6xl text-heading tracking-tight">
             Complete Your Order
           </h2>
