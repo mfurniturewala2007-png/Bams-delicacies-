@@ -1,7 +1,8 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 import AuthModal from './components/AuthModal';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
@@ -90,11 +91,29 @@ const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 //   [ ] /admin route renders (not a 404) — vercel.json rewrite handles SPA routing
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─── Auth Redirect Handler ─────────────────────────────────────────────────
+// After a guest signs in, automatically navigate to the page they were trying
+// to reach (e.g. /checkout after clicking "Proceed to Checkout" in the cart).
+const AuthRedirectHandler: React.FC = () => {
+  const { profile, redirectAfterAuth, closeAuthModal } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (profile && redirectAfterAuth) {
+      navigate(redirectAfterAuth);
+      closeAuthModal(); // ensure redirect path is cleared
+    }
+  }, [profile, redirectAfterAuth, navigate, closeAuthModal]);
+
+  return null;
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <CartProvider>
         <Router>
+          <AuthRedirectHandler />
           <AuthModal />
           {/* PageWrapper re-mounts on route change → triggers fade-in animation */}
           <PageWrapper>

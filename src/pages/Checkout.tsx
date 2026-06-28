@@ -107,14 +107,20 @@ const Checkout: React.FC = () => {
   const { items, totalAmount, clearCart } = useCart();
   const { profile, isLoadingProfile } = useAuth();
 
-  // ── Guards ────────────────────────────────────────────────────────────────
+  // ── Guards ─────────────────────────────────────────────────────────────────
   // NOTE: We wait for isLoadingProfile to be false before redirecting.
   // Without this, the async session restore causes a false "!profile" on first
   // render which incorrectly redirects logged-in users, causing the white screen.
-  useEffect(() => {
+  useEffect((): (() => void) | void => {
     if (isLoadingProfile) return; // still fetching — do nothing yet
-    if (items.length === 0 || !profile) {
+    if (items.length === 0) {
       navigate('/', { replace: true });
+      return;
+    }
+    if (!profile) {
+      // Show a brief message before redirecting so user knows why
+      const timer = setTimeout(() => navigate('/', { replace: true }), 2000);
+      return () => clearTimeout(timer);
     }
   }, [items.length, profile, isLoadingProfile, navigate]);
 
@@ -274,7 +280,26 @@ const Checkout: React.FC = () => {
     );
   }
 
-  if (items.length === 0 || !profile) return null;
+  if (items.length === 0) return null;
+
+  // Unauthenticated — show a friendly message for 2s before the redirect fires
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg px-4">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-4xl">🔒</span>
+          <h2 className="font-serif font-black text-xl text-heading">Sign in to continue</h2>
+          <p className="text-sm text-muted max-w-xs">
+            You need to be signed in to access checkout. Redirecting you to the homepage…
+          </p>
+          <svg className="animate-spin h-6 w-6 text-primary mt-2" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
 
   const itemCount = items.reduce((s, i) => s + i.dozens, 0);
 

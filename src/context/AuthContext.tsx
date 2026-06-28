@@ -7,7 +7,9 @@ interface AuthContextType {
   isLoadingProfile: boolean;
   isAuthModalOpen: boolean;
   isEditingProfile: boolean;
+  redirectAfterAuth: string | null;
   openAuthModal: () => void;
+  openAuthModalWithRedirect: (path: string) => void;
   closeAuthModal: () => void;
   openProfileEdit: () => void;
   signUp: (phone: string, name: string, address: string, pincode: string) => Promise<void>;
@@ -21,8 +23,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false); // Start with modal closed
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
+  const [redirectAfterAuth, setRedirectAfterAuth] = useState<string | null>(null);
 
   // Restore user session from localStorage on mount
   useEffect(() => {
@@ -59,6 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const openAuthModal = () => setIsAuthModalOpen(true);
 
+  const openAuthModalWithRedirect = (path: string) => {
+    setRedirectAfterAuth(path);
+    setIsAuthModalOpen(true);
+  };
+
   const openProfileEdit = () => {
     setIsEditingProfile(true);
     setIsAuthModalOpen(true);
@@ -67,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const closeAuthModal = () => {
     setIsAuthModalOpen(false);
     setIsEditingProfile(false);
+    setRedirectAfterAuth(null);
   };
 
   // SIGN UP — insert new profile row, phone is the unique key
@@ -114,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('bams_user_phone', phone);
     setProfile(data as UserProfile);
     setIsAuthModalOpen(false);
+    // redirectAfterAuth is consumed by App.tsx via context
   };
 
   // SIGN OUT — clear profile, clear local session
@@ -122,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfile(null);
     setIsEditingProfile(false);
     setIsAuthModalOpen(false);
+    setRedirectAfterAuth(null);
   };
 
   // UPDATE PROFILE — edit existing row by phone
@@ -147,7 +158,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoadingProfile,
         isAuthModalOpen,
         isEditingProfile,
+        redirectAfterAuth,
         openAuthModal,
+        openAuthModalWithRedirect,
         closeAuthModal,
         openProfileEdit,
         signUp,

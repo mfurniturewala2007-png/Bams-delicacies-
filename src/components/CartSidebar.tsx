@@ -12,7 +12,7 @@ interface CartSidebarProps {
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { items, updateQty, totalAmount, removeItem } = useCart();
-  const { profile, openAuthModal } = useAuth();
+  const { profile, openAuthModalWithRedirect } = useAuth();
   const navigate = useNavigate();
 
   // Lock body scroll when cart is open
@@ -23,7 +23,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const handleProceedToOrder = () => {
     onClose();
     if (!profile) {
-      openAuthModal();
+      openAuthModalWithRedirect('/checkout');
       return;
     }
     navigate('/checkout');
