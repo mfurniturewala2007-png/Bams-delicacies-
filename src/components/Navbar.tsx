@@ -45,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({ onCartOpen }) => {
 
   const navLinks: { label: string; href: string; isFestive?: boolean }[] = [
     { label: 'Menu', href: '/#menu' },
-    { label: 'Order Now', href: '/#order' },
+    { label: 'Order Now', href: '/checkout' },
   ];
 
   const handleLinkClick = () => {

@@ -18,6 +18,7 @@ interface PaymentModalProps {
   totalAmount: number;
   onConfirmed: () => void;
   onCancel: () => void;
+  onChangePay: () => void;
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -25,6 +26,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   totalAmount,
   onConfirmed,
   onCancel,
+  onChangePay,
 }) => {
   useScrollLock(true);
 
@@ -231,7 +233,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               style={{ focusRingColor: 'var(--color-yellow-glow)' } as React.CSSProperties}
             />
             <p className="text-xs font-sans mt-1.5 text-text/60">
-              Find it in your UPI app under transaction history
+              Find it in your UPI app after paying:
+              <br /><span className="font-semibold">GPay</span> → tap transaction → <em>UPI transaction ID</em>
+              <br /><span className="font-semibold">PhonePe</span> → tap transaction → <em>UTR No.</em>
+              <br /><span className="font-semibold">Paytm</span> → tap transaction → <em>Transaction ID</em>
             </p>
             {txnError && (
               <span className="text-error text-xs font-sans font-semibold mt-1 block">
@@ -240,24 +245,35 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             )}
           </div>
 
-          {/* ── Action Buttons ── */}
-          <div className="flex gap-3 pt-1 pb-2">
-            {/* Cancel — red text button, left */}
-            <button
-              onClick={handleCancelOrder}
-              disabled={isCancelling || isSubmitting}
-              className="flex-shrink-0 min-h-[44px] py-2.5 px-4 font-sans font-bold text-sm text-error hover:underline transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
-            >
-              {isCancelling ? 'Cancelling...' : 'Cancel'}
-            </button>
+          {/* Actions */}
+          <div className="flex flex-col gap-2 pt-1 pb-1">
+            <div className="flex gap-3">
+              {/* Cancel */}
+              <button
+                onClick={handleCancelOrder}
+                disabled={isCancelling || isSubmitting}
+                className="flex-shrink-0 min-h-[44px] py-2.5 px-4 font-sans font-bold text-sm text-error hover:underline transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
+              >
+                {isCancelling ? 'Cancelling...' : 'Cancel'}
+              </button>
 
-            {/* I've Paid — yellow, full width, rounded-full */}
+              {/* I've Paid */}
+              <button
+                onClick={handleConfirmPayment}
+                disabled={isSubmitting || isCancelling}
+                className="flex-1 py-4 rounded-full font-sans font-black text-sm uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center bg-accent text-on-accent hover:bg-accent-dim shadow-accent"
+              >
+                {isSubmitting ? 'Confirming...' : "I've Paid ✓"}
+              </button>
+            </div>
+
+            {/* Change payment method */}
             <button
-              onClick={handleConfirmPayment}
-              disabled={isSubmitting || isCancelling}
-              className="flex-1 py-4 rounded-full font-sans font-black text-sm uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center bg-accent text-on-accent hover:bg-accent-dim shadow-accent"
+              onClick={onChangePay}
+              disabled={isCancelling || isSubmitting}
+              className="w-full text-center text-xs font-sans text-muted hover:text-primary underline transition-colors py-1 disabled:opacity-40"
             >
-              {isSubmitting ? 'Confirming...' : "I've Paid ✓"}
+              ← Change payment method
             </button>
           </div>
 

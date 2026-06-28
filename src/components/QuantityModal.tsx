@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Product, FRYING_CHARGE_PER_DOZEN } from '../types';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { useAuth } from '../context/AuthContext';
 
 interface QuantityModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 }) => {
   const [dozens, setDozens] = useState(1);
   const [fried, setFried] = useState(false);
+  const { profile } = useAuth();
 
   // Reset every time the modal opens
   useEffect(() => {
@@ -170,6 +172,16 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Guest nudge */}
+        {!profile && (
+          <div className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/8 border border-primary/20">
+            <span className="text-base flex-shrink-0">💡</span>
+            <p className="text-xs font-sans text-primary/80 text-left leading-snug">
+              You'll need to <strong>sign in</strong> to place your order after adding to cart.
+            </p>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="w-full flex gap-3">

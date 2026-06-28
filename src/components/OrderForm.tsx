@@ -338,6 +338,14 @@ const OrderForm: React.FC = () => {
           totalAmount={paymentTotal}
           onConfirmed={handlePaymentConfirmed}
           onCancel={handlePaymentCancelled}
+          onChangePay={() => {
+            // Cancel the pending DB order, go back to COD
+            import('../utils/supabase').then(({ supabase }) => {
+              supabase.from('orders').update({ status: 'cancelled' }).eq('id', paymentOrderId).then(() => {});
+            });
+            setPaymentOrderId(null);
+            setPaymentMethod('COD');
+          }}
         />
       )}
 

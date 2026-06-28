@@ -104,7 +104,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
 // ─── Main Checkout Page ───────────────────────────────────────────────────────
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalAmount, clearCart, updateQty } = useCart();
   const { profile, isLoadingProfile } = useAuth();
 
   // ── Guards ─────────────────────────────────────────────────────────────────
@@ -173,8 +173,8 @@ const Checkout: React.FC = () => {
   const [pincode, setPincode] = useState(profile?.pincode ?? '');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // ── Payment ───────────────────────────────────────────────────────────────
-  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'COD' | null>(null);
+  // ── Payment ────────────────────────────────────────────────────────────────
+  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'COD' | null>('COD');
 
   // ── Order submit ──────────────────────────────────────────────────────────
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -263,6 +263,15 @@ const Checkout: React.FC = () => {
 
   const handlePaymentCancelled = () => {
     setPaymentOrderId(null);
+  };
+
+  // "Change payment method" from PaymentModal — cancel the DB order, go back to COD
+  const handleChangePay = async () => {
+    if (paymentOrderId) {
+      await supabase.from('orders').update({ status: 'cancelled' }).eq('id', paymentOrderId);
+    }
+    setPaymentOrderId(null);
+    setPaymentMethod('COD');
   };
 
   // Show a loading spinner while profile session is being restored
@@ -376,9 +385,6 @@ const Checkout: React.FC = () => {
                           {item.name}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                          <p className="text-xs text-muted">
-                            {item.dozens} doz × {item.dozens * 12} pcs
-                          </p>
                           {item.fried ? (
                             <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider bg-accent/20 text-accent-dim border border-accent/30">
                               🍳 Fried
@@ -388,6 +394,18 @@ const Checkout: React.FC = () => {
                               🥙 Unfried
                             </span>
                           )}
+                        </div>
+                        {/* Quantity stepper */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            onClick={() => updateQty(item.product_id, item.fried, item.dozens - 1)}
+                            className="w-7 h-7 rounded-lg bg-surface-2 border border-border text-text hover:text-error hover:border-error/40 flex items-center justify-center font-bold text-sm transition-all duration-200"
+                          >−</button>
+                          <span className="text-xs font-bold text-text min-w-[40px] text-center">{item.dozens} doz</span>
+                          <button
+                            onClick={() => updateQty(item.product_id, item.fried, item.dozens + 1)}
+                            className="w-7 h-7 rounded-lg bg-surface-2 border border-border text-text hover:text-primary hover:border-primary/40 flex items-center justify-center font-bold text-sm transition-all duration-200"
+                          >+</button>
                         </div>
                       </div>
                       <span className="text-sm font-black flex-shrink-0 text-accent">
@@ -626,6 +644,7 @@ const Checkout: React.FC = () => {
           totalAmount={paymentTotal}
           onConfirmed={handlePaymentConfirmed}
           onCancel={handlePaymentCancelled}
+          onChangePay={handleChangePay}
         />
       )}
     </>
