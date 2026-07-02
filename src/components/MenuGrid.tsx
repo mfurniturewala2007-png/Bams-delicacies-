@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { supabase } from '../utils/supabase';
 import ProductCard from './ProductCard';
+import ScrollFloat from './ScrollFloat';
 
 // Gourmet Fallback Products for offline/initial empty database states
 const MOCK_PRODUCTS: Product[] = [
@@ -110,12 +111,21 @@ const MenuGrid: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Section Heading */}
         <div className="text-center mb-10 md:mb-16 relative">
-          <span className="block font-serif italic text-xs md:text-sm text-accent-dim tracking-wider font-semibold pointer-events-none select-none mb-1">
+          <ScrollFloat
+            as="span"
+            containerClassName="block font-serif italic text-xs md:text-sm text-accent-dim tracking-wider font-semibold pointer-events-none select-none mb-1"
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
             ~ prepared fresh in small batches ~
-          </span>
-          <h2 className="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight">
+          </ScrollFloat>
+          <ScrollFloat
+            containerClassName="font-serif font-black text-4xl md:text-6xl text-heading tracking-tight"
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
             This Week's Menu
-          </h2>
+          </ScrollFloat>
           <div className="w-24 h-1 bg-primary mx-auto mt-4 rounded-full shadow-primary" />
           <p className="text-muted text-sm md:text-base mt-4 max-w-md mx-auto leading-relaxed">
             Freshly prepared, small-batch homemade courses. Choose your favorites below!

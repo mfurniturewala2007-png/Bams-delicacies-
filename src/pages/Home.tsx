@@ -9,6 +9,7 @@ import Footer from '../components/Footer';
 import ArtisanDivider from '../components/ArtisanDivider';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import ScrollFloat from '../components/ScrollFloat';
 
 const Home: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -52,10 +53,21 @@ const Home: React.FC = () => {
       {/* 5. Ready to Order — CTA card linking to /checkout */}
       <section id="order" className="py-16 px-4">
         <div className="max-w-xl mx-auto text-center">
-          <p className="font-serif italic text-accent-dim text-base mb-2">— almost there —</p>
-          <h2 className="font-serif font-black text-3xl sm:text-4xl text-heading mb-4">
+          <ScrollFloat
+            as="p"
+            containerClassName="font-serif italic text-accent-dim text-base mb-2"
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
+            — almost there —
+          </ScrollFloat>
+          <ScrollFloat
+            containerClassName="font-serif font-black text-3xl sm:text-4xl text-heading mb-4"
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
             Ready to Place Your Order?
-          </h2>
+          </ScrollFloat>
           <p className="text-muted font-sans text-sm mb-8 leading-relaxed max-w-sm mx-auto">
             {totalCount > 0
               ? `You have ${totalCount} dozen${totalCount !== 1 ? 's' : ''} in your cart. Head to checkout to confirm your delivery date and payment.`

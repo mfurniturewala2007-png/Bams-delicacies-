@@ -3,6 +3,7 @@ import { Product } from '../types';
 import { supabase } from '../utils/supabase';
 import { useCart } from '../context/CartContext';
 import QuantityModal from './QuantityModal';
+import ScrollFloat from './ScrollFloat';
 
 const FeaturedCard: React.FC<{ prod: Product; onAddClick: (p: Product) => void; tabIndex?: number }> = ({ prod, onAddClick, tabIndex = 0 }) => {
   return (
@@ -169,12 +170,21 @@ const FeaturedCarousel: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header Block */}
         <div className="text-left mb-8 relative">
-          <span className="block font-serif italic text-xs md:text-sm text-accent-dim tracking-wider font-semibold pointer-events-none select-none mb-0.5">
+          <ScrollFloat
+            as="span"
+            containerClassName="block font-serif italic text-xs md:text-sm text-accent-dim tracking-wider font-semibold pointer-events-none select-none mb-0.5"
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
             ~ chef's weekly highlights ~
-          </span>
-          <h2 className="font-serif font-black text-3xl md:text-5xl text-heading tracking-tight">
+          </ScrollFloat>
+          <ScrollFloat
+            containerClassName="font-serif font-black text-3xl md:text-5xl text-heading tracking-tight"
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
             Featured Delicacies
-          </h2>
+          </ScrollFloat>
           <div className="w-16 h-1 bg-primary mt-3 rounded-full shadow-primary" />
         </div>
 
