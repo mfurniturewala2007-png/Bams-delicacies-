@@ -1,6 +1,14 @@
-import { addDays, nextSaturday, nextSunday, getDay } from 'date-fns';
+import { addDays, getDay } from 'date-fns';
 
 export const MAX_ORDERS_PER_DAY = 15;
+
+function getNextDayOfWeek(date: Date, dayOfWeek: number): Date {
+  const result = new Date(date);
+  const currentDay = getDay(result);
+  const daysToAdd = (dayOfWeek - currentDay + 7) % 7 || 7;
+  result.setDate(result.getDate() + daysToAdd);
+  return result;
+}
 
 /** Legacy helper — still used by Admin and Hero components */
 export function getAvailableDeliveryDates(): { saturday: Date; sunday: Date } {
@@ -11,8 +19,8 @@ export function getAvailableDeliveryDates(): { saturday: Date; sunday: Date } {
   // Mon (1) through Thu (4) → use THIS week's Sat/Sun
   const useNextWeek = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
 
-  let saturday = nextSaturday(today);
-  let sunday = nextSunday(today);
+  let saturday = getNextDayOfWeek(today, 6); // 6 = Saturday
+  let sunday = getNextDayOfWeek(today, 0);   // 0 = Sunday
 
   if (useNextWeek) {
     saturday = addDays(saturday, 7);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import { CartItem, FRYING_CHARGE_PER_DOZEN } from '../types';
 
 interface CartContextType {
@@ -21,7 +21,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [lastAddedAt, setLastAddedAt] = useState<number | null>(null);
 
-  const addItem = (newItem: CartItem) => {
+  const addItem = useCallback((newItem: CartItem) => {
     setLastAddedAt(Date.now());
     setItems((prevItems) => {
       const existing = prevItems.find(
@@ -36,15 +36,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return [...prevItems, newItem];
     });
-  };
+  }, []);
 
-  const removeItem = (productId: string, fried: boolean) => {
+  const removeItem = useCallback((productId: string, fried: boolean) => {
     setItems((prevItems) =>
       prevItems.filter((item) => !(item.product_id === productId && item.fried === fried))
     );
-  };
+  }, []);
 
-  const updateQty = (productId: string, fried: boolean, dozens: number) => {
+  const updateQty = useCallback((productId: string, fried: boolean, dozens: number) => {
     if (dozens <= 0) {
       removeItem(productId, fried);
       return;
@@ -54,11 +54,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         item.product_id === productId && item.fried === fried ? { ...item, dozens } : item
       )
     );
-  };
+  }, [removeItem]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
   const totalAmount = useMemo(() => {
     return items.reduce(
@@ -83,7 +83,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalCount,
       lastAddedAt,
     }),
-    [items, totalAmount, totalCount, lastAddedAt]
+    [items, totalAmount, totalCount, lastAddedAt, addItem, removeItem, updateQty, clearCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

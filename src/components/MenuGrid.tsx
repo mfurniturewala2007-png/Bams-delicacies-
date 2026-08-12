@@ -89,7 +89,7 @@ const MenuGrid: React.FC = () => {
           // If query succeeds but tables are empty, load gourmet fallback mock products
           setProducts(MOCK_PRODUCTS);
         }
-      } catch (err) {
+      } catch {
         console.warn('Supabase products fetch skipped or failed. Using offline gourmet menu list.');
         setProducts(MOCK_PRODUCTS);
       } finally {

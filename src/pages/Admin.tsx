@@ -242,7 +242,7 @@ const Admin: React.FC = () => {
       } else {
         setProducts(DEFAULT_PRODUCTS);
       }
-    } catch (err) {
+    } catch {
       console.warn('Failed to load products list from database. Falling back to default records.');
       setProducts(DEFAULT_PRODUCTS);
     } finally {
@@ -263,7 +263,7 @@ const Admin: React.FC = () => {
         // cast JSON items to CartItem[]
         setOrders(data as Order[]);
       }
-    } catch (err) {
+    } catch {
       console.warn('Failed to load orders list from database.');
     } finally {
       setOrdersLoading(false);
@@ -306,7 +306,7 @@ const Admin: React.FC = () => {
         setTemplateDelivery(tempDeliv);
         setTemplatePickup(tempPick);
       }
-    } catch (e) {
+    } catch {
       console.warn('Failed to load settings.');
     }
   };
@@ -325,8 +325,9 @@ const Admin: React.FC = () => {
 
       if (error) throw error;
       showToast('Message templates updated successfully! ✓', 'success');
-    } catch (err: any) {
-      alert(`Failed to save message templates. Error: ${err.message}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Failed to save message templates. Error: ${message}`);
     } finally {
       setIsSavingTemplates(false);
     }
@@ -334,12 +335,10 @@ const Admin: React.FC = () => {
 
   const formatMessageWithOrder = (template: string, order: Order, isStage1 = false) => {
     const itemLines = order.items.map((i) => {
-      const doz = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
+      const doz = i.dozens ?? 1;
       const pcs = doz * 12;
-      const lineTotal = i.price_per_dozen !== undefined
-        ? i.price_per_dozen * doz
-        : (i as any).price * doz;
-      const style = (i as any).fried ? '🍳 Fried' : '🥙 Unfried';
+      const lineTotal = i.price_per_dozen * doz;
+      const style = i.fried ? '🍳 Fried' : '🥙 Unfried';
       if (isStage1) {
         return `• ${i.name} — ${doz} dozen (${pcs} pcs) [${style}] — ₹${lineTotal}`;
       } else {
@@ -372,6 +371,8 @@ const Admin: React.FC = () => {
     console.log("Admin component mounted at:", window.location.href);
   }, []);
 
+  // Load data when profile is ready and user is admin
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!isLoadingProfile && profile?.is_admin) {
       loadProducts();
@@ -379,6 +380,7 @@ const Admin: React.FC = () => {
       loadMaxOrders();
     }
   }, [isLoadingProfile, profile]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Products CRUD: Toggle Stock
   const handleToggleStock = async (id: string, currentStock: boolean) => {
@@ -476,9 +478,10 @@ const Admin: React.FC = () => {
 
       setUploadedImageUrl(urlData.publicUrl);
       showToast('Image uploaded successfully! ✓', 'success');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Storage upload failed:', err);
-      showToast(`Upload failed: ${err.message || 'Check bucket configuration'}`, 'error');
+      const message = err instanceof Error ? err.message : 'Check bucket configuration';
+      showToast(`Upload failed: ${message}`, 'error');
       setUploadedImageUrl(null);
     } finally {
       setIsUploadingImage(false);
@@ -546,9 +549,10 @@ const Admin: React.FC = () => {
       setImagePreview(null);
       setUploadedImageUrl(null);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to create new product in Supabase. Full error object:', err);
-      alert(`Error: ${err?.message || 'Please try again.'}`);
+      const message = err instanceof Error ? err.message : 'Please try again.';
+      alert(`Error: ${message}`);
     }
   };
 
@@ -580,12 +584,13 @@ const Admin: React.FC = () => {
       showToast("Menu seeded! 17 products loaded. ✓", "success");
       await loadProducts();
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Seed Menu failed. Full error object:', err);
-      const errMsg = err?.message || 'Please try again.';
-      const errDetails = err?.details ? `\nDetails: ${err.details}` : '';
-      const errHint = err?.hint ? `\nHint: ${err.hint}` : '';
-      const errCode = err?.code ? `\nCode: ${err.code}` : '';
+      const errMsg = err instanceof Error ? err.message : 'Please try again.';
+      const supabaseErr = err as { details?: string; hint?: string; code?: string };
+      const errDetails = supabaseErr.details ? `\nDetails: ${supabaseErr.details}` : '';
+      const errHint = supabaseErr.hint ? `\nHint: ${supabaseErr.hint}` : '';
+      const errCode = supabaseErr.code ? `\nCode: ${supabaseErr.code}` : '';
       showToast(`Error seeding menu: ${errMsg}`, 'error');
       alert(`Seed Menu failed.\n\nError: ${errMsg}${errDetails}${errHint}${errCode}\n\nFull Object: ${JSON.stringify(err, null, 2)}`);
     } finally {
@@ -640,9 +645,10 @@ const Admin: React.FC = () => {
 
       setEditUploadedImageUrl(urlData.publicUrl);
       showToast('Image uploaded successfully! ✓', 'success');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Storage upload failed:', err);
-      showToast(`Upload failed: ${err.message || 'Check bucket configuration'}`, 'error');
+      const message = err instanceof Error ? err.message : 'Check bucket configuration';
+      showToast(`Upload failed: ${message}`, 'error');
       setEditUploadedImageUrl(null);
     } finally {
       setIsUploadingEditImage(false);
@@ -691,9 +697,10 @@ const Admin: React.FC = () => {
       await loadProducts();
       setIsEditModalOpen(false);
       setEditingProduct(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to update product:', err);
-      alert(`Error: ${err?.message || 'Please try again.'}`);
+      const message = err instanceof Error ? err.message : 'Please try again.';
+      alert(`Error: ${message}`);
     }
   };
 
@@ -726,9 +733,10 @@ const Admin: React.FC = () => {
         .upsert({ key: 'max_orders_per_day', value: String(satVal) });
 
       showToast(`Order capacity updated: Saturday = ${satVal}, Sunday = ${sunVal}! ✓`, 'success');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert(`Failed to save capacity settings. Error: ${err.message}`);
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Failed to save capacity settings. Error: ${message}`);
     } finally {
       setIsSavingMaxOrders(false);
     }
@@ -759,7 +767,7 @@ const Admin: React.FC = () => {
     const headers = ['Order ID', 'Customer Name', 'Phone', 'Delivery Date', 'Items', 'Total Amount', 'Status', 'Address', 'Created At'];
     const rows = orders.map((o) => {
       const itemsSummary = o.items
-        .map((i) => `${i.name} (${i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1} doz)`)
+        .map((i) => `${i.name} (${i.dozens ?? 1} doz)`)
         .join('; ');
       return [
         o.id,
@@ -799,10 +807,11 @@ const Admin: React.FC = () => {
 
         setOrders((prev) => prev.filter((o) => o.id !== id));
         showToast('Cancelled order deleted successfully ✓', 'success');
-      } catch (err: any) {
-        console.error('Failed to delete order:', err);
-        alert(`Error deleting order: ${err?.message || 'Please try again.'}`);
-      }
+} catch (err) {
+      console.error('Failed to delete order:', err);
+      const message = err instanceof Error ? err.message : 'Please try again.';
+      alert(`Error deleting order: ${message}`);
+    }
     }
   };
 
@@ -1983,7 +1992,7 @@ const Admin: React.FC = () => {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setOrderSubTab(tab.id as any)}
+                    onClick={() => setOrderSubTab(tab.id as 'active' | 'pending' | 'confirmed' | 'cancelled')}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-sans text-xs font-bold uppercase tracking-wider transition-all duration-300 flex-shrink-0 ${
                       isActive
                         ? 'bg-primary text-white shadow-primary shadow-sm scale-[1.02]'
@@ -2048,7 +2057,7 @@ const Admin: React.FC = () => {
                         {/* Status select */}
                         <select
                           value={ord.status}
-                          onChange={(e) => handleUpdateStatus(ord.id, e.target.value as any)}
+                          onChange={(e) => handleUpdateStatus(ord.id, e.target.value as 'payment_pending' | 'pending' | 'confirmed' | 'delivered' | 'cancelled')}
                           className={`px-2 py-1 min-h-[48px] rounded-lg border text-xs font-bold focus:outline-none cursor-pointer flex-shrink-0 ${
                             ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
                             : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
@@ -2071,7 +2080,7 @@ const Admin: React.FC = () => {
                         {ord.items && ord.items.map((item, ki) => (
                           <p key={ki} className="text-xs text-text/85">
                             • {item.name} <span className="text-primary font-bold">
-                              {item.dozens !== undefined ? `×${item.dozens} doz (${item.dozens * 12} pcs)` : `×${(item as any).quantity}`}
+                              {item.dozens ?? 1} doz ({ (item.dozens ?? 1) * 12 } pcs)
                             </span>
                           </p>
                         ))}
@@ -2202,7 +2211,7 @@ const Admin: React.FC = () => {
                                   <li key={keyIdx} className="text-xs text-text/85">
                                     • {item.name}{' '}
                                     <span className="text-primary font-bold">
-                                      {item.dozens !== undefined ? `×${item.dozens} doz (${item.dozens * 12} pcs)` : `×${(item as any).quantity}`}
+                                      ×{item.dozens ?? 1} doz ({(item.dozens ?? 1) * 12} pcs)
                                     </span>
                                   </li>
                                 ))}
@@ -2221,7 +2230,7 @@ const Admin: React.FC = () => {
                             <td className="py-4 px-6 select-none">
                               <select
                                 value={ord.status}
-                                onChange={(e) => handleUpdateStatus(ord.id, e.target.value as any)}
+onChange={(e) => handleUpdateStatus(ord.id, e.target.value as 'payment_pending' | 'pending' | 'confirmed' | 'delivered' | 'cancelled')}
                                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold focus:outline-none transition-colors duration-250 cursor-pointer ${
                                   ord.status === 'payment_pending' ? 'bg-muted/10 border-muted/35 text-muted'
                                   : ord.status === 'pending' ? 'bg-warning/10 border-warning/35 text-warning'
@@ -2457,7 +2466,7 @@ const Admin: React.FC = () => {
           allOrdersReport.forEach((o) => {
             if (o.status !== 'cancelled') {
               o.items.forEach((i) => {
-                const qty = i.dozens !== undefined ? i.dozens : (i as any).quantity ?? 1;
+                const qty = i.dozens ?? 1;
                 itemsBreakdown[i.name] = (itemsBreakdown[i.name] || 0) + qty;
               });
             }
@@ -2603,8 +2612,8 @@ const Admin: React.FC = () => {
                               <td className="py-4 px-4 font-mono text-muted/90">{ord.delivery_date}</td>
                               <td className="py-4 px-6 text-text/80 leading-relaxed max-w-[240px]">
                                 {ord.items.map((i, idx) => (
-                                  <div key={idx} className="truncate" title={`${i.name} (${i.dozens ?? (i as any).quantity ?? 1} doz)`}>
-                                    • {i.name} ({i.dozens ?? (i as any).quantity ?? 1} {i.dozens !== undefined ? 'doz' : 'pcs'})
+                                  <div key={idx} className="truncate" title={`${i.name} (${i.dozens ?? 1} doz)`}>
+                                    • {i.name} ({i.dozens ?? 1} {i.dozens !== undefined ? 'doz' : 'pcs'})
                                   </div>
                                 ))}
                               </td>

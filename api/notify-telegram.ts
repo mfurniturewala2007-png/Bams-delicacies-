@@ -18,7 +18,18 @@ interface NotifyBody {
   items: OrderItem[];
 }
 
-export default async function handler(req: any, res: any) {
+interface VercelRequest {
+  method: string;
+  body: NotifyBody;
+}
+
+interface VercelResponse {
+  status: (code: number) => VercelResponse;
+  end: () => void;
+  json: (data: unknown) => VercelResponse;
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const {
@@ -99,8 +110,9 @@ export default async function handler(req: any, res: any) {
     }
 
     return res.status(200).json({ ok: true });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to send Telegram message:', err);
-    return res.status(500).json({ error: err.message ?? 'Unknown error' });
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return res.status(500).json({ error: message });
   }
 }

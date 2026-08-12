@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useCart } from '../context/CartContext';
@@ -6,8 +6,10 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { getNext7DeliveryDays } from '../utils/deliveryDates';
 import { FRYING_CHARGE_PER_DOZEN } from '../types';
-import PaymentModal from '../components/PaymentModal';
 import { useScrollLock } from '../hooks/useScrollLock';
+
+// Lazy-load PaymentModal (code-split: qrcode + gsap only load on UPI payment)
+const PaymentModal = lazy(() => import('../components/PaymentModal'));
 
 // ─── Colour tokens ────────────────────────────────────────────────────────────
 // bg:#2B2B2B  card:#1E1E1E  border:#3D3D3D  accent:#F5C200  muted:#999
@@ -247,9 +249,9 @@ const Checkout: React.FC = () => {
         setPaymentTotal(totalAmount);
         setPaymentOrderId(data.id);
       }
-    } catch (err: any) {
-      console.error('Order failed:', err);
-      setSubmitError(err.message || 'Something went wrong. Please try again.');
+    } catch (_err) {
+      console.error('Order failed:', _err);
+      setSubmitError(_err instanceof Error ? _err.message : 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -639,13 +641,15 @@ const Checkout: React.FC = () => {
 
       {/* ── PaymentModal (UPI flow) ────────────────────────────────────────── */}
       {paymentOrderId && (
-        <PaymentModal
-          orderId={paymentOrderId}
-          totalAmount={paymentTotal}
-          onConfirmed={handlePaymentConfirmed}
-          onCancel={handlePaymentCancelled}
-          onChangePay={handleChangePay}
-        />
+        <Suspense fallback={<div className="fixed inset-0 z-[60] flex items-center justify-center p-4"><div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary border-r-2 border-transparent" /></div>}>
+          <PaymentModal
+            orderId={paymentOrderId}
+            totalAmount={paymentTotal}
+            onConfirmed={handlePaymentConfirmed}
+            onCancel={handlePaymentCancelled}
+            onChangePay={handleChangePay}
+          />
+        </Suspense>
       )}
     </>
   );

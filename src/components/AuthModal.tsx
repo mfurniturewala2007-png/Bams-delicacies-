@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const AuthModal: React.FC = () => {
   const {
@@ -16,16 +17,18 @@ const AuthModal: React.FC = () => {
   const [tab, setTab] = useState<'signin' | 'signup'>('signup');
 
   // Form fields
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [pincode, setPincode] = useState('');
-
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
-  // Pre-fill fields when editing profile
+  // Form fields with initializers from profile
+  const [name, setName] = useState(() => profile?.name || '');
+  const [phone, setPhone] = useState(() => profile?.phone || '');
+  const [address, setAddress] = useState(() => profile?.address || '');
+  const [pincode, setPincode] = useState(() => profile?.pincode || '');
+
+  // Sync form with profile when editing mode changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   React.useEffect(() => {
     if (isEditingProfile && profile) {
       setName(profile.name || '');
@@ -39,9 +42,13 @@ const AuthModal: React.FC = () => {
       setPincode('');
     }
   }, [isEditingProfile, profile]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Lock scroll when modal is open — must be before any early return (Rules of Hooks)
   useScrollLock(isAuthModalOpen);
+
+  // Trap focus within modal for accessibility
+  const modalRef = useFocusTrap(isAuthModalOpen);
 
   if (!isAuthModalOpen) return null;
 
@@ -79,8 +86,9 @@ const AuthModal: React.FC = () => {
       setErrorMsg('');
       setFieldErrors({});
       await signIn(phone.trim());
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Phone number not found. Please sign up first.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Phone number not found. Please sign up first.';
+      setErrorMsg(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -114,8 +122,9 @@ const AuthModal: React.FC = () => {
       setErrorMsg('');
       setFieldErrors({});
       await signUp(phone.trim(), name.trim(), address.trim(), pincode.trim());
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to create account. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.';
+      setErrorMsg(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -149,8 +158,9 @@ const AuthModal: React.FC = () => {
         address: address.trim(),
         pincode: pincode.trim(),
       });
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to save profile. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to save profile. Please try again.';
+      setErrorMsg(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -166,7 +176,7 @@ const AuthModal: React.FC = () => {
       />
 
       {/* Modal Card */}
-      <div className="w-full max-w-[440px] bg-surface border border-border p-5 md:p-8 rounded-2xl shadow-2xl relative z-10 text-center animate-fade-slide-up flex flex-col max-h-[90vh] overflow-y-auto">
+      <div ref={modalRef} className="w-full max-w-[440px] bg-surface border border-border p-5 md:p-8 rounded-2xl shadow-2xl relative z-10 text-center animate-fade-slide-up flex flex-col max-h-[90vh] overflow-y-auto">
 
         {/* Close Button — always shown so users can close the modal */}
         <button

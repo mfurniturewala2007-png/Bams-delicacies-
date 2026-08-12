@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Product, FRYING_CHARGE_PER_DOZEN } from '../types';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useAuth } from '../context/AuthContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface QuantityModalProps {
   isOpen: boolean;
@@ -20,16 +21,21 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   const [dozens, setDozens] = useState(1);
   const [fried, setFried] = useState(false);
   const { profile } = useAuth();
+  const wasOpenRef = useRef(isOpen);
 
   // Reset every time the modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
       setDozens(1);
       setFried(false);
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen]);
 
   useScrollLock(isOpen);
+
+  // Trap focus within modal for accessibility
+  const modalRef = useFocusTrap(isOpen);
 
   if (!isOpen) return null;
 
@@ -50,6 +56,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
       />
 
       <div
+        ref={modalRef}
         className="relative z-10 w-full bg-surface border border-border rounded-2xl p-5 md:p-6 shadow-2xl text-center animate-fade-slide-up flex flex-col items-center gap-4"
         style={{ maxWidth: '400px' }}
       >

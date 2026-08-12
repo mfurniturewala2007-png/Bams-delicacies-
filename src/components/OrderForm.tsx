@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
@@ -18,12 +18,13 @@ const OrderForm: React.FC = () => {
   const { profile, openAuthModal } = useAuth();
 
   // Inputs state
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
+  const [customerName, setCustomerName] = useState(() => profile?.name || '');
+  const [customerPhone, setCustomerPhone] = useState(() => (profile?.phone || '').replace(/[^0-9]/g, '').slice(-10));
+  const [customerAddress, setCustomerAddress] = useState(() => profile?.address || '');
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'COD'>('UPI');
 
   // Prefill fields when profile details load
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (profile) {
       setCustomerName(profile.name || '');
@@ -35,6 +36,7 @@ const OrderForm: React.FC = () => {
       setCustomerAddress('');
     }
   }, [profile]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -61,21 +63,21 @@ const OrderForm: React.FC = () => {
   const [maxOrdersSatLimit, setMaxOrdersSatLimit] = useState(15);
 
   // Fetch orders count on mount to populate slot calculations
-  const fetchOrdersForWeek = async () => {
+  const fetchOrdersForWeek = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error: _error } = await supabase
         .from('orders')
         .select('delivery_date')
         .in('delivery_date', allDateStrs7);
 
-      if (error) throw error;
+      if (_error) throw _error;
       if (data) {
         setOrders(data);
       }
-    } catch (err) {
+    } catch {
       console.warn('Failed to load slots count. Falling back to default simulated capacities.');
     }
-  };
+  }, [allDateStrs7]);
 
   const fetchMaxOrders = async () => {
     try {
@@ -89,11 +91,12 @@ const OrderForm: React.FC = () => {
         const sat = data.find(r => r.key === 'max_orders_saturday')?.value || general;
         setMaxOrdersSatLimit(Number(sat));
       }
-    } catch (err) {
+    } catch {
       console.warn('Failed to fetch settings from Supabase. Falling back to defaults.');
     }
   };
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchMaxOrders();
   }, []);
@@ -102,7 +105,8 @@ const OrderForm: React.FC = () => {
     if (items.length > 0) {
       fetchOrdersForWeek();
     }
-  }, [items, allDateStrs7]);
+  }, [items, allDateStrs7, fetchOrdersForWeek]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type, visible: true });
@@ -242,10 +246,11 @@ const OrderForm: React.FC = () => {
         setPaymentOrderId(data.id);
       }
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error inserting order to Supabase:', err);
+      const message = err instanceof Error ? err.message : 'Failed to place order. Please try again.';
       showToast(
-        err.message || 'Failed to place order. Please try again.',
+        message,
         'error'
       );
     } finally {

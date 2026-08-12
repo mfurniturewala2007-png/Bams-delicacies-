@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 import { supabase } from '../utils/supabase';
 import HowItWorksModal from './HowItWorksModal';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 // ─── FILL IN YOUR DETAILS BELOW ──────────────────────────────────────────────
 const UPI_ID   = 'bfurniturewala@okicici';
@@ -38,6 +39,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [isCancelling, setIsCancelling] = useState(false);
   const [qrError, setQrError] = useState(false);
   const [showExplainer, setShowExplainer] = useState(false);
+
+  // Trap focus within modal for accessibility
+  const modalRef = useFocusTrap(true);
 
   // Generate QR code onto canvas whenever totalAmount changes
   useEffect(() => {
@@ -88,9 +92,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       if (error) throw error;
 
       onConfirmed();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to confirm payment:', err);
-      setTxnError(err.message || 'Something went wrong. Please try again.');
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setTxnError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +114,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       if (error) throw error;
 
       onCancel();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to cancel order:', err);
       // Still close modal even if DB update fails — admin can reconcile
       onCancel();
@@ -128,6 +133,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
       {/* Modal card — max-width 420px per spec */}
       <div
+        ref={modalRef}
         className="relative z-10 w-full bg-surface border border-border rounded-2xl shadow-2xl animate-fade-slide-up overflow-y-auto"
         style={{ maxWidth: '420px', maxHeight: '95vh' }}
       >

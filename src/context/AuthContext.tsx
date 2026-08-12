@@ -28,11 +28,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [redirectAfterAuth, setRedirectAfterAuth] = useState<string | null>(null);
 
   // Restore user session from localStorage on mount
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
+    let cancelled = false;
     const savedPhone = localStorage.getItem('bams_user_phone');
     if (!savedPhone) {
       // No saved session — immediately mark loading as done
-      setIsLoadingProfile(false);
+      if (!cancelled) setIsLoadingProfile(false);
       return;
     }
     const restoreSession = async () => {
@@ -46,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) throw error;
 
         if (data) {
-          setProfile(data as UserProfile);
+          if (!cancelled) setProfile(data as UserProfile);
         } else {
           // Clean up stale phone number if not found in db
           localStorage.removeItem('bams_user_phone');
@@ -54,11 +56,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (err) {
         console.warn('Failed to restore user session:', err);
       } finally {
-        setIsLoadingProfile(false);
+        if (!cancelled) setIsLoadingProfile(false);
       }
     };
     restoreSession();
+    return () => { cancelled = true; };
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const openAuthModal = () => setIsAuthModalOpen(true);
 

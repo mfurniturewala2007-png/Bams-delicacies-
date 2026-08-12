@@ -94,6 +94,7 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
   const Component = as;
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <Component ref={containerRef as any} className={`scroll-float ${containerClassName}`}>
       <span className={`scroll-float-text ${textClassName}`}>{splitText}</span>
     </Component>
