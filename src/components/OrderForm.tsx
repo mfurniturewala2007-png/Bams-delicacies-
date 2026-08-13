@@ -6,6 +6,7 @@ import { supabase } from '../utils/supabase';
 import { getNext7DeliveryDays } from '../utils/deliveryDates';
 import DeliveryPicker from './DeliveryPicker';
 import PaymentModal from './PaymentModal';
+import { checkoutSchema } from '../validation/schemas';
 
 interface ToastState {
   message: string;
@@ -116,28 +117,22 @@ const OrderForm: React.FC = () => {
   };
 
   const handlePlaceOrder = async () => {
-    const errors: { [key: string]: string } = {};
+    const formData = {
+      customerName,
+      customerPhone,
+      customerAddress,
+      selectedDate,
+      paymentMethod,
+    };
 
-    // 1. Validate Form Fields
-    if (!customerName.trim()) {
-      errors.name = 'Full Name is required';
-    }
+    const result = checkoutSchema.safeParse(formData);
 
-    if (!customerPhone.trim()) {
-      errors.phone = 'Phone Number is required';
-    } else if (!/^[0-9]{10}$/.test(customerPhone.trim())) {
-      errors.phone = 'Enter valid 10-digit number';
-    }
-
-    if (!customerAddress.trim()) {
-      errors.address = 'Delivery Address is required';
-    }
-
-    if (!selectedDate) {
-      errors.date = 'Please select a delivery date';
-    }
-
-    if (Object.keys(errors).length > 0) {
+    if (!result.success) {
+      const errors: { [key: string]: string } = {};
+      result.error.issues.forEach((err) => {
+        const field = err.path[0] as string;
+        errors[field] = err.message;
+      });
       setFieldErrors(errors);
       showToast('Please correct errors before placing order.', 'error');
       return;

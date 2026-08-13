@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { signInSchema, signUpSchema, profileUpdateSchema } from '../validation/schemas';
 
 const AuthModal: React.FC = () => {
   const {
@@ -68,15 +69,13 @@ const AuthModal: React.FC = () => {
   // SIGN IN — just phone number
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errors: { [key: string]: string } = {};
+    const result = signInSchema.safeParse({ phone });
 
-    if (!phone.trim()) {
-      errors.phone = 'Phone Number is required';
-    } else if (!/^[0-9]{10}$/.test(phone.trim())) {
-      errors.phone = 'Phone must be exactly 10 digits';
-    }
-
-    if (Object.keys(errors).length > 0) {
+if (!result.success) {
+      const errors: { [key: string]: string } = {};
+      result.error.issues.forEach((err) => {
+        errors[err.path[0] as string] = err.message;
+      });
       setFieldErrors(errors);
       return;
     }
@@ -97,22 +96,13 @@ const AuthModal: React.FC = () => {
   // SIGN UP — name + phone + pincode + address
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errors: { [key: string]: string } = {};
+    const result = signUpSchema.safeParse({ name, phone, pincode, address });
 
-    if (!name.trim()) errors.name = 'Full Name is required';
-    if (!phone.trim()) {
-      errors.phone = 'Phone Number is required';
-    } else if (!/^[0-9]{10}$/.test(phone.trim())) {
-      errors.phone = 'Phone must be exactly 10 digits';
-    }
-    if (!pincode.trim()) {
-      errors.pincode = 'Pincode is required';
-    } else if (!/^[0-9]{6}$/.test(pincode.trim())) {
-      errors.pincode = 'Pincode must be exactly 6 digits';
-    }
-    if (!address.trim()) errors.address = 'Delivery Address is required';
-
-    if (Object.keys(errors).length > 0) {
+    if (!result.success) {
+      const errors: { [key: string]: string } = {};
+      result.error.issues.forEach((err) => {
+        errors[err.path[0] as string] = err.message;
+      });
       setFieldErrors(errors);
       return;
     }
@@ -133,17 +123,13 @@ const AuthModal: React.FC = () => {
   // EDIT PROFILE — update name, address, pincode
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errors: { [key: string]: string } = {};
+    const result = profileUpdateSchema.safeParse({ name, pincode, address });
 
-    if (!name.trim()) errors.name = 'Full Name is required';
-    if (!pincode.trim()) {
-      errors.pincode = 'Pincode is required';
-    } else if (!/^[0-9]{6}$/.test(pincode.trim())) {
-      errors.pincode = 'Pincode must be exactly 6 digits';
-    }
-    if (!address.trim()) errors.address = 'Delivery Address is required';
-
-    if (Object.keys(errors).length > 0) {
+    if (!result.success) {
+      const errors: { [key: string]: string } = {};
+      result.error.issues.forEach((err) => {
+        errors[err.path[0] as string] = err.message;
+      });
       setFieldErrors(errors);
       return;
     }
